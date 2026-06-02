@@ -1,0 +1,57 @@
+{% extends "admin/_layout.html" %}
+
+{% block admin_title %}{{ expo.titulo }}{% endblock %}
+
+{% block admin_content %}
+<p class="admin-breadcrumb">
+    <a href="{{ url_for('admin.exposiciones_list') }}">‹ Exposiciones</a>
+</p>
+
+<div class="admin-head-row">
+    <div>
+        <h1 class="admin-h1">{{ expo.titulo }}</h1>
+        {% if expo.estado == ESTADO_PUBLICADA %}
+            <span class="admin-badge admin-badge-on">Publicada</span>
+        {% else %}
+            <span class="admin-badge">Borrador</span>
+        {% endif %}
+    </div>
+    <a class="admin-btn-sm" href="{{ url_for('admin.exposicion_editar', exposicion_id=expo.id) }}">Editar datos</a>
+</div>
+
+{% if expo.descripcion %}<p class="admin-lead">{{ expo.descripcion }}</p>{% endif %}
+
+<div class="admin-head-row">
+    <h2 class="admin-h2">Salas ({{ expo.salas|length }})</h2>
+    <a class="admin-btn-sm" href="{{ url_for('admin.sala_nueva', exposicion_id=expo.id) }}">+ Añadir sala</a>
+</div>
+
+{% if expo.salas %}
+<table class="admin-table">
+    <thead>
+        <tr><th>Orden</th><th>Sala</th><th>Plantilla</th><th>Zonas</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for s in expo.salas %}
+        <tr>
+            <td class="admin-muted">{{ s.orden }}</td>
+            <td><a href="{{ url_for('admin.sala_detail', sala_id=s.id) }}">{{ s.nombre }}</a></td>
+            <td class="admin-muted">{{ nombre_plantilla(s.plantilla_3d) }}</td>
+            <td>{{ s.zonas|length }}</td>
+            <td class="admin-actions">
+                <a href="{{ url_for('admin.sala_detail', sala_id=s.id) }}">Ver</a>
+                <a href="{{ url_for('admin.sala_editar', sala_id=s.id) }}">Editar</a>
+                <form method="post" action="{{ url_for('admin.sala_borrar', sala_id=s.id) }}"
+                      onsubmit="return confirm('¿Borrar la sala «{{ s.nombre }}» y sus zonas/obras?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="admin-link-danger">Borrar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="admin-empty">Esta exposición aún no tiene salas. Añade la primera.</p>
+{% endif %}
+{% endblock %}

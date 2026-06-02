@@ -1,0 +1,35 @@
+{% extends "admin/_layout.html" %}
+{% from "admin/_macros.html" import field %}
+
+{% block admin_title %}{{ titulo }}{% endblock %}
+
+{% block admin_content %}
+<p class="admin-breadcrumb">
+    <a href="{{ url_for('admin.exposicion_detail', exposicion_id=expo.id) }}">‹ {{ expo.titulo }}</a>
+</p>
+
+<h1 class="admin-h1">{{ titulo }}</h1>
+
+<form method="post" class="admin-form admin-form-wide">
+    {{ form.hidden_tag() }}
+    {{ field(form.nombre) }}
+
+    {% if es_nueva %}
+        {{ field(form.plantilla_3d) }}
+        <p class="admin-hint">Al guardar se crearán automáticamente las zonas de la plantilla.</p>
+    {% else %}
+        <label class="admin-field">
+            <span>Plantilla</span>
+            <input class="admin-input" value="{{ plantilla_actual }}" disabled>
+        </label>
+        <p class="admin-hint">La plantilla no se cambia tras crear la sala (sus zonas ya están sembradas).</p>
+    {% endif %}
+
+    {{ field(form.orden) }}
+
+    <div class="admin-form-actions">
+        <button type="submit" class="admin-btn">Guardar</button>
+        <a href="{{ url_for('admin.exposicion_detail', exposicion_id=expo.id) }}" class="admin-cancel">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

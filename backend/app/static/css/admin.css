@@ -431,3 +431,41 @@
     padding: 2rem;
     text-align: center;
 }
+
+/* ---- Detalle / sub-navegación ---- */
+.admin-breadcrumb {
+    margin: 0 0 1rem;
+    font-size: 0.88rem;
+}
+
+.admin-breadcrumb a {
+    color: var(--gva-azul-claro);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.admin-breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.admin-h2 {
+    font-family: "Cormorant Garamond", Garamond, serif;
+    font-size: 1.5rem;
+    margin: 2rem 0 0;
+    color: var(--gva-azul);
+}
+
+.admin-head-row .admin-h2 {
+    margin: 0;
+}
+
+.admin-hint {
+    color: #7488a0;
+    font-size: 0.85rem;
+    margin: 0.6rem 0 0;
+}
+
+input.admin-input:disabled {
+    background: #eef1f6;
+    color: #8a99ad;
+}

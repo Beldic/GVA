@@ -15,9 +15,14 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 
 from backend.app.extensions import db
-from backend.app.forms import AutorForm, ExposicionForm
-from backend.app.models import Autor, Exposicion, Usuario
+from backend.app.forms import AutorForm, ExposicionForm, SalaForm
+from backend.app.models import Autor, Exposicion, Sala, Usuario
 from backend.app.models.exposicion import ESTADO_BORRADOR, ESTADO_PUBLICADA
+from backend.app.plantillas import (
+    nombre_plantilla,
+    opciones_plantilla,
+    sembrar_zonas,
+)
 from backend.app.utils import slugify
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -235,3 +240,86 @@ def exposicion_borrar(exposicion_id):
     db.session.commit()
     flash("Exposición borrada.", "info")
     return redirect(url_for("admin.exposiciones_list"))
+
+
+@bp.get("/exposiciones/<int:exposicion_id>")
+@login_required
+def exposicion_detail(exposicion_id):
+    expo = db.get_or_404(Exposicion, exposicion_id)
+    return render_template(
+        "admin/exposicion_detail.html",
+        expo=expo,
+        ESTADO_PUBLICADA=ESTADO_PUBLICADA,
+        nombre_plantilla=nombre_plantilla,
+    )
+
+
+# --------------------------------------------------------------------------
+# Salas (dentro de una exposición)
+# --------------------------------------------------------------------------
+@bp.route("/exposiciones/<int:exposicion_id>/salas/nueva", methods=["GET", "POST"])
+@login_required
+def sala_nueva(exposicion_id):
+    expo = db.get_or_404(Exposicion, exposicion_id)
+    form = SalaForm()
+    form.plantilla_3d.choices = opciones_plantilla()
+    if request.method == "GET":
+        form.orden.data = len(expo.salas)
+    if form.validate_on_submit():
+        sala = Sala(
+            exposicion=expo,
+            nombre=form.nombre.data.strip(),
+            plantilla_3d=form.plantilla_3d.data,
+            orden=form.orden.data or 0,
+        )
+        sembrar_zonas(sala)
+        db.session.add(sala)
+        db.session.commit()
+        flash(f"Sala «{sala.nombre}» creada con {len(sala.zonas)} zonas.", "info")
+        return redirect(url_for("admin.exposicion_detail", exposicion_id=expo.id))
+    return render_template(
+        "admin/sala_form.html", form=form, expo=expo, titulo="Nueva sala", es_nueva=True
+    )
+
+
+@bp.route("/salas/<int:sala_id>/editar", methods=["GET", "POST"])
+@login_required
+def sala_editar(sala_id):
+    sala = db.get_or_404(Sala, sala_id)
+    form = SalaForm(obj=sala)
+    # La plantilla no se cambia tras crear la sala (las zonas ya están sembradas).
+    form.plantilla_3d.choices = [(sala.plantilla_3d, nombre_plantilla(sala.plantilla_3d))]
+    if form.validate_on_submit():
+        sala.nombre = form.nombre.data.strip()
+        sala.orden = form.orden.data or 0
+        db.session.commit()
+        flash("Sala actualizada.", "info")
+        return redirect(url_for("admin.exposicion_detail", exposicion_id=sala.exposicion_id))
+    return render_template(
+        "admin/sala_form.html",
+        form=form,
+        expo=sala.exposicion,
+        titulo=f"Editar: {sala.nombre}",
+        es_nueva=False,
+        plantilla_actual=nombre_plantilla(sala.plantilla_3d),
+    )
+
+
+@bp.get("/salas/<int:sala_id>")
+@login_required
+def sala_detail(sala_id):
+    sala = db.get_or_404(Sala, sala_id)
+    return render_template(
+        "admin/sala_detail.html", sala=sala, nombre_plantilla=nombre_plantilla
+    )
+
+
+@bp.post("/salas/<int:sala_id>/borrar")
+@login_required
+def sala_borrar(sala_id):
+    sala = db.get_or_404(Sala, sala_id)
+    exposicion_id = sala.exposicion_id
+    db.session.delete(sala)
+    db.session.commit()
+    flash("Sala borrada.", "info")
+    return redirect(url_for("admin.exposicion_detail", exposicion_id=exposicion_id))

@@ -16,7 +16,10 @@
     <tbody>
         {% for e in exposiciones %}
         <tr>
-            <td>{{ e.titulo }}<br><small class="admin-muted">/{{ e.slug }}</small></td>
+            <td>
+                <a href="{{ url_for('admin.exposicion_detail', exposicion_id=e.id) }}">{{ e.titulo }}</a>
+                <br><small class="admin-muted">/{{ e.slug }}</small>
+            </td>
             <td>
                 {% if e.estado == ESTADO_PUBLICADA %}
                     <span class="admin-badge admin-badge-on">Publicada</span>

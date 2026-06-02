@@ -4,7 +4,7 @@
 > programada** (corte de sesión, cambio de equipo, pausa larga). Resume qué se
 > está construyendo, cómo, en qué punto estamos y cómo continuar.
 >
-> Última actualización: 2026-06-02 — **Fase 3a** (CRUD autores + exposiciones) hecha.
+> Última actualización: 2026-06-02 — **Fase 3b** (salas + siembra de zonas) hecha.
 
 ---
 
@@ -100,8 +100,8 @@ tabla de **estadísticas** de clicks por obra (engagement).
 | 2 | **Autenticación** — Flask-Login, login/logout, `/admin` protegido, comando `crear-admin` | ✅ Hecho |
 | 3 | **Dashboard CRUD** (Flask-WTF + CSRF) | ⏳ En curso |
 | ↳ 3a | Autores + Exposiciones (publicar/despublicar) | ✅ Hecho |
-| ↳ 3b | Salas con zonas sembradas desde plantilla piloto | ⬜ Siguiente |
-| ↳ 3c | Obras + asignación a zona/orden + imagen placeholder | ⬜ |
+| ↳ 3b | Salas (dentro del detalle de expo) + zonas sembradas desde plantilla | ✅ Hecho |
+| ↳ 3c | Obras + asignación a zona/orden + imagen placeholder | ⬜ Siguiente |
 | 4 | **Cloudinary** — subida en el formulario de obra (`public_id`/`secure_url`) | ⬜ |
 | 5 | **API + 3D dinámico** — endpoint de la expo publicada; `painting.js` deja de estar hardcodeado | ⬜ |
 | 6 | **Postgres en Railway** — provisionar BD, variables, migraciones en prod, deploy | ⬜ |

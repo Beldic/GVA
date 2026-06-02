@@ -1,0 +1,37 @@
+{% extends "admin/_layout.html" %}
+
+{% block admin_title %}{{ sala.nombre }}{% endblock %}
+
+{% block admin_content %}
+{% set TIPOS = {'dibujo': 'Dibujos', 'cuadro': 'Cuadros', 'mixto': 'Mixto'} %}
+
+<p class="admin-breadcrumb">
+    <a href="{{ url_for('admin.exposicion_detail', exposicion_id=sala.exposicion_id) }}">‹ {{ sala.exposicion.titulo }}</a>
+</p>
+
+<div class="admin-head-row">
+    <div>
+        <h1 class="admin-h1">{{ sala.nombre }}</h1>
+        <span class="admin-muted">{{ nombre_plantilla(sala.plantilla_3d) }}</span>
+    </div>
+    <a class="admin-btn-sm" href="{{ url_for('admin.sala_editar', sala_id=sala.id) }}">Editar sala</a>
+</div>
+
+<h2 class="admin-h2">Zonas ({{ sala.zonas|length }})</h2>
+<table class="admin-table">
+    <thead>
+        <tr><th>Zona</th><th>Código</th><th>Admite</th><th>Ocupación</th></tr>
+    </thead>
+    <tbody>
+        {% for z in sala.zonas %}
+        <tr>
+            <td>{{ z.nombre }}</td>
+            <td class="admin-muted">{{ z.codigo }}</td>
+            <td>{{ TIPOS.get(z.tipo_admitido, z.tipo_admitido) }}</td>
+            <td>{{ z.obras|length }} / {{ z.capacidad }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p class="admin-hint">En la Fase 3c colgarás obras en estas zonas.</p>
+{% endblock %}
