@@ -35,6 +35,18 @@ def create_app(config_class=Config) -> Flask:
     def load_user(user_id: str):
         return db.session.get(Usuario, int(user_id))
 
+    # Cloudinary
+    from backend.app.services import cloudinary_service
+
+    cloudinary_service.configurar(app)
+
+    @app.template_global()
+    def miniatura(obra):
+        """URL de miniatura para el panel: transformación real o placeholder."""
+        if obra.cloudinary_public_id:
+            return cloudinary_service.url_miniatura(obra.cloudinary_public_id)
+        return obra.cloudinary_url
+
     @app.get("/frontend-assets/<path:subpath>")
     def frontend_assets(subpath: str):
         return send_from_directory(FRONTEND_ASSETS, subpath)

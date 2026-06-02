@@ -16,7 +16,7 @@
     · admite {{ TIPOS.get(zona.tipo_admitido, zona.tipo_admitido) }}
 </p>
 
-<form method="post" class="admin-form admin-form-wide">
+<form method="post" enctype="multipart/form-data" class="admin-form admin-form-wide">
     {{ form.hidden_tag() }}
     {{ field(form.titulo) }}
     {{ field(form.autor_id) }}
@@ -37,9 +37,19 @@
     </div>
     {{ field(form.descripcion, rows=3) }}
 
-    {% if es_nueva %}
-    <p class="admin-hint">La imagen se asigna como placeholder; se sustituirá al subir la definitiva (Fase 4).</p>
+    {% if imagen_actual %}
+    <div class="admin-field">
+        <span>Imagen actual</span>
+        <img class="admin-preview" src="{{ imagen_actual }}" alt="Imagen actual de la obra">
+    </div>
     {% endif %}
+
+    {{ field(form.imagen) }}
+    <p class="admin-hint">
+        {% if es_nueva %}Opcional: si no subes imagen, se queda con el placeholder.
+        {% else %}Sube una imagen para reemplazar la actual.{% endif %}
+        Formatos: jpg, png, webp (máx. 10 MB).
+    </p>
 
     <div class="admin-form-actions">
         <button type="submit" class="admin-btn">Guardar</button>

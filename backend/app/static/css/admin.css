@@ -512,3 +512,11 @@ input.admin-input:disabled {
     padding: 0.6rem 0.2rem;
     margin: 0;
 }
+
+.admin-preview {
+    max-width: 160px;
+    max-height: 160px;
+    border-radius: 8px;
+    border: 1px solid var(--gva-borde);
+    background: var(--gva-crema);
+}

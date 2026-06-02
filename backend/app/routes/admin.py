@@ -25,6 +25,7 @@ from backend.app.plantillas import (
     opciones_plantilla,
     sembrar_zonas,
 )
+from backend.app.services import cloudinary_service
 from backend.app.utils import slugify
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -370,6 +371,17 @@ def obra_nueva(zona_id):
             orden=_siguiente_hueco(zona),
             cloudinary_url=PLACEHOLDER_IMAGEN,
         )
+        archivo = form.imagen.data
+        if archivo:
+            if cloudinary_service.esta_configurado():
+                try:
+                    public_id, url = cloudinary_service.subir_imagen(archivo)
+                    obra.cloudinary_public_id = public_id
+                    obra.cloudinary_url = url
+                except cloudinary_service.CloudinaryError:
+                    flash("No se pudo subir la imagen: se mantiene el placeholder.", "error")
+            else:
+                flash("Cloudinary no está configurado: se mantiene el placeholder.", "error")
         db.session.add(obra)
         db.session.commit()
         flash(f"Obra «{obra.titulo}» colgada.", "info")
@@ -382,6 +394,7 @@ def obra_nueva(zona_id):
         zona_mixta=zona_mixta,
         titulo="Colgar obra",
         es_nueva=True,
+        imagen_actual=None,
     )
 
 
@@ -405,6 +418,21 @@ def obra_editar(obra_id):
         obra.ancho_cm = form.ancho_cm.data
         obra.alto_cm = form.alto_cm.data
         obra.descripcion = form.descripcion.data or None
+
+        archivo = form.imagen.data
+        if archivo:
+            if cloudinary_service.esta_configurado():
+                anterior = obra.cloudinary_public_id
+                try:
+                    public_id, url = cloudinary_service.subir_imagen(archivo)
+                    obra.cloudinary_public_id = public_id
+                    obra.cloudinary_url = url
+                    cloudinary_service.eliminar_imagen(anterior)  # limpia la antigua
+                except cloudinary_service.CloudinaryError:
+                    flash("No se pudo subir la imagen: se conserva la anterior.", "error")
+            else:
+                flash("Cloudinary no está configurado: la imagen no se actualizó.", "error")
+
         db.session.commit()
         flash("Obra actualizada.", "info")
         return redirect(url_for("admin.sala_detail", sala_id=zona.sala_id))
@@ -416,6 +444,7 @@ def obra_editar(obra_id):
         zona_mixta=zona_mixta,
         titulo=f"Editar: {obra.titulo}",
         es_nueva=False,
+        imagen_actual=obra.cloudinary_url,
     )
 
 
@@ -424,7 +453,10 @@ def obra_editar(obra_id):
 def obra_borrar(obra_id):
     obra = db.get_or_404(Obra, obra_id)
     sala_id = obra.zona.sala_id
+    public_id = obra.cloudinary_public_id
     db.session.delete(obra)
     db.session.commit()
+    if public_id and cloudinary_service.esta_configurado():
+        cloudinary_service.eliminar_imagen(public_id)  # borra la imagen huérfana
     flash("Obra retirada.", "info")
     return redirect(url_for("admin.sala_detail", sala_id=sala_id))

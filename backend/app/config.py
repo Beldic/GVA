@@ -28,6 +28,14 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-inseguro-cambiar-en-produccion")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # Límite de subida (imágenes): 10 MB
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024
+
+    # Cloudinary (subida de imágenes de obras)
+    CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
+    CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
+    CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
+
     _db_url = os.environ.get("DATABASE_URL")
     if _db_url:
         SQLALCHEMY_DATABASE_URI = _normalize_db_url(_db_url)

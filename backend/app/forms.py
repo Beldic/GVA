@@ -1,5 +1,6 @@
 """Formularios del panel (Flask-WTF / WTForms)."""
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed, FileField
 from wtforms import (
     DateField,
     FloatField,
@@ -52,4 +53,11 @@ class ObraForm(FlaskForm):
     ancho_cm = FloatField("Ancho (cm)", validators=[Optional(), NumberRange(min=0)])
     alto_cm = FloatField("Alto (cm)", validators=[Optional(), NumberRange(min=0)])
     descripcion = TextAreaField("Descripción", validators=[Optional()])
+    imagen = FileField(
+        "Imagen",
+        validators=[
+            Optional(),
+            FileAllowed(["jpg", "jpeg", "png", "webp"], "Solo imágenes (jpg, png, webp)."),
+        ],
+    )
     submit = SubmitField("Guardar")

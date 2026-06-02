@@ -14,7 +14,9 @@
       "PowerShell(git ls-files | Where-Object { $_ -notmatch \"static/\\(js|css\\)\" }; \"---gitignore---\"; Test-Path .gitignore; \"---venv---\"; Test-Path venv; \"---railway/procfile---\"; Test-Path Procfile; Test-Path railway.json; Test-Path nixpacks.toml)",
       "PowerShell(git *)",
       "PowerShell(& \".\\\\venv\\\\Scripts\\\\python.exe\" --version)",
-      "PowerShell(& \".\\\\venv\\\\Scripts\\\\python.exe\" -m pip install -r requirements.txt --quiet; if \\($?\\) { \"=== OK install ===\" } else { \"=== FALLO install ===\" })"
+      "PowerShell(& \".\\\\venv\\\\Scripts\\\\python.exe\" -m pip install -r requirements.txt --quiet; if \\($?\\) { \"=== OK install ===\" } else { \"=== FALLO install ===\" })",
+      "PowerShell($env:FLASK_SKIP_DOTENV='1'; python -c \"from backend.app import create_app; from backend.app.services import cloudinary_service; app=create_app\\(\\); ctx=app.app_context\\(\\); ctx.push\\(\\); print\\('configurado:', cloudinary_service.esta_configurado\\(\\)\\); print\\('cloud_name:', app.config['CLOUDINARY_CLOUD_NAME']\\)\")",
+      "PowerShell($env:FLASK_SKIP_DOTENV='1'; python _test_cloudinary.py)"
     ]
   }
 }

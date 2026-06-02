@@ -39,7 +39,7 @@
         <tbody>
             {% for o in z.obras %}
             <tr>
-                <td><img class="admin-thumb" src="{{ o.cloudinary_url }}" alt=""></td>
+                <td><img class="admin-thumb" src="{{ miniatura(o) }}" alt=""></td>
                 <td class="admin-muted">{{ o.orden + 1 }}</td>
                 <td>{{ o.titulo }}{% if o.anio %} <span class="admin-muted">({{ o.anio }})</span>{% endif %}</td>
                 <td>{{ o.autor.nombre }}</td>
