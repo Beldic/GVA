@@ -138,6 +138,9 @@ $env:FLASK_SKIP_DOTENV = "1"   # ver gotcha en sección 8
 # Crear/actualizar el administrador del panel
 & ".\venv\Scripts\python.exe" -m flask crear-admin --email "tu@email" --password "tu-pass"
 
+# Crear datos de ejemplo: exposición 'afesol_cero' (40 dibujos + 15 cuadros, placeholders)
+& ".\venv\Scripts\python.exe" -m flask seed-afesol-cero --reset
+
 # Arrancar en local
 & ".\venv\Scripts\python.exe" app.py     # http://127.0.0.1:5000
 ```
