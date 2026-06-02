@@ -200,3 +200,234 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
+
+.admin-card a {
+    color: var(--gva-azul);
+    text-decoration: none;
+}
+
+/* ---- Shell con navegación lateral ---- */
+.admin-shell {
+    display: flex;
+    align-items: stretch;
+    min-height: calc(100vh - 60px);
+}
+
+.admin-nav {
+    width: 210px;
+    flex-shrink: 0;
+    background: #fff;
+    border-right: 1px solid var(--gva-borde);
+    padding: 1.2rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.admin-nav a,
+.admin-nav-soon {
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--gva-azul-medio);
+    font-weight: 600;
+    font-size: 0.92rem;
+}
+
+.admin-nav a:hover {
+    background: var(--gva-crema);
+}
+
+.admin-nav a.is-active {
+    background: var(--gva-azul);
+    color: #fff;
+}
+
+.admin-nav-soon {
+    color: #9babc2;
+    font-weight: 500;
+    font-size: 0.82rem;
+}
+
+/* .admin-main: ahora vive dentro del shell flex */
+.admin-page .admin-main {
+    flex: 1;
+    max-width: 1000px;
+    margin: 0;
+    padding: 2rem 2.5rem;
+}
+
+/* ---- Cabecera de sección + botones ---- */
+.admin-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.admin-head-row .admin-h1 {
+    margin: 0;
+}
+
+.admin-btn-sm {
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    background: var(--gva-azul);
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.admin-btn-sm:hover {
+    background: var(--gva-azul-medio);
+}
+
+/* ---- Tablas ---- */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid var(--gva-borde);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.admin-table th,
+.admin-table td {
+    text-align: left;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--gva-borde);
+    font-size: 0.92rem;
+    vertical-align: middle;
+}
+
+.admin-table th {
+    background: var(--gva-crema);
+    color: var(--gva-azul-medio);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-muted {
+    color: #7488a0;
+    font-size: 0.82rem;
+}
+
+.admin-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.admin-actions a,
+.admin-link,
+.admin-link-danger {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--gva-azul-claro);
+}
+
+.admin-link-danger {
+    color: #b23a3a;
+}
+
+.admin-actions a:hover,
+.admin-link:hover,
+.admin-link-danger:hover {
+    text-decoration: underline;
+}
+
+.admin-actions form {
+    display: inline;
+}
+
+/* ---- Badges de estado ---- */
+.admin-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    background: #e6eaf1;
+    color: var(--gva-azul-medio);
+}
+
+.admin-badge-on {
+    background: #d7f0e2;
+    color: #1d7a4d;
+}
+
+/* ---- Formularios amplios ---- */
+.admin-form-wide {
+    max-width: 560px;
+    background: #fff;
+    padding: 1.8rem;
+    border-radius: 12px;
+    border: 1px solid var(--gva-borde);
+}
+
+.admin-input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--gva-borde);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: var(--gva-azul);
+    background: var(--gva-crema);
+    font-family: inherit;
+}
+
+.admin-input:focus {
+    outline: none;
+    border-color: var(--gva-azul-claro);
+    box-shadow: 0 0 0 3px rgba(47, 90, 147, 0.15);
+}
+
+.admin-form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.admin-form-row .admin-field {
+    flex: 1;
+}
+
+.admin-error {
+    color: #b23a3a;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.admin-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.admin-cancel {
+    color: var(--gva-azul-medio);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.admin-empty {
+    color: #7488a0;
+    background: #fff;
+    border: 1px dashed var(--gva-borde);
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+}

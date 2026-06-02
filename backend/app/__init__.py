@@ -3,7 +3,7 @@ from pathlib import Path
 from flask import Flask, send_from_directory
 
 from backend.app.config import Config
-from backend.app.extensions import db, login_manager, migrate
+from backend.app.extensions import csrf, db, login_manager, migrate
 
 # .../backend/app/__init__.py → raíz del proyecto = parents[2]
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -21,6 +21,7 @@ def create_app(config_class=Config) -> Flask:
     # Extensiones
     db.init_app(app)
     migrate.init_app(app, db, directory=str(PROJECT_ROOT / "backend" / "migrations"))
+    csrf.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = "admin.login"
     login_manager.login_message = "Inicia sesión para acceder al panel."

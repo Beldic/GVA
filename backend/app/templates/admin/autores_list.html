@@ -1,0 +1,37 @@
+{% extends "admin/_layout.html" %}
+
+{% block admin_title %}Autores{% endblock %}
+
+{% block admin_content %}
+<div class="admin-head-row">
+    <h1 class="admin-h1">Autores</h1>
+    <a class="admin-btn-sm" href="{{ url_for('admin.autor_nuevo') }}">+ Nuevo autor</a>
+</div>
+
+{% if autores %}
+<table class="admin-table">
+    <thead>
+        <tr><th>Nombre</th><th>Contacto</th><th>Obras</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for a in autores %}
+        <tr>
+            <td>{{ a.nombre }}</td>
+            <td>{{ a.contacto or '—' }}</td>
+            <td>{{ a.obras|length }}</td>
+            <td class="admin-actions">
+                <a href="{{ url_for('admin.autor_editar', autor_id=a.id) }}">Editar</a>
+                <form method="post" action="{{ url_for('admin.autor_borrar', autor_id=a.id) }}"
+                      onsubmit="return confirm('¿Borrar a {{ a.nombre }}?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="admin-link-danger">Borrar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="admin-empty">Aún no hay autores. Crea el primero.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "admin/_layout.html" %}
+
+{% block admin_title %}Exposiciones{% endblock %}
+
+{% block admin_content %}
+<div class="admin-head-row">
+    <h1 class="admin-h1">Exposiciones</h1>
+    <a class="admin-btn-sm" href="{{ url_for('admin.exposicion_nueva') }}">+ Nueva exposición</a>
+</div>
+
+{% if exposiciones %}
+<table class="admin-table">
+    <thead>
+        <tr><th>Título</th><th>Estado</th><th>Fechas</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for e in exposiciones %}
+        <tr>
+            <td>{{ e.titulo }}<br><small class="admin-muted">/{{ e.slug }}</small></td>
+            <td>
+                {% if e.estado == ESTADO_PUBLICADA %}
+                    <span class="admin-badge admin-badge-on">Publicada</span>
+                {% else %}
+                    <span class="admin-badge">Borrador</span>
+                {% endif %}
+            </td>
+            <td class="admin-muted">
+                {{ e.fecha_inicio.strftime('%d/%m/%Y') if e.fecha_inicio else '—' }}
+                {%- if e.fecha_fin %} – {{ e.fecha_fin.strftime('%d/%m/%Y') }}{% endif %}
+            </td>
+            <td class="admin-actions">
+                <a href="{{ url_for('admin.exposicion_editar', exposicion_id=e.id) }}">Editar</a>
+                {% if e.estado == ESTADO_PUBLICADA %}
+                <form method="post" action="{{ url_for('admin.exposicion_despublicar', exposicion_id=e.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="admin-link">Despublicar</button>
+                </form>
+                {% else %}
+                <form method="post" action="{{ url_for('admin.exposicion_publicar', exposicion_id=e.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="admin-link">Publicar</button>
+                </form>
+                {% endif %}
+                <form method="post" action="{{ url_for('admin.exposicion_borrar', exposicion_id=e.id) }}"
+                      onsubmit="return confirm('¿Borrar «{{ e.titulo }}» y todo su contenido?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="admin-link-danger">Borrar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="admin-empty">Aún no hay exposiciones. Crea la primera.</p>
+{% endif %}
+{% endblock %}

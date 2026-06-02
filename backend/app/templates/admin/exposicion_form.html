@@ -1,0 +1,23 @@
+{% extends "admin/_layout.html" %}
+{% from "admin/_macros.html" import field %}
+
+{% block admin_title %}{{ titulo }}{% endblock %}
+
+{% block admin_content %}
+<h1 class="admin-h1">{{ titulo }}</h1>
+
+<form method="post" class="admin-form admin-form-wide">
+    {{ form.hidden_tag() }}
+    {{ field(form.titulo) }}
+    {{ field(form.slug, placeholder="Se genera del título si lo dejas vacío") }}
+    {{ field(form.descripcion, rows=4) }}
+    <div class="admin-form-row">
+        {{ field(form.fecha_inicio) }}
+        {{ field(form.fecha_fin) }}
+    </div>
+    <div class="admin-form-actions">
+        <button type="submit" class="admin-btn">Guardar</button>
+        <a href="{{ url_for('admin.exposiciones_list') }}" class="admin-cancel">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

@@ -21,6 +21,7 @@
         {% endwith %}
 
         <form method="post" action="{{ url_for('admin.login_post', next=request.args.get('next')) }}" class="admin-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <label class="admin-field">
                 <span>Email</span>
                 <input type="email" name="email" required autofocus autocomplete="username">

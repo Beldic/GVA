@@ -1,0 +1,7 @@
+{% macro field(f) %}
+<label class="admin-field">
+    <span>{{ f.label.text }}</span>
+    {{ f(class_="admin-input", **kwargs) }}
+    {% for e in f.errors %}<small class="admin-error">{{ e }}</small>{% endfor %}
+</label>
+{% endmacro %}

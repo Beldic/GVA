@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{% block admin_title %}Panel{% endblock %} · AFESOL{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block body_class %}admin-page{% endblock %}
+
+{% block content %}
+<header class="admin-topbar">
+    <span class="admin-brand">GVA · Panel</span>
+    <div class="admin-topbar-right">
+        <span class="admin-user">{{ current_user.email }}</span>
+        <form method="post" action="{{ url_for('admin.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="admin-logout">Salir</button>
+        </form>
+    </div>
+</header>
+
+<div class="admin-shell">
+    <nav class="admin-nav">
+        <a href="{{ url_for('admin.dashboard') }}"
+           class="{{ 'is-active' if request.endpoint == 'admin.dashboard' }}">Inicio</a>
+        <a href="{{ url_for('admin.exposiciones_list') }}"
+           class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.exposicion') }}">Exposiciones</a>
+        <a href="{{ url_for('admin.autores_list') }}"
+           class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.autor') }}">Autores</a>
+        <span class="admin-nav-soon">Salas</span>
+        <span class="admin-nav-soon">Obras</span>
+    </nav>
+
+    <main class="admin-main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, msg in messages %}
+                <div class="admin-flash admin-flash-{{ category }}">{{ msg }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block admin_content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}
