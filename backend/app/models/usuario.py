@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from backend.app.extensions import db
@@ -8,8 +9,11 @@ ROL_ADMIN = "admin"
 ROL_COMISARIO = "comisario"
 
 
-class Usuario(db.Model):
-    """Administrador / comisario que gestiona el panel."""
+class Usuario(UserMixin, db.Model):
+    """Administrador / comisario que gestiona el panel.
+
+    UserMixin aporta los atributos que Flask-Login necesita
+    (is_authenticated, is_active, get_id, ...)."""
 
     __tablename__ = "usuario"
 

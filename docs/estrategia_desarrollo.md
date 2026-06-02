@@ -4,7 +4,7 @@
 > programada** (corte de sesión, cambio de equipo, pausa larga). Resume qué se
 > está construyendo, cómo, en qué punto estamos y cómo continuar.
 >
-> Última actualización: 2026-06-02 — fin de la **Fase 1 (andamiaje ORM)**.
+> Última actualización: 2026-06-02 — fin de la **Fase 2 (autenticación)**.
 
 ---
 
@@ -97,8 +97,8 @@ tabla de **estadísticas** de clicks por obra (engagement).
 | # | Fase | Estado |
 |---|---|---|
 | 1 | **Andamiaje ORM** — extensiones, config, modelos, 1ª migración, BD SQLite | ✅ Hecho |
-| 2 | **Autenticación** — login del comisario, proteger `/admin` | ⏳ Siguiente |
-| 3 | **Dashboard CRUD** — exposiciones, salas (desde plantilla), autores, obras + asignar zona/orden | ⬜ |
+| 2 | **Autenticación** — Flask-Login, login/logout, `/admin` protegido, comando `crear-admin` | ✅ Hecho |
+| 3 | **Dashboard CRUD** — exposiciones, salas (desde plantilla), autores, obras + asignar zona/orden | ⏳ Siguiente |
 | 4 | **Cloudinary** — subida en el formulario de obra (`public_id`/`secure_url`) | ⬜ |
 | 5 | **API + 3D dinámico** — endpoint de la expo publicada; `painting.js` deja de estar hardcodeado | ⬜ |
 | 6 | **Postgres en Railway** — provisionar BD, variables, migraciones en prod, deploy | ⬜ |
@@ -132,9 +132,15 @@ $env:FLASK_SKIP_DOTENV = "1"   # ver gotcha en sección 8
 & ".\venv\Scripts\python.exe" -m flask db migrate -m "mensaje"
 & ".\venv\Scripts\python.exe" -m flask db upgrade
 
+# Crear/actualizar el administrador del panel
+& ".\venv\Scripts\python.exe" -m flask crear-admin --email "tu@email" --password "tu-pass"
+
 # Arrancar en local
 & ".\venv\Scripts\python.exe" app.py     # http://127.0.0.1:5000
 ```
+
+**Panel de administración:** `/admin/login` (login) → `/admin/` (dashboard).
+Todo lo que cuelgue de `/admin` requiere sesión.
 
 ---
 

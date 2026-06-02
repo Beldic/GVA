@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Acceso · Panel AFESOL{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block body_class %}admin-auth-page{% endblock %}
+
+{% block content %}
+<div class="admin-auth">
+    <div class="admin-auth-card">
+        <p class="admin-eyebrow">AFESOL · Galería Virtual</p>
+        <h1 class="admin-auth-title">Panel de administración</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, msg in messages %}
+                <div class="admin-flash admin-flash-{{ category }}">{{ msg }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="post" action="{{ url_for('admin.login_post', next=request.args.get('next')) }}" class="admin-form">
+            <label class="admin-field">
+                <span>Email</span>
+                <input type="email" name="email" required autofocus autocomplete="username">
+            </label>
+            <label class="admin-field">
+                <span>Contraseña</span>
+                <input type="password" name="password" required autocomplete="current-password">
+            </label>
+            <button type="submit" class="admin-btn">Entrar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
