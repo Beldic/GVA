@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Galería Virtual AFESOL — Sala 1{% endblock %}
+{% block title %}Galería Virtual AFESOL — {{ datos.sala.nombre if datos else 'Galería' }}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}">
@@ -15,13 +15,16 @@
     <a href="{{ url_for('main.index') }}" class="hud-link" title="Volver a la entrada">
         <span aria-hidden="true">‹</span> Salir
     </a>
-    <span class="hud-title">Sala 1 · Piloto</span>
+    {% if datos %}
+    <span class="hud-title">{{ datos.sala.nombre }} · {{ datos.exposicion.titulo }}</span>
+    {% endif %}
 </div>
 
 <div id="overlay" class="overlay">
     <div class="overlay-card">
         <p class="overlay-eyebrow">AFESOL</p>
-        <h2 class="overlay-title">Sala de Exposición</h2>
+        {% if datos %}
+        <h2 class="overlay-title">{{ datos.sala.nombre }}</h2>
         <p class="overlay-text">
             Haz clic en la pantalla para tomar el control y comenzar la visita.
         </p>
@@ -31,11 +34,22 @@
             <li><kbd>Esc</kbd> — liberar el cursor</li>
         </ul>
         <button id="start-btn" type="button" class="overlay-btn">Entrar a la sala</button>
+        {% else %}
+        <h2 class="overlay-title">No hay exposición disponible</h2>
+        <p class="overlay-text">
+            Todavía no hay ninguna exposición publicada. Vuelve pronto para
+            visitar la galería.
+        </p>
+        <a href="{{ url_for('main.index') }}" class="overlay-btn">Volver a la entrada</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+{% if datos %}
+<script id="gallery-data" type="application/json">{{ datos|tojson }}</script>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script type="module" src="{{ url_for('static', filename='js/gallery/main.js') }}"></script>
+{% endif %}
 {% endblock %}

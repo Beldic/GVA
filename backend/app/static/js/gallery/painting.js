@@ -1,13 +1,13 @@
-import { ROOM } from "./room.js";
-
+// Construye un cuadro (marco + lienzo + placa) a partir de los datos de una obra
+// y lo coloca contra una pared usando el `placement` calculado por slotPlacement.
 const PAINTING = {
-    width: 1.2,
-    height: 1.2,
+    defaultSize: 1.0, // m, fallback cuando la obra no trae medidas
+    maxSize: 2.4, // m, tope de seguridad por dimensión
     frameThickness: 0.08,
     frameDepth: 0.06,
     centerY: 1.75,
     wallOffset: 0.02, // separación de la pared para evitar z-fighting
-    textureUrl: "/frontend-assets/images/afesol4.png",
+    slotMargin: 0.3, // m, aire mínimo entre cuadros contiguos del mismo hueco
 };
 
 const PLAQUE = {
@@ -17,53 +17,54 @@ const PLAQUE = {
     centerY: 0.9,
 };
 
-const TEXT = {
-    title: "Sin título",
-    author: "Autor AFESOL",
-    year: "2026",
-    description:
-        "Esta es una obra de prueba para el piloto de la Galería Virtual de Arte. " +
-        "El contenido definitivo será gestionado desde el panel de administración.",
-};
+let _seq = 0;
 
-export function buildPainting(scene) {
-    const wallZ = ROOM.depth / 2;
+export function buildPainting(scene, obra, placement) {
+    const id = _seq++;
+    const parent = new BABYLON.TransformNode(`obra-${id}`, scene);
+    parent.position = placement.position.clone();
+    parent.rotation.y = placement.rotationY;
+
+    const { width, height } = canvasSize(obra, placement.slotWidth);
 
     // ---- Marco (caja de madera oscura azulada) ----
-    const frameMat = new BABYLON.StandardMaterial("frameMat", scene);
+    const frameMat = new BABYLON.StandardMaterial(`frameMat-${id}`, scene);
     frameMat.diffuseColor = new BABYLON.Color3(0.08, 0.12, 0.2);
     frameMat.specularColor = new BABYLON.Color3(0.25, 0.3, 0.4);
     frameMat.specularPower = 64;
 
     const frame = BABYLON.MeshBuilder.CreateBox(
-        "paintingFrame",
+        `frame-${id}`,
         {
-            width: PAINTING.width + PAINTING.frameThickness * 2,
-            height: PAINTING.height + PAINTING.frameThickness * 2,
+            width: width + PAINTING.frameThickness * 2,
+            height: height + PAINTING.frameThickness * 2,
             depth: PAINTING.frameDepth,
         },
         scene
     );
+    // El centro de la sala es -Z en el espacio local del padre.
     frame.position = new BABYLON.Vector3(
         0,
         PAINTING.centerY,
-        wallZ - PAINTING.frameDepth / 2 - PAINTING.wallOffset
+        -(PAINTING.frameDepth / 2 + PAINTING.wallOffset)
     );
     frame.material = frameMat;
+    frame.parent = parent;
 
-    // ---- Lienzo (textura del logo placeholder) ----
+    // ---- Lienzo (textura de la obra desde Cloudinary o placeholder) ----
     const canvasTexture = new BABYLON.Texture(
-        PAINTING.textureUrl,
+        obra.imagen_url,
         scene,
         undefined,
         undefined,
         BABYLON.Texture.TRILINEAR_SAMPLINGMODE,
-        () => console.info("[painting] textura cargada", PAINTING.textureUrl),
-        (msg, ex) => console.error("[painting] error cargando textura", msg, ex)
+        null,
+        (msg, ex) =>
+            console.error("[painting] error cargando textura", obra.imagen_url, msg, ex)
     );
     canvasTexture.hasAlpha = false;
 
-    const canvasMat = new BABYLON.StandardMaterial("canvasMat", scene);
+    const canvasMat = new BABYLON.StandardMaterial(`canvasMat-${id}`, scene);
     canvasMat.diffuseColor = new BABYLON.Color3(1, 1, 1); // fallback blanco
     canvasMat.diffuseTexture = canvasTexture;
     canvasMat.emissiveTexture = canvasTexture; // que el cuadro brille por sí solo
@@ -72,48 +73,72 @@ export function buildPainting(scene) {
     canvasMat.backFaceCulling = false;
 
     const canvasPlane = BABYLON.MeshBuilder.CreatePlane(
-        "paintingCanvas",
-        {
-            width: PAINTING.width,
-            height: PAINTING.height,
-            sideOrientation: BABYLON.Mesh.DOUBLESIDE,
-        },
+        `canvas-${id}`,
+        { width, height, sideOrientation: BABYLON.Mesh.DOUBLESIDE },
         scene
     );
     canvasPlane.position = new BABYLON.Vector3(
         0,
         PAINTING.centerY,
-        wallZ - PAINTING.frameDepth - PAINTING.wallOffset - 0.001
+        -(PAINTING.frameDepth + PAINTING.wallOffset + 0.001)
     );
-    // Sin rotación: el Plane de Babylon ya mira hacia -Z por defecto,
-    // que es justamente hacia el centro de la sala.
     canvasPlane.material = canvasMat;
+    canvasPlane.parent = parent;
 
-    // ---- Placa con título / autor / texto ----
-    const plaqueMat = new BABYLON.StandardMaterial("plaqueMat", scene);
-    plaqueMat.diffuseTexture = createPlaqueTexture(scene);
+    // ---- Placa con título / autor·año / descripción ----
+    const plaqueMat = new BABYLON.StandardMaterial(`plaqueMat-${id}`, scene);
+    plaqueMat.diffuseTexture = createPlaqueTexture(scene, obra, id);
     plaqueMat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
     plaqueMat.emissiveColor = new BABYLON.Color3(0.08, 0.08, 0.08);
 
     const plaque = BABYLON.MeshBuilder.CreateBox(
-        "plaque",
+        `plaque-${id}`,
         { width: PLAQUE.width, height: PLAQUE.height, depth: PLAQUE.depth },
         scene
     );
     plaque.position = new BABYLON.Vector3(
         0,
         PLAQUE.centerY,
-        wallZ - PLAQUE.depth / 2 - PAINTING.wallOffset
+        -(PLAQUE.depth / 2 + PAINTING.wallOffset)
     );
     plaque.material = plaqueMat;
+    plaque.parent = parent;
+
+    return parent;
+}
+
+// Tamaño del lienzo en metros: medidas reales (cm→m) con topes y recorte al
+// ancho de hueco disponible, manteniendo la proporción.
+function canvasSize(obra, slotWidth) {
+    let w = obra.ancho_cm ? obra.ancho_cm / 100 : PAINTING.defaultSize;
+    let h = obra.alto_cm ? obra.alto_cm / 100 : PAINTING.defaultSize;
+
+    const limitW = Math.min(
+        PAINTING.maxSize,
+        (slotWidth || PAINTING.maxSize) - PAINTING.slotMargin
+    );
+    if (w > limitW) {
+        h *= limitW / w;
+        w = limitW;
+    }
+    if (h > PAINTING.maxSize) {
+        w *= PAINTING.maxSize / h;
+        h = PAINTING.maxSize;
+    }
+    return { width: w, height: h };
 }
 
 // ---- Texturas dinámicas ----
 
-function createPlaqueTexture(scene) {
+function createPlaqueTexture(scene, obra, id) {
     const w = 1024;
     const h = 384;
-    const tex = new BABYLON.DynamicTexture("plaqueTex", { width: w, height: h }, scene, false);
+    const tex = new BABYLON.DynamicTexture(
+        `plaqueTex-${id}`,
+        { width: w, height: h },
+        scene,
+        false
+    );
     const ctx = tex.getContext();
 
     // Fondo crema con leve gradiente
@@ -132,12 +157,13 @@ function createPlaqueTexture(scene) {
     ctx.fillStyle = "#0a1f3d";
     ctx.textAlign = "center";
     ctx.font = "italic 64px 'Cormorant Garamond', Garamond, serif";
-    ctx.fillText(TEXT.title, w / 2, 90);
+    ctx.fillText(obra.titulo || "Sin título", w / 2, 90);
 
     // Autor + año
+    const anio = obra.anio ? ` · ${obra.anio}` : "";
     ctx.font = "32px 'Cormorant Garamond', Garamond, serif";
     ctx.fillStyle = "#14315c";
-    ctx.fillText(`${TEXT.author} · ${TEXT.year}`, w / 2, 140);
+    ctx.fillText(`${obra.autor || ""}${anio}`, w / 2, 140);
 
     // Línea divisoria
     ctx.strokeStyle = "#14315c";
@@ -148,9 +174,11 @@ function createPlaqueTexture(scene) {
     ctx.stroke();
 
     // Descripción (wrap manual)
-    ctx.font = "26px 'Cormorant Garamond', Garamond, serif";
-    ctx.fillStyle = "#1f2a3d";
-    wrapText(ctx, TEXT.description, w / 2, 220, w - 100, 34);
+    if (obra.descripcion) {
+        ctx.font = "26px 'Cormorant Garamond', Garamond, serif";
+        ctx.fillStyle = "#1f2a3d";
+        wrapText(ctx, obra.descripcion, w / 2, 220, w - 100, 34);
+    }
 
     tex.update();
     return tex;

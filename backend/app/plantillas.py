@@ -19,6 +19,18 @@ PLANTILLAS = {
             {"codigo": "right", "nombre": "Pared derecha", "tipo_admitido": TIPO_DIBUJO, "capacidad": 8, "orden": 3},
         ],
     },
+    "sala-rectangular": {
+        "nombre": "Sala rectangular grande (con puerta)",
+        "descripcion": "Sala alargada 11×16 m con puerta de entrada. Cuadros al "
+        "fondo y a ambos lados de la puerta; dibujos en las dos paredes laterales. "
+        "Capacidad: 15 cuadros + 40 dibujos.",
+        "zonas": [
+            {"codigo": "far", "nombre": "Pared del fondo", "tipo_admitido": TIPO_CUADRO, "capacidad": 8, "orden": 0},
+            {"codigo": "near", "nombre": "Pared de entrada (junto a la puerta)", "tipo_admitido": TIPO_CUADRO, "capacidad": 7, "orden": 1},
+            {"codigo": "left", "nombre": "Pared izquierda", "tipo_admitido": TIPO_DIBUJO, "capacidad": 20, "orden": 2},
+            {"codigo": "right", "nombre": "Pared derecha", "tipo_admitido": TIPO_DIBUJO, "capacidad": 20, "orden": 3},
+        ],
+    },
 }
 
 

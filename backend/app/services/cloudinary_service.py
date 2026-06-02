@@ -67,3 +67,18 @@ def url_miniatura(public_id, ancho=80, alto=80) -> str:
         public_id, width=ancho, height=alto, crop="fill", secure=True
     )
     return url
+
+
+def url_obra(public_id, ancho=1200) -> str:
+    """URL para mostrar la obra en el 3D: redimensionada sin recortar, con
+    calidad y formato automáticos (Cloudinary sirve WebP/AVIF si el navegador
+    lo admite). `crop="limit"` no agranda imágenes más pequeñas que `ancho`."""
+    url, _ = cloudinary.utils.cloudinary_url(
+        public_id,
+        width=ancho,
+        crop="limit",
+        quality="auto",
+        fetch_format="auto",
+        secure=True,
+    )
+    return url
