@@ -3,6 +3,10 @@ venv/
 .venv/
 env/
 
+# Base de datos local (SQLite)
+*.db
+instance/
+
 # Python
 __pycache__/
 *.py[cod]
