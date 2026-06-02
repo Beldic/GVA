@@ -1,0 +1,281 @@
+.door-page {
+    background:
+        radial-gradient(ellipse at 50% 40%, #1a3a6b 0%, #0a1f3d 55%, #050f1f 100%);
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1800px;
+    overflow: hidden;
+}
+
+.door-stage {
+    position: relative;
+    width: min(720px, 92vw);
+    text-align: center;
+    padding: clamp(1.5rem, 4vh, 3rem) 1rem;
+    transform-style: preserve-3d;
+}
+
+.door-glow {
+    position: absolute;
+    inset: -10% -10% auto -10%;
+    height: 60vh;
+    background: radial-gradient(ellipse at center, rgba(180, 210, 255, 0.18), transparent 65%);
+    filter: blur(20px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ---- Tipografía hero ---- */
+.door-header {
+    position: relative;
+    z-index: 2;
+    margin-bottom: clamp(1.5rem, 4vh, 2.5rem);
+    transition: opacity 1.2s var(--easing-soft), transform 1.2s var(--easing-soft);
+}
+
+.brand-eyebrow {
+    font-size: 0.85rem;
+    letter-spacing: 0.6em;
+    text-indent: 0.6em;
+    text-transform: uppercase;
+    color: var(--color-soft);
+    margin: 0 0 0.75rem;
+    font-weight: 500;
+}
+
+.brand-title {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    margin: 0;
+    color: var(--color-white);
+    font-style: italic;
+    text-shadow: 0 1px 30px rgba(0, 0, 0, 0.4);
+}
+
+.brand-subtitle {
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+    font-weight: 300;
+    color: var(--color-mist);
+    margin: 0.75rem 0 0;
+    letter-spacing: 0.12em;
+}
+
+/* ---- Marco y puerta ---- */
+.door-frame {
+    position: relative;
+    z-index: 1;
+    width: min(420px, 78vw);
+    aspect-ratio: 3 / 5;
+    margin: 0 auto;
+    perspective: 1400px;
+    transform-style: preserve-3d;
+}
+
+.door-arch {
+    position: absolute;
+    inset: 0;
+    border-radius: 210px 210px 8px 8px;
+    background: linear-gradient(180deg, #03101f 0%, #061a2e 60%, #02080f 100%);
+    box-shadow:
+        inset 0 0 40px rgba(0, 0, 0, 0.85),
+        0 30px 60px -20px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+    transform-style: preserve-3d;
+}
+
+/* Hojas idénticas, espejadas explícitamente por lado */
+.door {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 1.8s var(--easing-soft);
+    will-change: transform;
+    border-radius: inherit;
+    box-shadow:
+        inset 0 0 60px rgba(0, 0, 0, 0.5),
+        inset 0 4px 0 rgba(255, 255, 255, 0.06);
+}
+
+.door-left {
+    left: 0;
+    transform-origin: 0% 50%;
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, transparent 12%, transparent 88%, rgba(0, 0, 0, 0.45) 100%),
+        linear-gradient(180deg, #1b3d6e 0%, #14315c 50%, #0d2244 100%);
+}
+
+.door-right {
+    right: 0;
+    transform-origin: 100% 50%;
+    background:
+        linear-gradient(270deg, rgba(255, 255, 255, 0.08) 0%, transparent 12%, transparent 88%, rgba(0, 0, 0, 0.45) 100%),
+        linear-gradient(180deg, #1b3d6e 0%, #14315c 50%, #0d2244 100%);
+}
+
+.door-left .door-handle {
+    right: 8%;
+}
+
+.door-right .door-handle {
+    left: 8%;
+}
+
+.door-panel {
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.25));
+    box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+}
+
+.door-panel--top {
+    top: 8%;
+    height: 38%;
+    border-radius: 120px 120px 6px 6px;
+}
+
+.door-panel--bottom {
+    top: 52%;
+    height: 40%;
+}
+
+.door-handle {
+    position: absolute;
+    top: 50%;
+    width: 10px;
+    height: 36px;
+    background: linear-gradient(180deg, #cfdcec, #5b8dc9 50%, #14315c);
+    border-radius: 5px;
+    transform: translateY(-50%);
+    box-shadow: 0 0 8px rgba(180, 210, 255, 0.4);
+}
+
+.door-threshold {
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    bottom: 2%;
+    height: 6px;
+    background: linear-gradient(90deg, transparent, rgba(180, 210, 255, 0.35), transparent);
+    filter: blur(2px);
+    opacity: 0;
+    transition: opacity 1.6s var(--easing-soft) 0.4s;
+}
+
+/* ---- Estado abierto ---- */
+.door-page.is-opening .door-left {
+    transform: rotateY(-115deg);
+    box-shadow:
+        inset 0 0 60px rgba(0, 0, 0, 0.5),
+        -10px 0 40px rgba(0, 0, 0, 0.4);
+}
+
+.door-page.is-opening .door-right {
+    transform: rotateY(115deg);
+    box-shadow:
+        inset 0 0 60px rgba(0, 0, 0, 0.5),
+        10px 0 40px rgba(0, 0, 0, 0.4);
+}
+
+.door-page.is-opening .door-threshold {
+    opacity: 1;
+    height: 90%;
+    bottom: 5%;
+    background: radial-gradient(ellipse at center, rgba(255, 245, 220, 0.6), transparent 70%);
+    filter: blur(8px);
+}
+
+.door-page.is-opening .door-header {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.door-page.is-opening .door-actions {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Velo final que blanquea antes de redirigir */
+.door-page.is-entering::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, #fbf4dd 0%, #ffffff 60%);
+    opacity: 0;
+    animation: enter-fade 0.9s var(--easing-soft) forwards;
+    z-index: 999;
+    pointer-events: none;
+}
+
+@keyframes enter-fade {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* ---- Botón Entrar ---- */
+.door-actions {
+    position: relative;
+    z-index: 2;
+    margin-top: clamp(1.5rem, 4vh, 2.5rem);
+    transition: opacity 0.6s var(--easing-soft);
+}
+
+.enter-btn {
+    position: relative;
+    background: transparent;
+    border: 1px solid var(--color-soft);
+    color: var(--color-white);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    padding: 0.9rem 2.6rem 0.9rem 3rem;
+    cursor: pointer;
+    overflow: hidden;
+    transition: background 0.4s var(--easing-soft), color 0.4s var(--easing-soft), letter-spacing 0.4s var(--easing-soft);
+}
+
+.enter-btn:hover,
+.enter-btn:focus-visible {
+    background: rgba(91, 141, 201, 0.12);
+    letter-spacing: 0.5em;
+    outline: none;
+}
+
+.enter-btn:focus-visible {
+    box-shadow: 0 0 0 2px rgba(91, 141, 201, 0.45);
+}
+
+.enter-btn__line {
+    display: block;
+    width: 30px;
+    height: 1px;
+    background: var(--color-soft);
+    margin: 0.5rem auto 0;
+    opacity: 0.7;
+}
+
+/* Cursor sobre la puerta indica que también es clicable */
+.door-frame {
+    cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .door,
+    .door-header,
+    .door-threshold,
+    .door-actions {
+        transition-duration: 0.001s;
+    }
+    .door-page.is-entering::after {
+        animation-duration: 0.001s;
+    }
+}

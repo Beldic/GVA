@@ -1,0 +1,154 @@
+html, body {
+    background: #000;
+    overflow: hidden;
+}
+
+#renderCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    display: block;
+    touch-action: none;
+    outline: none;
+}
+
+/* ---- HUD superior ---- */
+.hud {
+    position: fixed;
+    z-index: 10;
+    color: var(--color-pale);
+    font-family: var(--font-display);
+    pointer-events: none;
+}
+
+.hud-top {
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent);
+}
+
+.hud-link {
+    pointer-events: auto;
+    color: var(--color-pale);
+    text-decoration: none;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid transparent;
+    transition: border-color 0.2s var(--easing-soft), color 0.2s var(--easing-soft);
+}
+
+.hud-link:hover,
+.hud-link:focus-visible {
+    border-color: rgba(207, 220, 236, 0.4);
+    color: var(--color-white);
+    outline: none;
+}
+
+.hud-title {
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: rgba(207, 220, 236, 0.7);
+}
+
+/* ---- Overlay inicial ---- */
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, rgba(10, 31, 61, 0.6) 0%, rgba(0, 0, 0, 0.85) 100%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: opacity 0.6s var(--easing-soft);
+}
+
+.overlay.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.overlay-card {
+    text-align: center;
+    color: var(--color-pale);
+    max-width: 460px;
+    padding: 2.5rem 2rem;
+    border: 1px solid rgba(207, 220, 236, 0.18);
+    background: rgba(10, 20, 36, 0.55);
+    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.8);
+}
+
+.overlay-eyebrow {
+    font-size: 0.8rem;
+    letter-spacing: 0.55em;
+    color: var(--color-soft);
+    margin: 0 0 0.5rem;
+    text-transform: uppercase;
+}
+
+.overlay-title {
+    font-size: 2.4rem;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--color-white);
+    margin: 0 0 1rem;
+}
+
+.overlay-text {
+    color: var(--color-mist);
+    margin: 0 0 1.5rem;
+    font-size: 1.05rem;
+}
+
+.overlay-keys {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.8rem;
+    display: grid;
+    gap: 0.5rem;
+    color: var(--color-mist);
+    font-size: 0.95rem;
+}
+
+.overlay-keys kbd {
+    display: inline-block;
+    min-width: 1.6em;
+    padding: 0.1em 0.45em;
+    margin: 0 0.1em;
+    border: 1px solid rgba(207, 220, 236, 0.35);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    color: var(--color-white);
+}
+
+.overlay-btn {
+    background: transparent;
+    border: 1px solid var(--color-soft);
+    color: var(--color-white);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    padding: 0.8rem 2.2rem;
+    cursor: pointer;
+    transition: background 0.3s var(--easing-soft), letter-spacing 0.3s var(--easing-soft);
+}
+
+.overlay-btn:hover,
+.overlay-btn:focus-visible {
+    background: rgba(91, 141, 201, 0.18);
+    letter-spacing: 0.45em;
+    outline: none;
+}

@@ -1,0 +1,36 @@
+:root {
+    --color-deep: #0a1f3d;
+    --color-navy: #14315c;
+    --color-mid: #1e4d8c;
+    --color-soft: #5b8dc9;
+    --color-mist: #cfdcec;
+    --color-pale: #eaf1f8;
+    --color-cream: #f7f9fc;
+    --color-white: #ffffff;
+    --color-ink: #0a1424;
+
+    --font-display: "Cormorant Garamond", "Garamond", "Times New Roman", serif;
+
+    --easing-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--color-deep);
+    color: var(--color-cream);
+    font-family: var(--font-display);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+}

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config *)",
+      "PowerShell(ssh -T -o StrictHostKeyChecking=accept-new git@github.com)",
+      "Bash(\"C:/Users/jordi/Desktop/Proyectos/Galeria/venv/Scripts/pip.exe\" list *)",
+      "Bash(./venv/Scripts/pip.exe install *)",
+      "Bash(curl -s http://127.0.0.1:5000/)",
+      "Bash(curl -s http://127.0.0.1:5000/gallery)",
+      "Bash(./venv/Scripts/python.exe app.py)",
+      "Bash(curl -s -o /dev/null -w \"GET / -> %{http_code}\\\\nGET /gallery -> %{http_code}\\\\nGET /frontend-assets/images/afesol4.png -> \" http://127.0.0.1:5000/ http://127.0.0.1:5000/gallery)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} \\(%{size_download} bytes, %{content_type}\\)\\\\n\" http://127.0.0.1:5000/frontend-assets/images/afesol4.png)",
+      "Bash(curl -s -o /dev/null -w \"GET /frontend-assets/images/missing.png -> %{http_code}\\\\n\" http://127.0.0.1:5000/frontend-assets/images/missing.png)"
+    ]
+  }
+}

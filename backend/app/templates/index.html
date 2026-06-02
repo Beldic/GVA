@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Galería Virtual AFESOL — Entrada{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/door.css') }}">
+{% endblock %}
+
+{% block body_class %}door-page{% endblock %}
+
+{% block content %}
+<main class="door-stage">
+    <div class="door-glow" aria-hidden="true"></div>
+
+    <header class="door-header">
+        <p class="brand-eyebrow">AFESOL</p>
+        <h1 class="brand-title">Galería Virtual de Arte</h1>
+        <p class="brand-subtitle">Una sala. Una obra. Un instante.</p>
+    </header>
+
+    <section class="door-frame" aria-label="Puerta de acceso a la galería">
+        <div class="door-arch">
+            <div class="door door-left">
+                <div class="door-panel door-panel--top"></div>
+                <div class="door-panel door-panel--bottom"></div>
+                <div class="door-handle" aria-hidden="true"></div>
+            </div>
+            <div class="door door-right">
+                <div class="door-panel door-panel--top"></div>
+                <div class="door-panel door-panel--bottom"></div>
+                <div class="door-handle" aria-hidden="true"></div>
+            </div>
+            <div class="door-threshold" aria-hidden="true"></div>
+        </div>
+    </section>
+
+    <footer class="door-actions">
+        <button id="enter-btn" type="button" class="enter-btn">
+            <span class="enter-btn__label">Entrar</span>
+            <span class="enter-btn__line" aria-hidden="true"></span>
+        </button>
+    </footer>
+</main>
+
+<a id="enter-link" href="{{ url_for('main.gallery') }}" hidden></a>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/door.js') }}" defer></script>
+{% endblock %}
