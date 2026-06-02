@@ -153,95 +153,13 @@ def register_commands(app) -> None:
     @click.option("--publicar", is_flag=True, help="Publica la exposición al crearla.")
     def seed_rectangular(reset, publicar):
         """Crea 'afesol_rect': una sola sala rectangular (15 cuadros + 40 dibujos)."""
-        from backend.app.models import Autor, Exposicion, Obra, Sala
-        from backend.app.models.exposicion import (
-            ESTADO_BORRADOR,
-            ESTADO_PUBLICADA,
-        )
-        from backend.app.models.obra import (
-            PLACEHOLDER_IMAGEN,
-            TIPO_CUADRO,
-            TIPO_DIBUJO,
-        )
-        from backend.app.plantillas import sembrar_zonas
-        from backend.app.utils import slugify
+        from backend.app.seeds import sembrar_rectangular
 
-        slug = slugify("afesol_rect")
-        existente = Exposicion.query.filter_by(slug=slug).first()
-        if existente is not None:
-            if not reset:
-                click.echo("Ya existe 'afesol_rect'. Usa --reset para recrearla.")
-                return
-            db.session.delete(existente)
-            db.session.commit()
-            click.echo("Exposición anterior borrada (--reset).")
-
-        autor = Autor.query.filter_by(nombre="Autor de ejemplo").first()
-        if autor is None:
-            autor = Autor(
-                nombre="Autor de ejemplo",
-                bio="Autor ficticio para los datos de ejemplo.",
-            )
-            db.session.add(autor)
-
-        if publicar:
-            # Solo una publicada a la vez: despublica las demás.
-            Exposicion.query.filter(Exposicion.estado == ESTADO_PUBLICADA).update(
-                {"estado": ESTADO_BORRADOR}
-            )
-
-        expo = Exposicion(
-            titulo="afesol_rect",
-            slug=slug,
-            descripcion="Sala rectangular de prueba (placeholders).",
-            estado=ESTADO_PUBLICADA if publicar else ESTADO_BORRADOR,
-        )
-        db.session.add(expo)
-
-        sala = Sala(
-            exposicion=expo,
-            nombre="Sala única",
-            plantilla_3d="sala-rectangular",
-            orden=0,
-        )
-        sembrar_zonas(sala)
-        db.session.add(sala)
-        db.session.flush()
-
-        zonas = sorted(sala.zonas, key=lambda z: z.orden)
-        zonas_cuadro = [z for z in zonas if z.tipo_admitido == TIPO_CUADRO]
-        zonas_dibujo = [z for z in zonas if z.tipo_admitido == TIPO_DIBUJO]
-
-        def slots(zs):
-            for z in zs:
-                for orden in range(z.capacidad):
-                    yield z, orden
-
-        def llenar(zs, cantidad, tipo, prefijo, ancho, alto, tecnica):
-            creadas = 0
-            for n, (z, orden) in zip(range(1, cantidad + 1), slots(zs)):
-                db.session.add(
-                    Obra(
-                        zona=z,
-                        autor=autor,
-                        titulo=f"{prefijo} {n:02d}",
-                        tipo=tipo,
-                        anio=2026,
-                        tecnica=tecnica,
-                        ancho_cm=ancho,
-                        alto_cm=alto,
-                        descripcion=f"{prefijo} {n:02d} — texto de ejemplo provisional.",
-                        orden=orden,
-                        cloudinary_url=PLACEHOLDER_IMAGEN,
-                    )
-                )
-                creadas += 1
-            return creadas
-
-        n_cuadros = llenar(zonas_cuadro, 15, TIPO_CUADRO, "Cuadro", 150, 120, "Óleo sobre lienzo (ejemplo)")
-        n_dibujos = llenar(zonas_dibujo, 40, TIPO_DIBUJO, "Dibujo", 29.7, 42, "Lápiz sobre papel (ejemplo)")
-
-        db.session.commit()
+        res = sembrar_rectangular(reset=reset, publicar=publicar)
+        if res is None:
+            click.echo("Ya existe 'afesol_rect'. Usa --reset para recrearla.")
+            return
+        n_cuadros, n_dibujos = res
         estado = "publicada" if publicar else "borrador"
         click.echo(
             f"Exposición 'afesol_rect' creada ({estado}): 1 sala rectangular, "
