@@ -17,21 +17,50 @@
     <a class="admin-btn-sm" href="{{ url_for('admin.sala_editar', sala_id=sala.id) }}">Editar sala</a>
 </div>
 
-<h2 class="admin-h2">Zonas ({{ sala.zonas|length }})</h2>
-<table class="admin-table">
-    <thead>
-        <tr><th>Zona</th><th>Código</th><th>Admite</th><th>Ocupación</th></tr>
-    </thead>
-    <tbody>
-        {% for z in sala.zonas %}
-        <tr>
-            <td>{{ z.nombre }}</td>
-            <td class="admin-muted">{{ z.codigo }}</td>
-            <td>{{ TIPOS.get(z.tipo_admitido, z.tipo_admitido) }}</td>
-            <td>{{ z.obras|length }} / {{ z.capacidad }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<p class="admin-hint">En la Fase 3c colgarás obras en estas zonas.</p>
+{% for z in sala.zonas %}
+<section class="admin-zona">
+    <div class="admin-zona-head">
+        <h2 class="admin-h2">{{ z.nombre }}</h2>
+        <span class="admin-badge">{{ TIPOS.get(z.tipo_admitido, z.tipo_admitido) }}</span>
+        <span class="admin-muted">{{ z.obras|length }} / {{ z.capacidad }}</span>
+        <span class="admin-zona-spacer"></span>
+        {% if z.obras|length < z.capacidad %}
+            <a class="admin-btn-sm" href="{{ url_for('admin.obra_nueva', zona_id=z.id) }}">+ Colgar obra</a>
+        {% else %}
+            <span class="admin-btn-sm admin-btn-disabled">Zona completa</span>
+        {% endif %}
+    </div>
+
+    {% if z.obras %}
+    <table class="admin-table">
+        <thead>
+            <tr><th></th><th>Pos.</th><th>Obra</th><th>Autor</th><th>Medidas</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for o in z.obras %}
+            <tr>
+                <td><img class="admin-thumb" src="{{ o.cloudinary_url }}" alt=""></td>
+                <td class="admin-muted">{{ o.orden + 1 }}</td>
+                <td>{{ o.titulo }}{% if o.anio %} <span class="admin-muted">({{ o.anio }})</span>{% endif %}</td>
+                <td>{{ o.autor.nombre }}</td>
+                <td class="admin-muted">
+                    {%- if o.ancho_cm and o.alto_cm %}{{ o.ancho_cm }}×{{ o.alto_cm }} cm{% else %}—{% endif -%}
+                </td>
+                <td class="admin-actions">
+                    <a href="{{ url_for('admin.obra_editar', obra_id=o.id) }}">Editar</a>
+                    <form method="post" action="{{ url_for('admin.obra_borrar', obra_id=o.id) }}"
+                          onsubmit="return confirm('¿Retirar «{{ o.titulo }}»?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="admin-link-danger">Retirar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="admin-empty-sm">Zona vacía.</p>
+    {% endif %}
+</section>
+{% endfor %}
 {% endblock %}

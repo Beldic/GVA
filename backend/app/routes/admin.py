@@ -15,9 +15,11 @@ from flask import (
 from flask_login import current_user, login_required, login_user, logout_user
 
 from backend.app.extensions import db
-from backend.app.forms import AutorForm, ExposicionForm, SalaForm
-from backend.app.models import Autor, Exposicion, Sala, Usuario
+from backend.app.forms import AutorForm, ExposicionForm, ObraForm, SalaForm
+from backend.app.models import Autor, Exposicion, Obra, Sala, Usuario, Zona
 from backend.app.models.exposicion import ESTADO_BORRADOR, ESTADO_PUBLICADA
+from backend.app.models.obra import PLACEHOLDER_IMAGEN
+from backend.app.models.zona import TIPO_MIXTO
 from backend.app.plantillas import (
     nombre_plantilla,
     opciones_plantilla,
@@ -323,3 +325,106 @@ def sala_borrar(sala_id):
     db.session.commit()
     flash("Sala borrada.", "info")
     return redirect(url_for("admin.exposicion_detail", exposicion_id=exposicion_id))
+
+
+# --------------------------------------------------------------------------
+# Obras (colgadas en una zona)
+# --------------------------------------------------------------------------
+def _siguiente_hueco(zona) -> int:
+    """Primer orden libre en la zona dentro de su capacidad."""
+    ocupados = {o.orden for o in zona.obras}
+    for i in range(zona.capacidad):
+        if i not in ocupados:
+            return i
+    return len(zona.obras)  # no debería alcanzarse (la capacidad se valida antes)
+
+
+@bp.route("/zonas/<int:zona_id>/obras/nueva", methods=["GET", "POST"])
+@login_required
+def obra_nueva(zona_id):
+    zona = db.get_or_404(Zona, zona_id)
+    if len(zona.obras) >= zona.capacidad:
+        flash("La zona está completa.", "error")
+        return redirect(url_for("admin.sala_detail", sala_id=zona.sala_id))
+
+    autores = Autor.query.order_by(Autor.nombre).all()
+    if not autores:
+        flash("Crea al menos un autor antes de colgar obras.", "error")
+        return redirect(url_for("admin.autor_nuevo"))
+
+    form = ObraForm()
+    form.autor_id.choices = [(a.id, a.nombre) for a in autores]
+    zona_mixta = zona.tipo_admitido == TIPO_MIXTO
+
+    if form.validate_on_submit():
+        obra = Obra(
+            zona=zona,
+            autor_id=form.autor_id.data,
+            titulo=form.titulo.data.strip(),
+            tipo=form.tipo.data if zona_mixta else zona.tipo_admitido,
+            anio=form.anio.data,
+            tecnica=form.tecnica.data or None,
+            ancho_cm=form.ancho_cm.data,
+            alto_cm=form.alto_cm.data,
+            descripcion=form.descripcion.data or None,
+            orden=_siguiente_hueco(zona),
+            cloudinary_url=PLACEHOLDER_IMAGEN,
+        )
+        db.session.add(obra)
+        db.session.commit()
+        flash(f"Obra «{obra.titulo}» colgada.", "info")
+        return redirect(url_for("admin.sala_detail", sala_id=zona.sala_id))
+
+    return render_template(
+        "admin/obra_form.html",
+        form=form,
+        zona=zona,
+        zona_mixta=zona_mixta,
+        titulo="Colgar obra",
+        es_nueva=True,
+    )
+
+
+@bp.route("/obras/<int:obra_id>/editar", methods=["GET", "POST"])
+@login_required
+def obra_editar(obra_id):
+    obra = db.get_or_404(Obra, obra_id)
+    zona = obra.zona
+    autores = Autor.query.order_by(Autor.nombre).all()
+    form = ObraForm(obj=obra)
+    form.autor_id.choices = [(a.id, a.nombre) for a in autores]
+    zona_mixta = zona.tipo_admitido == TIPO_MIXTO
+
+    if form.validate_on_submit():
+        obra.titulo = form.titulo.data.strip()
+        obra.autor_id = form.autor_id.data
+        if zona_mixta:
+            obra.tipo = form.tipo.data
+        obra.anio = form.anio.data
+        obra.tecnica = form.tecnica.data or None
+        obra.ancho_cm = form.ancho_cm.data
+        obra.alto_cm = form.alto_cm.data
+        obra.descripcion = form.descripcion.data or None
+        db.session.commit()
+        flash("Obra actualizada.", "info")
+        return redirect(url_for("admin.sala_detail", sala_id=zona.sala_id))
+
+    return render_template(
+        "admin/obra_form.html",
+        form=form,
+        zona=zona,
+        zona_mixta=zona_mixta,
+        titulo=f"Editar: {obra.titulo}",
+        es_nueva=False,
+    )
+
+
+@bp.post("/obras/<int:obra_id>/borrar")
+@login_required
+def obra_borrar(obra_id):
+    obra = db.get_or_404(Obra, obra_id)
+    sala_id = obra.zona.sala_id
+    db.session.delete(obra)
+    db.session.commit()
+    flash("Obra retirada.", "info")
+    return redirect(url_for("admin.sala_detail", sala_id=sala_id))

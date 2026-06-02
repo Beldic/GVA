@@ -469,3 +469,46 @@ input.admin-input:disabled {
     background: #eef1f6;
     color: #8a99ad;
 }
+
+/* ---- Zonas con sus obras ---- */
+.admin-zona {
+    margin-top: 1.8rem;
+}
+
+.admin-zona-head {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.7rem;
+}
+
+.admin-zona-head .admin-h2 {
+    margin: 0;
+}
+
+.admin-zona-spacer {
+    flex: 1;
+}
+
+.admin-btn-disabled {
+    background: #e6eaf1;
+    color: #9babc2;
+    cursor: not-allowed;
+}
+
+.admin-thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--gva-borde);
+    background: var(--gva-crema);
+    display: block;
+}
+
+.admin-empty-sm {
+    color: #7488a0;
+    font-size: 0.88rem;
+    padding: 0.6rem 0.2rem;
+    margin: 0;
+}

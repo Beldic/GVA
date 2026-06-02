@@ -1,0 +1,49 @@
+{% extends "admin/_layout.html" %}
+{% from "admin/_macros.html" import field %}
+
+{% block admin_title %}{{ titulo }}{% endblock %}
+
+{% block admin_content %}
+{% set TIPOS = {'dibujo': 'Dibujos', 'cuadro': 'Cuadros', 'mixto': 'Mixto'} %}
+
+<p class="admin-breadcrumb">
+    <a href="{{ url_for('admin.sala_detail', sala_id=zona.sala_id) }}">‹ {{ zona.sala.nombre }}</a>
+</p>
+
+<h1 class="admin-h1">{{ titulo }}</h1>
+<p class="admin-lead">
+    Zona: <strong>{{ zona.nombre }}</strong>
+    · admite {{ TIPOS.get(zona.tipo_admitido, zona.tipo_admitido) }}
+</p>
+
+<form method="post" class="admin-form admin-form-wide">
+    {{ form.hidden_tag() }}
+    {{ field(form.titulo) }}
+    {{ field(form.autor_id) }}
+
+    {% if zona_mixta %}
+        {{ field(form.tipo) }}
+    {% else %}
+        <input type="hidden" name="tipo" value="{{ zona.tipo_admitido }}">
+    {% endif %}
+
+    <div class="admin-form-row">
+        {{ field(form.anio) }}
+        {{ field(form.tecnica) }}
+    </div>
+    <div class="admin-form-row">
+        {{ field(form.ancho_cm) }}
+        {{ field(form.alto_cm) }}
+    </div>
+    {{ field(form.descripcion, rows=3) }}
+
+    {% if es_nueva %}
+    <p class="admin-hint">La imagen se asigna como placeholder; se sustituirá al subir la definitiva (Fase 4).</p>
+    {% endif %}
+
+    <div class="admin-form-actions">
+        <button type="submit" class="admin-btn">Guardar</button>
+        <a href="{{ url_for('admin.sala_detail', sala_id=zona.sala_id) }}" class="admin-cancel">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

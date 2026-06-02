@@ -4,7 +4,7 @@
 > programada** (corte de sesión, cambio de equipo, pausa larga). Resume qué se
 > está construyendo, cómo, en qué punto estamos y cómo continuar.
 >
-> Última actualización: 2026-06-02 — **Fase 3b** (salas + siembra de zonas) hecha.
+> Última actualización: 2026-06-02 — **Fase 3 completa** (CRUD del dashboard).
 
 ---
 
@@ -98,11 +98,11 @@ tabla de **estadísticas** de clicks por obra (engagement).
 |---|---|---|
 | 1 | **Andamiaje ORM** — extensiones, config, modelos, 1ª migración, BD SQLite | ✅ Hecho |
 | 2 | **Autenticación** — Flask-Login, login/logout, `/admin` protegido, comando `crear-admin` | ✅ Hecho |
-| 3 | **Dashboard CRUD** (Flask-WTF + CSRF) | ⏳ En curso |
+| 3 | **Dashboard CRUD** (Flask-WTF + CSRF) | ✅ Hecho |
 | ↳ 3a | Autores + Exposiciones (publicar/despublicar) | ✅ Hecho |
 | ↳ 3b | Salas (dentro del detalle de expo) + zonas sembradas desde plantilla | ✅ Hecho |
-| ↳ 3c | Obras + asignación a zona/orden + imagen placeholder | ⬜ Siguiente |
-| 4 | **Cloudinary** — subida en el formulario de obra (`public_id`/`secure_url`) | ⬜ |
+| ↳ 3c | Obras colgadas en zona (hueco automático, tipo por zona, placeholder) | ✅ Hecho |
+| 4 | **Cloudinary** — subida en el formulario de obra (`public_id`/`secure_url`) | ⏳ Siguiente |
 | 5 | **API + 3D dinámico** — endpoint de la expo publicada; `painting.js` deja de estar hardcodeado | ⬜ |
 | 6 | **Postgres en Railway** — provisionar BD, variables, migraciones en prod, deploy | ⬜ |
 

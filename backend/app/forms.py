@@ -2,13 +2,14 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     DateField,
+    FloatField,
     IntegerField,
     SelectField,
     StringField,
     SubmitField,
     TextAreaField,
 )
-from wtforms.validators import URL, DataRequired, Length, Optional
+from wtforms.validators import URL, DataRequired, Length, NumberRange, Optional
 
 
 class AutorForm(FlaskForm):
@@ -36,4 +37,19 @@ class SalaForm(FlaskForm):
     nombre = StringField("Nombre de la sala", validators=[DataRequired(), Length(max=120)])
     plantilla_3d = SelectField("Plantilla", validators=[Optional()])
     orden = IntegerField("Orden en el recorrido", validators=[Optional()], default=0)
+    submit = SubmitField("Guardar")
+
+
+class ObraForm(FlaskForm):
+    titulo = StringField("Título", validators=[DataRequired(), Length(max=200)])
+    autor_id = SelectField("Autor", coerce=int, validators=[DataRequired()])
+    tipo = SelectField(
+        "Tipo", choices=[("dibujo", "Dibujo"), ("cuadro", "Cuadro")],
+        validators=[Optional()],
+    )
+    anio = IntegerField("Año", validators=[Optional()])
+    tecnica = StringField("Técnica", validators=[Optional(), Length(max=160)])
+    ancho_cm = FloatField("Ancho (cm)", validators=[Optional(), NumberRange(min=0)])
+    alto_cm = FloatField("Alto (cm)", validators=[Optional(), NumberRange(min=0)])
+    descripcion = TextAreaField("Descripción", validators=[Optional()])
     submit = SubmitField("Guardar")

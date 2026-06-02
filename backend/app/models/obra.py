@@ -5,6 +5,9 @@ from backend.app.extensions import db
 TIPO_DIBUJO = "dibujo"
 TIPO_CUADRO = "cuadro"
 
+# Imagen por defecto mientras no se sube la definitiva a Cloudinary (Fase 4).
+PLACEHOLDER_IMAGEN = "/frontend-assets/images/afesol4.png"
+
 
 class Obra(db.Model):
     """Una pieza (dibujo o cuadro) colgada en una zona. La posición en la sala
