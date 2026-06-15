@@ -16,7 +16,8 @@
       "PowerShell(& \".\\\\venv\\\\Scripts\\\\python.exe\" --version)",
       "PowerShell(& \".\\\\venv\\\\Scripts\\\\python.exe\" -m pip install -r requirements.txt --quiet; if \\($?\\) { \"=== OK install ===\" } else { \"=== FALLO install ===\" })",
       "PowerShell($env:FLASK_SKIP_DOTENV='1'; python -c \"from backend.app import create_app; from backend.app.services import cloudinary_service; app=create_app\\(\\); ctx=app.app_context\\(\\); ctx.push\\(\\); print\\('configurado:', cloudinary_service.esta_configurado\\(\\)\\); print\\('cloud_name:', app.config['CLOUDINARY_CLOUD_NAME']\\)\")",
-      "PowerShell($env:FLASK_SKIP_DOTENV='1'; python _test_cloudinary.py)"
+      "PowerShell($env:FLASK_SKIP_DOTENV='1'; python _test_cloudinary.py)",
+      "Bash(FLASK_SKIP_DOTENV=1 venv/Scripts/python.exe -c ' *)"
     ]
   }
 }

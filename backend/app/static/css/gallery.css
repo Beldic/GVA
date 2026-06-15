@@ -89,17 +89,17 @@ html, body {
 }
 
 .overlay-eyebrow {
+    font-family: var(--font-mono);
     font-size: 0.8rem;
     letter-spacing: 0.55em;
-    color: var(--color-soft);
+    color: var(--color-tech-soft);
     margin: 0 0 0.5rem;
     text-transform: uppercase;
 }
 
 .overlay-title {
     font-size: 2.4rem;
-    font-style: italic;
-    font-weight: 400;
+    font-weight: 600;
     color: var(--color-white);
     margin: 0 0 1rem;
 }

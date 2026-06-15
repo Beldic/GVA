@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Acceso · Panel AFESOL{% endblock %}
+{% block title %}Acceso · Panel SIT{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
@@ -11,7 +11,7 @@
 {% block content %}
 <div class="admin-auth">
     <div class="admin-auth-card">
-        <p class="admin-eyebrow">AFESOL · Galería Virtual</p>
+        <p class="admin-eyebrow">SIT · Sala de Infografías Técnicas</p>
         <h1 class="admin-auth-title">Panel de administración</h1>
 
         {% with messages = get_flashed_messages(with_categories=true) %}

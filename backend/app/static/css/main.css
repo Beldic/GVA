@@ -9,7 +9,13 @@
     --color-white: #ffffff;
     --color-ink: #0a1424;
 
-    --font-display: "Cormorant Garamond", "Garamond", "Times New Roman", serif;
+    /* Acento tecnológico */
+    --color-tech: #38bdf8;
+    --color-tech-soft: #7dd3fc;
+    --color-tech-deep: #0ea5e9;
+
+    --font-display: "Space Grotesk", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "JetBrains Mono", "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
 
     --easing-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
 }

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{% block admin_title %}Panel{% endblock %} · AFESOL{% endblock %}
+{% block title %}{% block admin_title %}Panel{% endblock %} · SIT{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
@@ -10,7 +10,7 @@
 
 {% block content %}
 <header class="admin-topbar">
-    <span class="admin-brand">GVA · Panel</span>
+    <span class="admin-brand">SIT · Panel</span>
     <div class="admin-topbar-right">
         <span class="admin-user">{{ current_user.email }}</span>
         <form method="post" action="{{ url_for('admin.logout') }}">

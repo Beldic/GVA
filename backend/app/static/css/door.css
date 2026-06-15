@@ -1,6 +1,6 @@
 .door-page {
     background:
-        radial-gradient(ellipse at 50% 40%, #1a3a6b 0%, #0a1f3d 55%, #050f1f 100%);
+        radial-gradient(ellipse at 50% 38%, #12325c 0%, #0a1f3d 52%, #04101f 100%);
     min-height: 100dvh;
     display: flex;
     align-items: center;
@@ -9,20 +9,36 @@
     overflow: hidden;
 }
 
+/* Rejilla técnica de fondo */
+.door-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at 50% 45%, #000 0%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 45%, #000 0%, transparent 78%);
+    pointer-events: none;
+    z-index: 0;
+}
+
 .door-stage {
     position: relative;
     width: min(720px, 92vw);
     text-align: center;
     padding: clamp(1.5rem, 4vh, 3rem) 1rem;
     transform-style: preserve-3d;
+    z-index: 1;
 }
 
 .door-glow {
     position: absolute;
     inset: -10% -10% auto -10%;
     height: 60vh;
-    background: radial-gradient(ellipse at center, rgba(180, 210, 255, 0.18), transparent 65%);
-    filter: blur(20px);
+    background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.18), transparent 65%);
+    filter: blur(24px);
     z-index: 0;
     pointer-events: none;
 }
@@ -35,35 +51,51 @@
     transition: opacity 1.2s var(--easing-soft), transform 1.2s var(--easing-soft);
 }
 
+.door-emblem {
+    display: inline-flex;
+    width: clamp(48px, 7vw, 64px);
+    height: clamp(48px, 7vw, 64px);
+    margin-bottom: 1rem;
+    color: var(--color-tech);
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
+}
+
+.door-emblem svg {
+    width: 100%;
+    height: 100%;
+}
+
 .brand-eyebrow {
-    font-size: 0.85rem;
-    letter-spacing: 0.6em;
-    text-indent: 0.6em;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.65em;
+    text-indent: 0.65em;
     text-transform: uppercase;
-    color: var(--color-soft);
+    color: var(--color-tech-soft);
     margin: 0 0 0.75rem;
     font-weight: 500;
 }
 
 .brand-title {
-    font-size: clamp(2.4rem, 6vw, 4rem);
-    font-weight: 400;
-    letter-spacing: 0.02em;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5.2vw, 3.4rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
     margin: 0;
     color: var(--color-white);
-    font-style: italic;
-    text-shadow: 0 1px 30px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 1px 30px rgba(0, 0, 0, 0.45);
 }
 
 .brand-subtitle {
-    font-size: clamp(1rem, 1.8vw, 1.2rem);
-    font-weight: 300;
+    font-family: var(--font-mono);
+    font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+    font-weight: 400;
     color: var(--color-mist);
-    margin: 0.75rem 0 0;
-    letter-spacing: 0.12em;
+    margin: 0.85rem 0 0;
+    letter-spacing: 0.18em;
 }
 
-/* ---- Marco y puerta ---- */
+/* ---- Marco y panel de acceso ---- */
 .door-frame {
     position: relative;
     z-index: 1;
@@ -72,21 +104,25 @@
     margin: 0 auto;
     perspective: 1400px;
     transform-style: preserve-3d;
+    cursor: pointer;
 }
 
 .door-arch {
     position: absolute;
     inset: 0;
-    border-radius: 210px 210px 8px 8px;
+    border-radius: 12px;
     background: linear-gradient(180deg, #03101f 0%, #061a2e 60%, #02080f 100%);
+    border: 1px solid rgba(56, 189, 248, 0.25);
     box-shadow:
         inset 0 0 40px rgba(0, 0, 0, 0.85),
-        0 30px 60px -20px rgba(0, 0, 0, 0.7);
+        0 0 0 1px rgba(0, 0, 0, 0.6),
+        0 30px 60px -20px rgba(0, 0, 0, 0.7),
+        0 0 50px -10px rgba(56, 189, 248, 0.25);
     overflow: hidden;
     transform-style: preserve-3d;
 }
 
-/* Hojas idénticas, espejadas explícitamente por lado */
+/* Hojas metálicas con trazas de circuito, se deslizan a los lados */
 .door {
     position: absolute;
     top: 0;
@@ -95,101 +131,123 @@
     transform-style: preserve-3d;
     transition: transform 1.8s var(--easing-soft);
     will-change: transform;
-    border-radius: inherit;
     box-shadow:
         inset 0 0 60px rgba(0, 0, 0, 0.5),
-        inset 0 4px 0 rgba(255, 255, 255, 0.06);
+        inset 0 4px 0 rgba(125, 211, 252, 0.08);
+}
+
+/* Trazas de circuito grabadas en cada hoja */
+.door::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(56, 189, 248, 0.10) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.10) 1px, transparent 1px);
+    background-size: 26px 26px;
+    opacity: 0.7;
 }
 
 .door-left {
     left: 0;
-    transform-origin: 0% 50%;
     background:
-        linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, transparent 12%, transparent 88%, rgba(0, 0, 0, 0.45) 100%),
-        linear-gradient(180deg, #1b3d6e 0%, #14315c 50%, #0d2244 100%);
+        linear-gradient(90deg, rgba(125, 211, 252, 0.10) 0%, transparent 14%, transparent 86%, rgba(0, 0, 0, 0.5) 100%),
+        linear-gradient(180deg, #14315c 0%, #102a4d 50%, #0a1f3d 100%);
 }
 
 .door-right {
     right: 0;
-    transform-origin: 100% 50%;
     background:
-        linear-gradient(270deg, rgba(255, 255, 255, 0.08) 0%, transparent 12%, transparent 88%, rgba(0, 0, 0, 0.45) 100%),
-        linear-gradient(180deg, #1b3d6e 0%, #14315c 50%, #0d2244 100%);
+        linear-gradient(270deg, rgba(125, 211, 252, 0.10) 0%, transparent 14%, transparent 86%, rgba(0, 0, 0, 0.5) 100%),
+        linear-gradient(180deg, #14315c 0%, #102a4d 50%, #0a1f3d 100%);
 }
 
-.door-left .door-handle {
-    right: 8%;
-}
-
-.door-right .door-handle {
-    left: 8%;
-}
-
+/* Segmentos tipo pantalla / paneles de datos */
 .door-panel {
     position: absolute;
-    left: 12%;
-    right: 12%;
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    left: 14%;
+    right: 14%;
+    border: 1px solid rgba(56, 189, 248, 0.22);
     background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.25));
+        repeating-linear-gradient(
+            180deg,
+            rgba(56, 189, 248, 0.05) 0px,
+            rgba(56, 189, 248, 0.05) 1px,
+            transparent 1px,
+            transparent 7px),
+        linear-gradient(135deg, rgba(125, 211, 252, 0.05), rgba(0, 0, 0, 0.3));
     box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.5);
-    border-radius: 6px;
+    border-radius: 4px;
 }
 
 .door-panel--top {
-    top: 8%;
-    height: 38%;
-    border-radius: 120px 120px 6px 6px;
+    top: 9%;
+    height: 36%;
+    border-radius: 4px;
 }
 
 .door-panel--bottom {
     top: 52%;
-    height: 40%;
+    height: 39%;
 }
 
+/* Tiras de luz / LED de estado en el borde interior de cada hoja */
 .door-handle {
     position: absolute;
-    top: 50%;
-    width: 10px;
-    height: 36px;
-    background: linear-gradient(180deg, #cfdcec, #5b8dc9 50%, #14315c);
-    border-radius: 5px;
-    transform: translateY(-50%);
-    box-shadow: 0 0 8px rgba(180, 210, 255, 0.4);
+    top: 18%;
+    width: 4px;
+    height: 64%;
+    background: linear-gradient(180deg, rgba(125, 211, 252, 0.1), var(--color-tech) 50%, rgba(125, 211, 252, 0.1));
+    border-radius: 3px;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
 }
 
+.door-left .door-handle {
+    right: 6%;
+}
+
+.door-right .door-handle {
+    left: 6%;
+}
+
+/* Costura central de luz */
 .door-threshold {
     position: absolute;
-    left: 5%;
-    right: 5%;
-    bottom: 2%;
-    height: 6px;
-    background: linear-gradient(90deg, transparent, rgba(180, 210, 255, 0.35), transparent);
-    filter: blur(2px);
-    opacity: 0;
-    transition: opacity 1.6s var(--easing-soft) 0.4s;
+    left: 50%;
+    top: 4%;
+    bottom: 4%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, transparent, var(--color-tech-soft), transparent);
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.8);
+    opacity: 0.85;
+    transition: opacity 1.6s var(--easing-soft);
 }
 
-/* ---- Estado abierto ---- */
+/* ---- Estado abierto: las hojas se separan deslizando ---- */
 .door-page.is-opening .door-left {
-    transform: rotateY(-115deg);
+    transform: translateX(-102%);
     box-shadow:
         inset 0 0 60px rgba(0, 0, 0, 0.5),
-        -10px 0 40px rgba(0, 0, 0, 0.4);
+        20px 0 50px rgba(0, 0, 0, 0.5);
 }
 
 .door-page.is-opening .door-right {
-    transform: rotateY(115deg);
+    transform: translateX(102%);
     box-shadow:
         inset 0 0 60px rgba(0, 0, 0, 0.5),
-        10px 0 40px rgba(0, 0, 0, 0.4);
+        -20px 0 50px rgba(0, 0, 0, 0.5);
 }
 
 .door-page.is-opening .door-threshold {
     opacity: 1;
-    height: 90%;
+    width: 90%;
+    left: 5%;
+    top: 5%;
     bottom: 5%;
-    background: radial-gradient(ellipse at center, rgba(255, 245, 220, 0.6), transparent 70%);
+    transform: none;
+    background: radial-gradient(ellipse at center, rgba(125, 211, 252, 0.75), transparent 70%);
+    box-shadow: none;
     filter: blur(8px);
 }
 
@@ -203,12 +261,12 @@
     pointer-events: none;
 }
 
-/* Velo final que blanquea antes de redirigir */
+/* Velo final luminoso antes de redirigir */
 .door-page.is-entering::after {
     content: "";
     position: fixed;
     inset: 0;
-    background: radial-gradient(ellipse at center, #fbf4dd 0%, #ffffff 60%);
+    background: radial-gradient(ellipse at center, #cdeefc 0%, #ffffff 60%);
     opacity: 0;
     animation: enter-fade 0.9s var(--easing-soft) forwards;
     z-index: 999;
@@ -231,41 +289,37 @@
 .enter-btn {
     position: relative;
     background: transparent;
-    border: 1px solid var(--color-soft);
+    border: 1px solid var(--color-tech);
     color: var(--color-white);
-    font-family: var(--font-display);
-    font-size: 1.05rem;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
     letter-spacing: 0.4em;
     text-transform: uppercase;
     padding: 0.9rem 2.6rem 0.9rem 3rem;
     cursor: pointer;
     overflow: hidden;
-    transition: background 0.4s var(--easing-soft), color 0.4s var(--easing-soft), letter-spacing 0.4s var(--easing-soft);
+    transition: background 0.4s var(--easing-soft), color 0.4s var(--easing-soft), letter-spacing 0.4s var(--easing-soft), box-shadow 0.4s var(--easing-soft);
 }
 
 .enter-btn:hover,
 .enter-btn:focus-visible {
-    background: rgba(91, 141, 201, 0.12);
+    background: rgba(56, 189, 248, 0.14);
     letter-spacing: 0.5em;
+    box-shadow: 0 0 24px -4px rgba(56, 189, 248, 0.6);
     outline: none;
 }
 
 .enter-btn:focus-visible {
-    box-shadow: 0 0 0 2px rgba(91, 141, 201, 0.45);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.55);
 }
 
 .enter-btn__line {
     display: block;
     width: 30px;
     height: 1px;
-    background: var(--color-soft);
+    background: var(--color-tech);
     margin: 0.5rem auto 0;
-    opacity: 0.7;
-}
-
-/* Cursor sobre la puerta indica que también es clicable */
-.door-frame {
-    cursor: pointer;
+    opacity: 0.8;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,4 +1,4 @@
-"""Modelos del dominio de la Galería Virtual de Arte.
+"""Modelos del dominio de la Sala de Infografías Técnicas (SIT).
 
 Jerarquía: exposicion -> sala -> zona -> obra (>- autor). Más `usuario` para el
 panel de administración. Importar este paquete registra todos los modelos en el

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Galería Virtual AFESOL — {{ datos.sala.nombre if datos else 'Galería' }}{% endblock %}
+{% block title %}SIT — {{ datos.sala.nombre if datos else 'Sala de Infografías Técnicas' }}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}">
@@ -22,7 +22,7 @@
 
 <div id="overlay" class="overlay">
     <div class="overlay-card">
-        <p class="overlay-eyebrow">AFESOL</p>
+        <p class="overlay-eyebrow">SIT</p>
         {% if datos %}
         <h2 class="overlay-title">{{ datos.sala.nombre }}</h2>
         <p class="overlay-text">
@@ -38,7 +38,7 @@
         <h2 class="overlay-title">No hay exposición disponible</h2>
         <p class="overlay-text">
             Todavía no hay ninguna exposición publicada. Vuelve pronto para
-            visitar la galería.
+            visitar la sala.
         </p>
         <a href="{{ url_for('main.index') }}" class="overlay-btn">Volver a la entrada</a>
         {% endif %}

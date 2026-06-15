@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Galería Virtual AFESOL — Entrada{% endblock %}
+{% block title %}Sala de Infografías Técnicas (SIT) — Entrada{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/door.css') }}">
@@ -13,12 +13,21 @@
     <div class="door-glow" aria-hidden="true"></div>
 
     <header class="door-header">
-        <p class="brand-eyebrow">AFESOL</p>
-        <h1 class="brand-title">Galería Virtual de Arte</h1>
-        <p class="brand-subtitle">Una sala. Una obra. Un instante.</p>
+        <span class="door-emblem" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <rect x="20" y="20" width="24" height="24" rx="3"/>
+                <rect x="27" y="27" width="10" height="10" rx="1.5"/>
+                <path d="M26 20v-9M38 20v-9M26 44v9M38 44v9M20 26h-9M20 38h-9M44 26h9M44 38h9"/>
+                <circle cx="32" cy="32" r="1.6" fill="currentColor" stroke="none"/>
+            </svg>
+        </span>
+        <p class="brand-eyebrow">SIT</p>
+        <h1 class="brand-title">Sala de Infografías Técnicas</h1>
+        <p class="brand-subtitle">Recorre · Observa · Comprende</p>
     </header>
 
-    <section class="door-frame" aria-label="Puerta de acceso a la galería">
+    <section class="door-frame" aria-label="Puerta de acceso a la sala">
         <div class="door-arch">
             <div class="door door-left">
                 <div class="door-panel door-panel--top"></div>
