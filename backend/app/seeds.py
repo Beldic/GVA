@@ -41,7 +41,7 @@ def sembrar_rectangular(reset: bool = False, publicar: bool = False):
         )
 
     expo = Exposicion(
-        titulo="Demostración SIT",
+        titulo="Exposición de demostración",
         slug=slug,
         descripcion="Sala rectangular de prueba (placeholders).",
         estado=ESTADO_PUBLICADA if publicar else ESTADO_BORRADOR,

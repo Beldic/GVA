@@ -1,4 +1,4 @@
-"""Modelos del dominio de la Sala de Infografías Técnicas (SIT).
+"""Modelos del dominio de la Plataforma de Exposiciones Virtuales.
 
 Jerarquía: exposicion -> sala -> zona -> obra (>- autor). Más `usuario` para el
 panel de administración. Importar este paquete registra todos los modelos en el

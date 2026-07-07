@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}SIT — {{ datos.sala.nombre if datos else 'Sala de Infografías Técnicas' }}{% endblock %}
+{% block title %}{{ (datos.exposicion.titulo ~ ' — ' ~ datos.sala.nombre) if datos else 'Plataforma de Exposiciones Virtuales' }}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}">
@@ -22,8 +22,10 @@
 
 <div id="overlay" class="overlay">
     <div class="overlay-card">
-        <p class="overlay-eyebrow">SIT</p>
         {% if datos %}
+        <p class="overlay-eyebrow">
+            {{ datos.exposicion.titulo }}{% if datos.exposicion.organizador %} · por {{ datos.exposicion.organizador }}{% endif %}
+        </p>
         <h2 class="overlay-title">{{ datos.sala.nombre }}</h2>
         <p class="overlay-text">
             Haz clic en la pantalla para tomar el control y comenzar la visita.
@@ -35,6 +37,7 @@
         </ul>
         <button id="start-btn" type="button" class="overlay-btn">Entrar a la sala</button>
         {% else %}
+        <p class="overlay-eyebrow">Plataforma de Exposiciones Virtuales</p>
         <h2 class="overlay-title">No hay exposición disponible</h2>
         <p class="overlay-text">
             Todavía no hay ninguna exposición publicada. Vuelve pronto para
