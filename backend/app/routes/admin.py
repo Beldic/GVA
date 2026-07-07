@@ -14,6 +14,7 @@ from flask import (
 )
 from flask_login import current_user, login_required, login_user, logout_user
 
+from backend.app.authz import exigir_acceso_exposicion, exigir_propietario
 from backend.app.extensions import db
 from backend.app.forms import AutorForm, ExposicionForm, ObraForm, SalaForm
 from backend.app.models import Autor, Exposicion, Obra, Sala, Usuario, Zona
@@ -56,7 +57,10 @@ def login_post():
 
     usuario = Usuario.query.filter_by(email=email).first()
     if usuario is not None and usuario.check_password(password):
-        login_user(usuario)
+        # login_user rechaza cuentas con is_active=False (activo=False).
+        if not login_user(usuario):
+            flash("Tu cuenta está desactivada. Contacta con la plataforma.", "error")
+            return redirect(url_for("admin.login"))
         siguiente = request.args.get("next")
         if _es_url_segura(siguiente):
             return redirect(siguiente)
@@ -86,7 +90,11 @@ def dashboard():
 @bp.get("/autores")
 @login_required
 def autores_list():
-    autores = Autor.query.order_by(Autor.nombre).all()
+    autores = (
+        Autor.query.filter_by(usuario_id=current_user.id)
+        .order_by(Autor.nombre)
+        .all()
+    )
     return render_template("admin/autores_list.html", autores=autores)
 
 
@@ -96,6 +104,7 @@ def autor_nuevo():
     form = AutorForm()
     if form.validate_on_submit():
         autor = Autor(
+            usuario_id=current_user.id,
             nombre=form.nombre.data.strip(),
             bio=form.bio.data or None,
             foto_url=form.foto_url.data or None,
@@ -112,6 +121,7 @@ def autor_nuevo():
 @login_required
 def autor_editar(autor_id):
     autor = db.get_or_404(Autor, autor_id)
+    exigir_propietario(autor.usuario_id)
     form = AutorForm(obj=autor)
     if form.validate_on_submit():
         autor.nombre = form.nombre.data.strip()
@@ -130,6 +140,7 @@ def autor_editar(autor_id):
 @login_required
 def autor_borrar(autor_id):
     autor = db.get_or_404(Autor, autor_id)
+    exigir_propietario(autor.usuario_id)
     if autor.obras:
         flash("No se puede borrar: el autor tiene obras asignadas.", "error")
     else:
@@ -160,7 +171,11 @@ def _slug_unico(base: str, exclude_id=None) -> str:
 @bp.get("/exposiciones")
 @login_required
 def exposiciones_list():
-    exposiciones = Exposicion.query.order_by(Exposicion.created_at.desc()).all()
+    exposiciones = (
+        Exposicion.query.filter_by(usuario_id=current_user.id)
+        .order_by(Exposicion.created_at.desc())
+        .all()
+    )
     return render_template(
         "admin/exposiciones_list.html",
         exposiciones=exposiciones,
@@ -175,6 +190,7 @@ def exposicion_nueva():
     if form.validate_on_submit():
         base = slugify(form.slug.data or form.titulo.data)
         expo = Exposicion(
+            usuario_id=current_user.id,
             titulo=form.titulo.data.strip(),
             slug=_slug_unico(base),
             descripcion=form.descripcion.data or None,
@@ -195,6 +211,7 @@ def exposicion_nueva():
 @login_required
 def exposicion_editar(exposicion_id):
     expo = db.get_or_404(Exposicion, exposicion_id)
+    exigir_acceso_exposicion(expo)
     form = ExposicionForm(obj=expo)
     if form.validate_on_submit():
         expo.titulo = form.titulo.data.strip()
@@ -215,13 +232,11 @@ def exposicion_editar(exposicion_id):
 @login_required
 def exposicion_publicar(exposicion_id):
     expo = db.get_or_404(Exposicion, exposicion_id)
-    # Solo una publicada a la vez: despublica las demás.
-    Exposicion.query.filter(
-        Exposicion.id != expo.id, Exposicion.estado == ESTADO_PUBLICADA
-    ).update({"estado": ESTADO_BORRADOR})
+    exigir_acceso_exposicion(expo)
+    # Cada organizador publica sus exposiciones de forma independiente.
     expo.estado = ESTADO_PUBLICADA
     db.session.commit()
-    flash(f"«{expo.titulo}» es ahora la exposición publicada.", "info")
+    flash(f"«{expo.titulo}» está publicada.", "info")
     return redirect(url_for("admin.exposiciones_list"))
 
 
@@ -229,6 +244,7 @@ def exposicion_publicar(exposicion_id):
 @login_required
 def exposicion_despublicar(exposicion_id):
     expo = db.get_or_404(Exposicion, exposicion_id)
+    exigir_acceso_exposicion(expo)
     expo.estado = ESTADO_BORRADOR
     db.session.commit()
     flash(f"«{expo.titulo}» pasó a borrador.", "info")
@@ -239,6 +255,7 @@ def exposicion_despublicar(exposicion_id):
 @login_required
 def exposicion_borrar(exposicion_id):
     expo = db.get_or_404(Exposicion, exposicion_id)
+    exigir_acceso_exposicion(expo)
     db.session.delete(expo)
     db.session.commit()
     flash("Exposición borrada.", "info")
@@ -249,6 +266,7 @@ def exposicion_borrar(exposicion_id):
 @login_required
 def exposicion_detail(exposicion_id):
     expo = db.get_or_404(Exposicion, exposicion_id)
+    exigir_acceso_exposicion(expo)
     return render_template(
         "admin/exposicion_detail.html",
         expo=expo,
@@ -264,6 +282,7 @@ def exposicion_detail(exposicion_id):
 @login_required
 def sala_nueva(exposicion_id):
     expo = db.get_or_404(Exposicion, exposicion_id)
+    exigir_acceso_exposicion(expo)
     form = SalaForm()
     form.plantilla_3d.choices = opciones_plantilla()
     if request.method == "GET":
@@ -289,6 +308,7 @@ def sala_nueva(exposicion_id):
 @login_required
 def sala_editar(sala_id):
     sala = db.get_or_404(Sala, sala_id)
+    exigir_acceso_exposicion(sala.exposicion)
     form = SalaForm(obj=sala)
     # La plantilla no se cambia tras crear la sala (las zonas ya están sembradas).
     form.plantilla_3d.choices = [(sala.plantilla_3d, nombre_plantilla(sala.plantilla_3d))]
@@ -312,6 +332,7 @@ def sala_editar(sala_id):
 @login_required
 def sala_detail(sala_id):
     sala = db.get_or_404(Sala, sala_id)
+    exigir_acceso_exposicion(sala.exposicion)
     return render_template(
         "admin/sala_detail.html", sala=sala, nombre_plantilla=nombre_plantilla
     )
@@ -321,6 +342,7 @@ def sala_detail(sala_id):
 @login_required
 def sala_borrar(sala_id):
     sala = db.get_or_404(Sala, sala_id)
+    exigir_acceso_exposicion(sala.exposicion)
     exposicion_id = sala.exposicion_id
     db.session.delete(sala)
     db.session.commit()
@@ -344,11 +366,16 @@ def _siguiente_hueco(zona) -> int:
 @login_required
 def obra_nueva(zona_id):
     zona = db.get_or_404(Zona, zona_id)
+    exigir_acceso_exposicion(zona.sala.exposicion)
     if len(zona.obras) >= zona.capacidad:
         flash("La zona está completa.", "error")
         return redirect(url_for("admin.sala_detail", sala_id=zona.sala_id))
 
-    autores = Autor.query.order_by(Autor.nombre).all()
+    autores = (
+        Autor.query.filter_by(usuario_id=current_user.id)
+        .order_by(Autor.nombre)
+        .all()
+    )
     if not autores:
         flash("Crea al menos un autor antes de colgar obras.", "error")
         return redirect(url_for("admin.autor_nuevo"))
@@ -403,7 +430,12 @@ def obra_nueva(zona_id):
 def obra_editar(obra_id):
     obra = db.get_or_404(Obra, obra_id)
     zona = obra.zona
-    autores = Autor.query.order_by(Autor.nombre).all()
+    exigir_acceso_exposicion(zona.sala.exposicion)
+    autores = (
+        Autor.query.filter_by(usuario_id=current_user.id)
+        .order_by(Autor.nombre)
+        .all()
+    )
     form = ObraForm(obj=obra)
     form.autor_id.choices = [(a.id, a.nombre) for a in autores]
     zona_mixta = zona.tipo_admitido == TIPO_MIXTO
@@ -452,6 +484,7 @@ def obra_editar(obra_id):
 @login_required
 def obra_borrar(obra_id):
     obra = db.get_or_404(Obra, obra_id)
+    exigir_acceso_exposicion(obra.zona.sala.exposicion)
     sala_id = obra.zona.sala_id
     public_id = obra.cloudinary_public_id
     db.session.delete(obra)
