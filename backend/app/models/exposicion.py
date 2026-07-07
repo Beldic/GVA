@@ -7,12 +7,16 @@ ESTADO_PUBLICADA = "publicada"
 
 
 class Exposicion(db.Model):
-    """Una muestra completa. Solo una puede estar 'publicada' a la vez;
-    la galería pública muestra siempre esa."""
+    """Una muestra completa, propiedad de un organizador. Cada organizador
+    publica sus exposiciones de forma independiente; la galería pública sirve
+    cada exposición publicada por su slug."""
 
     __tablename__ = "exposicion"
 
     id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(
+        db.Integer, db.ForeignKey("usuario.id"), nullable=False, index=True
+    )
     titulo = db.Column(db.String(200), nullable=False)
     slug = db.Column(db.String(220), unique=True, nullable=False, index=True)
     descripcion = db.Column(db.Text)
@@ -25,6 +29,7 @@ class Exposicion(db.Model):
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
 
+    propietario = db.relationship("Usuario", back_populates="exposiciones")
     salas = db.relationship(
         "Sala",
         back_populates="exposicion",

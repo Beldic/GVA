@@ -6,15 +6,15 @@ import click
 
 from backend.app.extensions import db
 from backend.app.models import Usuario
-from backend.app.models.usuario import ROL_ADMIN
+from backend.app.models.usuario import ROL_SUPERADMIN
 
 
 def register_commands(app) -> None:
     @app.cli.command("crear-admin")
-    @click.option("--email", default=None, help="Email del administrador.")
+    @click.option("--email", default=None, help="Email del superadmin de plataforma.")
     @click.option("--password", default=None, help="Contraseña (se pedirá si falta).")
     def crear_admin(email, password):
-        """Crea o actualiza el usuario administrador del panel.
+        """Crea o actualiza el superadmin de la plataforma.
 
         Toma los valores de las opciones o de ADMIN_EMAIL/ADMIN_PASSWORD del
         entorno. En modo interactivo (terminal) los pide por teclado; en un
@@ -37,17 +37,18 @@ def register_commands(app) -> None:
 
         usuario = Usuario.query.filter_by(email=email).first()
         if usuario is None:
-            usuario = Usuario(email=email, rol=ROL_ADMIN)
+            usuario = Usuario(email=email, rol=ROL_SUPERADMIN, activo=True)
             usuario.set_password(password)
             db.session.add(usuario)
             accion = "creado"
         else:
             usuario.set_password(password)
-            usuario.rol = ROL_ADMIN
+            usuario.rol = ROL_SUPERADMIN
+            usuario.activo = True
             accion = "actualizado"
 
         db.session.commit()
-        click.echo(f"Administrador {accion}: {email}")
+        click.echo(f"Superadmin {accion}: {email}")
 
     @app.cli.command("seed-afesol-cero")
     @click.option("--reset", is_flag=True, help="Borra la exposición si ya existe y la recrea.")

@@ -20,8 +20,8 @@ def aplicar_migraciones(app) -> None:
 
 
 def asegurar_admin(app) -> None:
-    """Crea o actualiza el admin a partir de ADMIN_EMAIL/ADMIN_PASSWORD si están
-    definidas. Idempotente."""
+    """Crea o actualiza el superadmin de plataforma a partir de
+    ADMIN_EMAIL/ADMIN_PASSWORD si están definidas. Idempotente."""
     email = os.environ.get("ADMIN_EMAIL")
     password = os.environ.get("ADMIN_PASSWORD")
     if not email or not password:
@@ -29,19 +29,20 @@ def asegurar_admin(app) -> None:
         return
 
     from backend.app.models import Usuario
-    from backend.app.models.usuario import ROL_ADMIN
+    from backend.app.models.usuario import ROL_SUPERADMIN
 
     with app.app_context():
         usuario = Usuario.query.filter_by(email=email).first()
         if usuario is None:
-            usuario = Usuario(email=email, rol=ROL_ADMIN)
+            usuario = Usuario(email=email, rol=ROL_SUPERADMIN, activo=True)
             usuario.set_password(password)
             db.session.add(usuario)
         else:
             usuario.set_password(password)
-            usuario.rol = ROL_ADMIN
+            usuario.rol = ROL_SUPERADMIN
+            usuario.activo = True
         db.session.commit()
-        app.logger.info("[bootstrap] administrador asegurado: %s", email)
+        app.logger.info("[bootstrap] superadmin asegurado: %s", email)
 
 
 def sembrar_demo_si_procede(app) -> None:
