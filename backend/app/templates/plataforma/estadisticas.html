@@ -1,0 +1,61 @@
+{% extends "plataforma/_layout.html" %}
+
+{% block plat_title %}Estadísticas{% endblock %}
+
+{% block plat_content %}
+<h1 class="admin-h1">Estadísticas de visitas</h1>
+<p class="plat-note">Una visita se cuenta una vez por exposición y sesión de navegador (recargar no suma).</p>
+
+<div class="stat-grid">
+    <div class="stat-card stat-card--accent">
+        <div class="stat-value">{{ resumen.visitas_total }}</div>
+        <div class="stat-label">Visitas totales</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ resumen.visitas_7d }}</div>
+        <div class="stat-label">Últimos 7 días</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ resumen.publicadas }}</div>
+        <div class="stat-label">Exposiciones publicadas</div>
+    </div>
+</div>
+
+{% if filas %}
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>Exposición</th>
+            <th>Organizador</th>
+            <th>Estado</th>
+            <th class="bar-cell">Visitas</th>
+            <th>7 días</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for f in filas %}
+        <tr>
+            <td>{{ f.exposicion.titulo }}<br><small class="admin-muted">/{{ f.exposicion.slug }}</small></td>
+            <td class="admin-muted">{{ f.exposicion.propietario.nombre or f.exposicion.propietario.email }}</td>
+            <td>
+                {% if f.exposicion.estado == 'publicada' %}
+                    <span class="admin-badge admin-badge-on">Publicada</span>
+                {% else %}
+                    <span class="admin-badge">Borrador</span>
+                {% endif %}
+            </td>
+            <td class="bar-cell">
+                <span class="bar-num">{{ f.total }}</span>
+                <div class="bar-track" title="{{ f.total }} visitas">
+                    <div class="bar-fill" style="width: {{ ((f.total / maximo) * 100) if maximo else 0 }}%;"></div>
+                </div>
+            </td>
+            <td><span class="bar-num-sub">{{ f.recientes }}</span></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="admin-empty">No hay exposiciones todavía.</p>
+{% endif %}
+{% endblock %}

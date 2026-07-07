@@ -1,0 +1,51 @@
+{% extends "plataforma/_layout.html" %}
+
+{% block plat_title %}Organizadores{% endblock %}
+
+{% block plat_content %}
+<div class="admin-head-row">
+    <h1 class="admin-h1">Organizadores</h1>
+    <a class="admin-btn-sm" href="{{ url_for('plataforma.organizador_nuevo') }}">+ Nuevo organizador</a>
+</div>
+
+{% if organizadores %}
+<table class="admin-table">
+    <thead>
+        <tr><th>Organizador</th><th>Estado</th><th>Exposiciones</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for o in organizadores %}
+        <tr>
+            <td>
+                {{ o.nombre or '—' }}
+                <br><small class="admin-muted">{{ o.email }}</small>
+            </td>
+            <td>
+                {% if o.activo %}
+                    <span class="admin-badge admin-badge-on">Activa</span>
+                {% else %}
+                    <span class="admin-badge admin-badge-off">Desactivada</span>
+                {% endif %}
+            </td>
+            <td class="admin-muted">{{ o.exposiciones|length }}</td>
+            <td class="admin-actions">
+                <a href="{{ url_for('plataforma.organizador_editar', usuario_id=o.id) }}">Editar</a>
+                <form method="post" action="{{ url_for('plataforma.organizador_reset_password', usuario_id=o.id) }}"
+                      onsubmit="return confirm('¿Generar una nueva contraseña para {{ o.email }}?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="admin-link">Resetear contraseña</button>
+                </form>
+                <form method="post" action="{{ url_for('plataforma.organizador_borrar', usuario_id=o.id) }}"
+                      onsubmit="return confirm('¿Borrar «{{ o.email }}» y TODO su contenido (exposiciones, autores, obras)? Esta acción no se puede deshacer.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="admin-link-danger">Borrar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="admin-empty">Aún no hay organizadores. Crea el primero para que pueda montar sus exposiciones.</p>
+{% endif %}
+{% endblock %}

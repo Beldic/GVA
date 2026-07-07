@@ -1,0 +1,48 @@
+{% extends "plataforma/_layout.html" %}
+
+{% block plat_title %}{{ titulo }}{% endblock %}
+
+{% block plat_content %}
+<p class="admin-breadcrumb">
+    <a href="{{ url_for('plataforma.organizadores_list') }}">‹ Organizadores</a>
+</p>
+<h1 class="admin-h1">{{ titulo }}</h1>
+
+<form method="post" class="admin-form-wide">
+    {{ form.hidden_tag() }}
+
+    {% if not es_edicion %}
+    <label class="admin-field">
+        <span>{{ form.email.label.text }}</span>
+        {{ form.email(class="admin-input", type="email", autocomplete="off") }}
+        {% for e in form.email.errors %}<span class="admin-error">{{ e }}</span>{% endfor %}
+    </label>
+    {% endif %}
+
+    <label class="admin-field">
+        <span>{{ form.nombre.label.text }}</span>
+        {{ form.nombre(class="admin-input") }}
+        {% for e in form.nombre.errors %}<span class="admin-error">{{ e }}</span>{% endfor %}
+    </label>
+
+    {% if not es_edicion %}
+    <label class="admin-field">
+        <span>{{ form.password.label.text }}</span>
+        {{ form.password(class="admin-input", autocomplete="new-password") }}
+        <span class="admin-hint">Si la dejas vacía se genera una contraseña temporal (se mostrará una sola vez).</span>
+        {% for e in form.password.errors %}<span class="admin-error">{{ e }}</span>{% endfor %}
+    </label>
+    {% else %}
+    <label class="admin-field" style="flex-direction: row; align-items: center; gap: 0.6rem;">
+        {{ form.activo() }}
+        <span>{{ form.activo.label.text }}</span>
+    </label>
+    <p class="admin-hint">Una cuenta desactivada no puede iniciar sesión, pero conserva todos sus datos.</p>
+    {% endif %}
+
+    <div class="admin-form-actions">
+        {{ form.submit(class="admin-btn") }}
+        <a class="admin-cancel" href="{{ url_for('plataforma.organizadores_list') }}">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

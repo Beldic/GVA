@@ -1,0 +1,50 @@
+{% extends "plataforma/_layout.html" %}
+
+{% block plat_title %}Inicio{% endblock %}
+
+{% block plat_content %}
+<h1 class="admin-h1">Panel de plataforma</h1>
+<p class="admin-lead">Resumen de organizadores, exposiciones y visitas.</p>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ resumen.organizadores }}</div>
+        <div class="stat-label">Organizadores</div>
+        <div class="stat-sub">{{ resumen.organizadores_activos }} activos</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ resumen.exposiciones }}</div>
+        <div class="stat-label">Exposiciones</div>
+        <div class="stat-sub">{{ resumen.publicadas }} publicadas</div>
+    </div>
+    <div class="stat-card stat-card--accent">
+        <div class="stat-value">{{ resumen.visitas_total }}</div>
+        <div class="stat-label">Visitas totales</div>
+        <div class="stat-sub">{{ resumen.visitas_7d }} en 7 días</div>
+    </div>
+</div>
+
+<div class="admin-head-row">
+    <h2 class="admin-h2">Exposiciones más visitadas</h2>
+    <a class="admin-btn-sm" href="{{ url_for('plataforma.estadisticas') }}">Ver estadísticas</a>
+</div>
+
+{% if top and top[0].total > 0 %}
+<table class="admin-table">
+    <thead>
+        <tr><th>Exposición</th><th>Organizador</th><th>Visitas</th></tr>
+    </thead>
+    <tbody>
+        {% for f in top %}
+        <tr>
+            <td>{{ f.exposicion.titulo }}</td>
+            <td class="admin-muted">{{ f.exposicion.propietario.nombre or f.exposicion.propietario.email }}</td>
+            <td><span class="bar-num">{{ f.total }}</span></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="admin-empty">Todavía no se han registrado visitas.</p>
+{% endif %}
+{% endblock %}

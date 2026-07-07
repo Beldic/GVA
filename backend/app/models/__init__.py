@@ -10,6 +10,7 @@ from backend.app.models.exposicion import Exposicion
 from backend.app.models.obra import Obra
 from backend.app.models.sala import Sala
 from backend.app.models.usuario import Usuario
+from backend.app.models.visita import Visita
 from backend.app.models.zona import Zona
 
-__all__ = ["db", "Usuario", "Autor", "Exposicion", "Sala", "Zona", "Obra"]
+__all__ = ["db", "Usuario", "Autor", "Exposicion", "Sala", "Zona", "Obra", "Visita"]

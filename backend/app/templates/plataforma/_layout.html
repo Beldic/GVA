@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{% block plat_title %}Plataforma{% endblock %} · Superadmin{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/plataforma.css') }}">
+{% endblock %}
+
+{% block body_class %}admin-page{% endblock %}
+
+{% block content %}
+<header class="admin-topbar">
+    <span class="admin-brand">Plataforma de Exposiciones Virtuales · Superadmin</span>
+    <div class="admin-topbar-right">
+        <span class="admin-user">{{ current_user.email }}</span>
+        <form method="post" action="{{ url_for('admin.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="admin-logout">Salir</button>
+        </form>
+    </div>
+</header>
+
+<div class="admin-shell">
+    <nav class="admin-nav">
+        <a href="{{ url_for('plataforma.dashboard') }}"
+           class="{{ 'is-active' if request.endpoint == 'plataforma.dashboard' }}">Inicio</a>
+        <a href="{{ url_for('plataforma.organizadores_list') }}"
+           class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('plataforma.organizador') }}">Organizadores</a>
+        <a href="{{ url_for('plataforma.estadisticas') }}"
+           class="{{ 'is-active' if request.endpoint == 'plataforma.estadisticas' }}">Estadísticas</a>
+    </nav>
+
+    <main class="admin-main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, msg in messages %}
+                <div class="admin-flash admin-flash-{{ category }}">{{ msg }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block plat_content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}

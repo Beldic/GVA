@@ -2,15 +2,27 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField
 from wtforms import (
+    BooleanField,
     DateField,
     FloatField,
     IntegerField,
+    PasswordField,
     SelectField,
     StringField,
     SubmitField,
     TextAreaField,
 )
-from wtforms.validators import URL, DataRequired, Length, NumberRange, Optional
+from wtforms.validators import (
+    URL,
+    DataRequired,
+    Length,
+    NumberRange,
+    Optional,
+    Regexp,
+)
+
+# Validación de email ligera (evita la dependencia email_validator de WTForms).
+_EMAIL_RE = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
 
 class AutorForm(FlaskForm):
@@ -61,3 +73,35 @@ class ObraForm(FlaskForm):
         ],
     )
     submit = SubmitField("Guardar")
+
+
+class OrganizadorForm(FlaskForm):
+    """Alta de un organizador desde el panel de plataforma."""
+
+    email = StringField(
+        "Email",
+        validators=[
+            DataRequired(),
+            Length(max=255),
+            Regexp(_EMAIL_RE, message="Introduce un email válido."),
+        ],
+    )
+    nombre = StringField(
+        "Nombre visible", validators=[Optional(), Length(max=160)]
+    )
+    password = PasswordField(
+        "Contraseña (opcional)",
+        validators=[Optional(), Length(min=8, max=128)],
+        description="Si la dejas vacía se genera una automáticamente.",
+    )
+    submit = SubmitField("Crear organizador")
+
+
+class OrganizadorEditForm(FlaskForm):
+    """Edición de datos básicos de un organizador."""
+
+    nombre = StringField(
+        "Nombre visible", validators=[Optional(), Length(max=160)]
+    )
+    activo = BooleanField("Cuenta activa")
+    submit = SubmitField("Guardar cambios")

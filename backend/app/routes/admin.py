@@ -43,10 +43,17 @@ def _es_url_segura(destino: str) -> bool:
     return parsed.scheme == "" and parsed.netloc == "" and destino.startswith("/")
 
 
+def _inicio_por_rol():
+    """Panel de inicio según el rol: superadmin -> plataforma, resto -> admin."""
+    if current_user.es_superadmin:
+        return url_for("plataforma.dashboard")
+    return url_for("admin.dashboard")
+
+
 @bp.get("/login")
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for("admin.dashboard"))
+        return redirect(_inicio_por_rol())
     return render_template("admin/login.html")
 
 
@@ -64,7 +71,7 @@ def login_post():
         siguiente = request.args.get("next")
         if _es_url_segura(siguiente):
             return redirect(siguiente)
-        return redirect(url_for("admin.dashboard"))
+        return redirect(_inicio_por_rol())
 
     flash("Email o contraseña incorrectos.", "error")
     return redirect(url_for("admin.login"))

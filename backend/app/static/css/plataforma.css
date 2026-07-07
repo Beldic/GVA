@@ -1,0 +1,93 @@
+/* Panel de plataforma — KPIs y barras de estadísticas.
+   Reutiliza la paleta azul/blanco de admin.css (variables --gva-*). */
+
+/* ---- Rejilla de KPIs ---- */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin: 0 0 2.2rem;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid var(--gva-borde);
+    border-radius: 12px;
+    padding: 1.2rem 1.3rem;
+}
+
+.stat-value {
+    font-family: "Cormorant Garamond", Garamond, serif;
+    font-size: 2.3rem;
+    line-height: 1;
+    color: var(--gva-azul);
+}
+
+.stat-label {
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gva-azul-claro);
+    font-weight: 600;
+}
+
+.stat-sub {
+    margin-top: 0.35rem;
+    font-size: 0.82rem;
+    color: #7488a0;
+}
+
+.stat-card--accent {
+    background: linear-gradient(160deg, var(--gva-azul) 0%, var(--gva-azul-medio) 100%);
+    border-color: transparent;
+}
+
+.stat-card--accent .stat-value { color: #fff; }
+.stat-card--accent .stat-label { color: #a9c2e4; }
+.stat-card--accent .stat-sub { color: #cdddf1; }
+
+/* ---- Barra de proporción de visitas ---- */
+.bar-cell { min-width: 160px; }
+
+.bar-track {
+    position: relative;
+    height: 10px;
+    border-radius: 999px;
+    background: #e6eaf1;
+    overflow: hidden;
+}
+
+.bar-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--gva-azul-claro), var(--gva-azul-medio));
+    min-width: 3px;
+}
+
+.bar-num {
+    display: inline-block;
+    min-width: 2.5ch;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--gva-azul);
+}
+
+.bar-num-sub {
+    color: #7488a0;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Estado de cuenta */
+.admin-badge-off {
+    background: #f1e1e1;
+    color: #9b2226;
+}
+
+.plat-note {
+    margin: 0.4rem 0 1.6rem;
+    color: #7488a0;
+    font-size: 0.85rem;
+}

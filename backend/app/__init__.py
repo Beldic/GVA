@@ -54,9 +54,11 @@ def create_app(config_class=Config) -> Flask:
     # Blueprints
     from backend.app.routes.admin import bp as admin_bp
     from backend.app.routes.main import bp as main_bp
+    from backend.app.routes.plataforma import bp as plataforma_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(plataforma_bp)
 
     # Comandos CLI
     from backend.app.cli import register_commands

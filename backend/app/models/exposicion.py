@@ -30,6 +30,11 @@ class Exposicion(db.Model):
     )
 
     propietario = db.relationship("Usuario", back_populates="exposiciones")
+    visitas = db.relationship(
+        "Visita",
+        back_populates="exposicion",
+        cascade="all, delete-orphan",
+    )
     salas = db.relationship(
         "Sala",
         back_populates="exposicion",
