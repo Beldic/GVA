@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Sala de Infografías Técnicas (SIT) — Entrada{% endblock %}
+{% block title %}Galería Virtual — Exposiciones abiertas{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/door.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/portal.css') }}">
 {% endblock %}
 
-{% block body_class %}door-page{% endblock %}
+{% block body_class %}portal-page{% endblock %}
 
 {% block content %}
-<main class="door-stage">
-    <div class="door-glow" aria-hidden="true"></div>
+<div class="portal-glow" aria-hidden="true"></div>
 
-    <header class="door-header">
-        <span class="door-emblem" aria-hidden="true">
+<main class="portal">
+    <header class="portal-hero">
+        <span class="portal-emblem" aria-hidden="true">
             <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"
                  stroke-linecap="round" stroke-linejoin="round">
                 <rect x="20" y="20" width="24" height="24" rx="3"/>
@@ -22,38 +22,51 @@
                 <circle cx="32" cy="32" r="1.6" fill="currentColor" stroke="none"/>
             </svg>
         </span>
-        <p class="brand-eyebrow">SIT</p>
-        <h1 class="brand-title">Sala de Infografías Técnicas</h1>
-        <p class="brand-subtitle">Recorre · Observa · Comprende</p>
+        <p class="portal-eyebrow">Galería Virtual</p>
+        <h1 class="portal-title">Exposiciones abiertas</h1>
+        <p class="portal-subtitle">Entra y recorre en 3D las muestras publicadas.</p>
     </header>
 
-    <section class="door-frame" aria-label="Puerta de acceso a la sala">
-        <div class="door-arch">
-            <div class="door door-left">
-                <div class="door-panel door-panel--top"></div>
-                <div class="door-panel door-panel--bottom"></div>
-                <div class="door-handle" aria-hidden="true"></div>
-            </div>
-            <div class="door door-right">
-                <div class="door-panel door-panel--top"></div>
-                <div class="door-panel door-panel--bottom"></div>
-                <div class="door-handle" aria-hidden="true"></div>
-            </div>
-            <div class="door-threshold" aria-hidden="true"></div>
-        </div>
+    {% if galerias %}
+    <section class="portal-grid" aria-label="Galerías abiertas">
+        {% for g in galerias %}
+        <article class="gcard">
+            <a class="gcard-link" href="{{ url_for('main.gallery', slug=g.slug) }}">
+                <div class="gcard-cover{% if not g.portada %} gcard-cover--empty{% endif %}"
+                     {% if g.portada %}style="background-image: url('{{ g.portada }}');"{% endif %}>
+                    {% if not g.portada %}
+                    <span class="gcard-cover-emblem" aria-hidden="true">
+                        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="20" y="20" width="24" height="24" rx="3"/>
+                            <rect x="27" y="27" width="10" height="10" rx="1.5"/>
+                        </svg>
+                    </span>
+                    {% endif %}
+                    <span class="gcard-badge"><span class="gcard-badge-dot" aria-hidden="true"></span>Abierta</span>
+                </div>
+                <div class="gcard-body">
+                    {% if g.organizador %}<p class="gcard-org">{{ g.organizador }}</p>{% endif %}
+                    <h2 class="gcard-title">{{ g.titulo }}</h2>
+                    {% if g.descripcion %}<p class="gcard-desc">{{ g.descripcion }}</p>{% endif %}
+                    <div class="gcard-meta">
+                        <span>{{ g.n_salas }} sala{{ 's' if g.n_salas != 1 }}</span>
+                        <span>{{ g.n_obras }} obra{{ 's' if g.n_obras != 1 }}</span>
+                        {% if g.fecha_inicio %}
+                        <span>{{ g.fecha_inicio.strftime('%d/%m/%Y') }}{% if g.fecha_fin %} – {{ g.fecha_fin.strftime('%d/%m/%Y') }}{% endif %}</span>
+                        {% endif %}
+                    </div>
+                    <span class="gcard-cta">Visitar galería <span class="gcard-cta-arrow" aria-hidden="true">→</span></span>
+                </div>
+            </a>
+        </article>
+        {% endfor %}
     </section>
-
-    <footer class="door-actions">
-        <button id="enter-btn" type="button" class="enter-btn">
-            <span class="enter-btn__label">Entrar</span>
-            <span class="enter-btn__line" aria-hidden="true"></span>
-        </button>
-    </footer>
+    {% else %}
+    <section class="portal-empty">
+        <p class="portal-empty-title">Todavía no hay galerías abiertas</p>
+        <p class="portal-empty-text">Vuelve pronto: las exposiciones aparecerán aquí en cuanto se publiquen.</p>
+    </section>
+    {% endif %}
 </main>
-
-<a id="enter-link" href="{{ url_for('main.gallery') }}" hidden></a>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/door.js') }}" defer></script>
 {% endblock %}

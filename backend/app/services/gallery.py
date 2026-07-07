@@ -29,13 +29,57 @@ def _serializar_obra(obra) -> dict:
     }
 
 
+def _portada_url(expo):
+    """Miniatura de portada para la card del portal: primera obra con imagen
+    propia en Cloudinary, recortada a proporción de card. `None` si la
+    exposición aún no tiene ninguna imagen real (la plantilla usa un fondo)."""
+    for sala in expo.salas:
+        for zona in sala.zonas:
+            for obra in zona.obras:
+                if obra.cloudinary_public_id:
+                    return cloudinary_service.url_miniatura(
+                        obra.cloudinary_public_id, ancho=800, alto=520
+                    )
+    return None
+
+
+def _contar_obras(expo) -> int:
+    return sum(len(zona.obras) for sala in expo.salas for zona in sala.zonas)
+
+
+def resumen_exposicion(expo) -> dict:
+    """Datos que muestra la card de una galería publicada en el portal."""
+    propietario = expo.propietario
+    return {
+        "titulo": expo.titulo,
+        "slug": expo.slug,
+        "descripcion": expo.descripcion,
+        "organizador": (propietario.nombre or propietario.email)
+        if propietario
+        else None,
+        "fecha_inicio": expo.fecha_inicio,
+        "fecha_fin": expo.fecha_fin,
+        "n_salas": len(expo.salas),
+        "n_obras": _contar_obras(expo),
+        "portada": _portada_url(expo),
+        "visitable": bool(expo.salas),
+    }
+
+
 def serializar_sala(sala) -> dict:
     """Estructura completa de una sala lista para el 3D. Las relaciones ya
     vienen ordenadas por `orden` (definido en los modelos)."""
+    expo = sala.exposicion
+    organizador = (
+        (expo.propietario.nombre or expo.propietario.email)
+        if expo.propietario
+        else None
+    )
     return {
         "exposicion": {
-            "titulo": sala.exposicion.titulo,
-            "slug": sala.exposicion.slug,
+            "titulo": expo.titulo,
+            "slug": expo.slug,
+            "organizador": organizador,
         },
         "sala": {
             "nombre": sala.nombre,

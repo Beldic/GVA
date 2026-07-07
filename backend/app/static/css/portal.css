@@ -1,0 +1,271 @@
+/* Portal de entrada: rejilla de galerías abiertas.
+   Reutiliza los tokens de :root definidos en main.css (paleta navy + acento
+   cian tecnológico, tipografía Space Grotesk). */
+
+.portal-page {
+    background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(56, 189, 248, 0.10), transparent 60%),
+        linear-gradient(180deg, var(--color-deep) 0%, #071a34 100%);
+    min-height: 100dvh;
+}
+
+.portal-glow {
+    position: fixed;
+    inset: -20% 0 auto 0;
+    height: 70vh;
+    pointer-events: none;
+    background: radial-gradient(600px 300px at 50% 0, rgba(56, 189, 248, 0.16), transparent 70%);
+    filter: blur(10px);
+    z-index: 0;
+}
+
+.portal {
+    position: relative;
+    z-index: 1;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.1rem, 4vw, 2.5rem) 4rem;
+}
+
+/* ---- Hero ---------------------------------------------------------------- */
+.portal-hero {
+    text-align: center;
+    margin-bottom: clamp(2.25rem, 5vw, 3.75rem);
+}
+
+.portal-emblem {
+    display: inline-flex;
+    width: 62px;
+    height: 62px;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-tech);
+    border: 1px solid rgba(125, 211, 252, 0.35);
+    border-radius: 16px;
+    background: rgba(56, 189, 248, 0.06);
+    box-shadow: 0 0 40px rgba(56, 189, 248, 0.18);
+    margin-bottom: 1.25rem;
+}
+
+.portal-emblem svg { width: 34px; height: 34px; }
+
+.portal-eyebrow {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--color-tech-soft);
+}
+
+.portal-title {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3.15rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-white);
+}
+
+.portal-subtitle {
+    margin: 0.75rem auto 0;
+    max-width: 34ch;
+    color: var(--color-mist);
+    font-size: clamp(1rem, 2.2vw, 1.12rem);
+    font-weight: 300;
+}
+
+/* ---- Rejilla de cards ---------------------------------------------------- */
+.portal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+    gap: clamp(1.1rem, 2.5vw, 1.75rem);
+}
+
+.gcard {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(30, 77, 140, 0.28), rgba(10, 31, 61, 0.55));
+    border: 1px solid rgba(125, 211, 252, 0.14);
+    transition: transform 0.35s var(--easing-soft),
+                border-color 0.35s var(--easing-soft),
+                box-shadow 0.35s var(--easing-soft);
+}
+
+.gcard-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+}
+
+.gcard:hover,
+.gcard:focus-within {
+    transform: translateY(-6px);
+    border-color: rgba(56, 189, 248, 0.55);
+    box-shadow: 0 18px 44px rgba(2, 12, 27, 0.55),
+                0 0 0 1px rgba(56, 189, 248, 0.18);
+}
+
+.gcard-link:focus-visible { outline: 2px solid var(--color-tech); outline-offset: 3px; }
+
+/* Portada */
+.gcard-cover {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    background-color: #0c2647;
+    background-size: cover;
+    background-position: center;
+}
+
+.gcard-cover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(7, 20, 38, 0) 45%, rgba(7, 20, 38, 0.72) 100%);
+}
+
+.gcard-cover--empty {
+    display: grid;
+    place-items: center;
+    background:
+        radial-gradient(120% 120% at 50% 0, rgba(56, 189, 248, 0.14), transparent 60%),
+        repeating-linear-gradient(45deg, rgba(125, 211, 252, 0.05) 0 10px, transparent 10px 20px),
+        #0c2647;
+}
+
+.gcard-cover-emblem { color: rgba(125, 211, 252, 0.55); }
+.gcard-cover-emblem svg { width: 46px; height: 46px; }
+
+.gcard-badge {
+    position: absolute;
+    z-index: 1;
+    top: 0.85rem;
+    left: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.6rem;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #eafaff;
+    background: rgba(7, 20, 38, 0.6);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    backdrop-filter: blur(6px);
+}
+
+.gcard-badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-tech);
+    box-shadow: 0 0 8px var(--color-tech);
+}
+
+/* Cuerpo */
+.gcard-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 1.15rem 1.25rem 1.35rem;
+}
+
+.gcard-org {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-tech-soft);
+}
+
+.gcard-title {
+    margin: 0;
+    font-size: 1.28rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-white);
+}
+
+.gcard-desc {
+    margin: 0.55rem 0 0;
+    color: var(--color-mist);
+    font-size: 0.92rem;
+    font-weight: 300;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.gcard-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    margin-top: 0.9rem;
+    color: var(--color-soft);
+    font-size: 0.78rem;
+}
+
+.gcard-meta span { position: relative; }
+.gcard-meta span + span::before {
+    content: "";
+    position: absolute;
+    left: -0.5rem;
+    top: 50%;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--color-soft);
+    transform: translateY(-50%);
+    opacity: 0.7;
+}
+
+.gcard-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: auto;
+    padding-top: 1.05rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--color-tech);
+}
+
+.gcard-cta-arrow { transition: transform 0.3s var(--easing-soft); }
+.gcard:hover .gcard-cta-arrow,
+.gcard:focus-within .gcard-cta-arrow { transform: translateX(5px); }
+
+/* ---- Estado vacío -------------------------------------------------------- */
+.portal-empty {
+    text-align: center;
+    padding: clamp(3rem, 8vw, 5rem) 1.5rem;
+    border: 1px dashed rgba(125, 211, 252, 0.22);
+    border-radius: 18px;
+    background: rgba(10, 31, 61, 0.4);
+}
+
+.portal-empty-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-white);
+}
+
+.portal-empty-text {
+    margin: 0;
+    color: var(--color-mist);
+    font-weight: 300;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gcard,
+    .gcard-cta-arrow { transition: none; }
+    .gcard:hover,
+    .gcard:focus-within { transform: none; }
+}
