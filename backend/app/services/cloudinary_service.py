@@ -9,6 +9,8 @@ inválido). La subida convierte cualquier fallo en `CloudinaryError` para que la
 ruta lo muestre con un flash; el borrado es best-effort y solo registra el error
 (una imagen huérfana no debe tumbar la operación).
 """
+import time
+
 import cloudinary
 import cloudinary.uploader
 import cloudinary.utils
@@ -59,6 +61,26 @@ def eliminar_imagen(public_id) -> None:
         current_app.logger.exception(
             "No se pudo borrar la imagen de Cloudinary: %s", public_id
         )
+
+
+def firmar_subida() -> dict:
+    """Datos para una subida firmada directa desde el navegador a Cloudinary.
+
+    El navegador sube el archivo directo al endpoint de Cloudinary con estos
+    parámetros; el `api_secret` no sale del servidor (solo se usa para firmar).
+    La misma firma sirve para varias subidas dentro de su ventana temporal."""
+    cfg = cloudinary.config()
+    timestamp = int(time.time())
+    firma = cloudinary.utils.api_sign_request(
+        {"folder": CARPETA, "timestamp": timestamp}, cfg.api_secret
+    )
+    return {
+        "cloud_name": cfg.cloud_name,
+        "api_key": cfg.api_key,
+        "timestamp": timestamp,
+        "signature": firma,
+        "folder": CARPETA,
+    }
 
 
 def url_miniatura(public_id, ancho=80, alto=80) -> str:

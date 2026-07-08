@@ -19,7 +19,7 @@ from backend.app.extensions import db
 from backend.app.forms import AutorForm, ExposicionForm, ObraForm, SalaForm
 from backend.app.models import Autor, Exposicion, Obra, Sala, Usuario, Zona
 from backend.app.models.exposicion import ESTADO_BORRADOR, ESTADO_PUBLICADA
-from backend.app.models.obra import PLACEHOLDER_IMAGEN
+from backend.app.models.obra import PLACEHOLDER_IMAGEN, TIPO_CUADRO, TIPO_DIBUJO
 from backend.app.models.zona import TIPO_MIXTO
 from backend.app.plantillas import (
     nombre_plantilla,
@@ -500,3 +500,111 @@ def obra_borrar(obra_id):
         cloudinary_service.eliminar_imagen(public_id)  # borra la imagen huérfana
     flash("Obra retirada.", "info")
     return redirect(url_for("admin.sala_detail", sala_id=sala_id))
+
+
+# --------------------------------------------------------------------------
+# Carga múltiple de obras (subida directa navegador → Cloudinary)
+# --------------------------------------------------------------------------
+def _huecos_libres(sala, tipo):
+    """(zona, orden) libres que admiten `tipo`, en orden de recorrido."""
+    huecos = []
+    for zona in sala.zonas:  # ya vienen ordenadas por Zona.orden
+        if zona.tipo_admitido not in (tipo, TIPO_MIXTO):
+            continue
+        ocupados = {o.orden for o in zona.obras}
+        for i in range(zona.capacidad):
+            if i not in ocupados:
+                huecos.append((zona, i))
+    return huecos
+
+
+@bp.get("/salas/<int:sala_id>/obras/subir")
+@login_required
+def obras_subir_form(sala_id):
+    sala = db.get_or_404(Sala, sala_id)
+    exigir_acceso_exposicion(sala.exposicion)
+    autores = (
+        Autor.query.filter_by(usuario_id=current_user.id)
+        .order_by(Autor.nombre)
+        .all()
+    )
+    return render_template(
+        "admin/obras_bulk.html",
+        sala=sala,
+        autores=autores,
+        libres_dibujo=len(_huecos_libres(sala, TIPO_DIBUJO)),
+        libres_cuadro=len(_huecos_libres(sala, TIPO_CUADRO)),
+        cloudinary_ok=cloudinary_service.esta_configurado(),
+    )
+
+
+@bp.get("/cloudinary/firma")
+@login_required
+def cloudinary_firma():
+    """Devuelve la firma para subir directamente a Cloudinary desde el navegador."""
+    if not cloudinary_service.esta_configurado():
+        return {"error": "Cloudinary no está configurado en el servidor."}, 400
+    return cloudinary_service.firmar_subida()
+
+
+@bp.post("/salas/<int:sala_id>/obras/subir")
+@login_required
+def obras_subir(sala_id):
+    """Crea en lote las obras ya subidas a Cloudinary por el navegador.
+    Recibe JSON con el autor, el tipo y la lista de imágenes (public_id/url)."""
+    sala = db.get_or_404(Sala, sala_id)
+    exigir_acceso_exposicion(sala.exposicion)
+
+    data = request.get_json(silent=True) or {}
+    tipo = data.get("tipo")
+    if tipo not in (TIPO_DIBUJO, TIPO_CUADRO):
+        return {"error": "Tipo inválido."}, 400
+    imagenes = data.get("imagenes") or []
+    if not imagenes:
+        return {"error": "No se recibió ninguna imagen."}, 400
+
+    # Autor: nuevo (por nombre) o uno propio existente.
+    nombre_nuevo = (data.get("autor_nuevo") or "").strip()
+    if nombre_nuevo:
+        autor = Autor(usuario_id=current_user.id, nombre=nombre_nuevo[:160])
+        db.session.add(autor)
+        db.session.flush()
+    else:
+        try:
+            autor = db.session.get(Autor, int(data.get("autor_id")))
+        except (TypeError, ValueError):
+            autor = None
+        if autor is None or autor.usuario_id != current_user.id:
+            return {"error": "Elige un autor válido o crea uno nuevo."}, 400
+
+    huecos = _huecos_libres(sala, tipo)
+    ancho, alto = (29.7, 42.0) if tipo == TIPO_DIBUJO else (100.0, 80.0)
+    creadas = 0
+    sin_hueco = []
+    for img in imagenes:
+        public_id = img.get("public_id")
+        url = img.get("secure_url")
+        nombre = (img.get("filename") or "Obra").rsplit(".", 1)[0].strip() or "Obra"
+        if not public_id or not url:
+            continue
+        if creadas >= len(huecos):
+            sin_hueco.append(nombre)
+            continue
+        zona, orden = huecos[creadas]
+        db.session.add(
+            Obra(
+                zona=zona,
+                autor=autor,
+                titulo=nombre[:200],
+                tipo=tipo,
+                ancho_cm=ancho,
+                alto_cm=alto,
+                orden=orden,
+                cloudinary_public_id=public_id,
+                cloudinary_url=url,
+            )
+        )
+        creadas += 1
+
+    db.session.commit()
+    return {"creadas": creadas, "sin_hueco": sin_hueco, "autor": autor.nombre}

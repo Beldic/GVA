@@ -1,0 +1,162 @@
+{% extends "admin/_layout.html" %}
+
+{% block admin_title %}Subir varias obras{% endblock %}
+
+{% block admin_content %}
+<p class="admin-breadcrumb">
+    <a href="{{ url_for('admin.sala_detail', sala_id=sala.id) }}">‹ {{ sala.nombre }}</a>
+</p>
+<h1 class="admin-h1">Subir varias obras</h1>
+<p class="admin-lead">
+    Las imágenes se suben directamente a Cloudinary desde tu navegador (en
+    paralelo) y se cuelgan en los huecos libres de la sala.
+</p>
+
+{% if not cloudinary_ok %}
+<div class="admin-flash admin-flash-error">
+    Cloudinary no está configurado en el servidor: la subida no funcionará hasta
+    definir las credenciales.
+</div>
+{% endif %}
+
+<div class="admin-form-wide">
+    <label class="admin-field">
+        <span>Tipo de obra</span>
+        <select id="bulk-tipo" class="admin-input">
+            <option value="dibujo">Dibujos — {{ libres_dibujo }} huecos libres</option>
+            <option value="cuadro">Cuadros — {{ libres_cuadro }} huecos libres</option>
+        </select>
+    </label>
+
+    <label class="admin-field">
+        <span>Autor existente</span>
+        <select id="bulk-autor" class="admin-input">
+            <option value="">— elige un autor —</option>
+            {% for a in autores %}
+            <option value="{{ a.id }}">{{ a.nombre }}</option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label class="admin-field">
+        <span>…o crea uno nuevo</span>
+        <input id="bulk-autor-nuevo" class="admin-input" type="text" placeholder="Nombre del nuevo autor">
+        <span class="admin-hint">Si escribes aquí un nombre, se creará ese autor y se ignorará el desplegable.</span>
+    </label>
+
+    <label class="admin-field">
+        <span>Imágenes</span>
+        <input id="bulk-files" class="admin-input" type="file" accept="image/*" multiple>
+        <span class="admin-hint">El título de cada obra será el nombre del archivo; las medidas van por defecto y las puedes afinar luego.</span>
+    </label>
+
+    <div class="admin-form-actions">
+        <button id="bulk-go" type="button" class="admin-btn" {{ 'disabled' if not cloudinary_ok }}>Subir obras</button>
+        <a class="admin-cancel" href="{{ url_for('admin.sala_detail', sala_id=sala.id) }}">Cancelar</a>
+    </div>
+
+    <div style="margin-top:1.2rem;">
+        <div style="height:8px;background:#e6eaf1;border-radius:999px;overflow:hidden;">
+            <div id="bulk-barra" style="height:100%;width:0;background:var(--gva-azul-claro);transition:width .2s;"></div>
+        </div>
+        <p id="bulk-estado" class="admin-hint" style="margin-top:.5rem;"></p>
+        <div id="bulk-result"></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const cfg = {
+        firma: "{{ url_for('admin.cloudinary_firma') }}",
+        bulk: "{{ url_for('admin.obras_subir', sala_id=sala.id) }}",
+        volver: "{{ url_for('admin.sala_detail', sala_id=sala.id) }}",
+        csrf: "{{ csrf_token() }}",
+    };
+    const $ = (id) => document.getElementById(id);
+    const btn = $("bulk-go"), estado = $("bulk-estado"), barra = $("bulk-barra"), resultado = $("bulk-result");
+    const files = $("bulk-files"), tipo = $("bulk-tipo"), autorSel = $("bulk-autor"), autorNew = $("bulk-autor-nuevo");
+
+    const setEstado = (t) => { estado.textContent = t; };
+    const setBarra = (p) => { barra.style.width = p + "%"; };
+
+    async function subirUno(file, firma) {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("api_key", firma.api_key);
+        fd.append("timestamp", firma.timestamp);
+        fd.append("signature", firma.signature);
+        fd.append("folder", firma.folder);
+        const r = await fetch(`https://api.cloudinary.com/v1_1/${firma.cloud_name}/image/upload`, { method: "POST", body: fd });
+        if (!r.ok) throw new Error("Cloudinary " + r.status);
+        const j = await r.json();
+        return { public_id: j.public_id, secure_url: j.secure_url, filename: file.name };
+    }
+
+    async function run() {
+        const lista = Array.from(files.files || []);
+        if (!lista.length) { alert("Selecciona una o varias imágenes."); return; }
+        const nuevo = autorNew.value.trim();
+        if (!nuevo && !autorSel.value) { alert("Elige un autor del desplegable o escribe uno nuevo."); return; }
+
+        btn.disabled = true; resultado.innerHTML = ""; setBarra(0); setEstado("Preparando…");
+
+        let firma;
+        try {
+            const fr = await fetch(cfg.firma);
+            if (!fr.ok) throw new Error();
+            firma = await fr.json();
+        } catch (e) {
+            setEstado("No se pudo iniciar la subida (revisa la configuración de Cloudinary).");
+            btn.disabled = false; return;
+        }
+
+        const total = lista.length;
+        let hechas = 0;
+        const subidas = [], fallidas = [];
+        const CONC = 4;
+        let idx = 0;
+        async function worker() {
+            while (idx < total) {
+                const f = lista[idx++];
+                try { subidas.push(await subirUno(f, firma)); }
+                catch (e) { fallidas.push(f.name); }
+                hechas++; setBarra(Math.round((hechas / total) * 100)); setEstado(`Subiendo ${hechas}/${total}…`);
+            }
+        }
+        await Promise.all(Array.from({ length: Math.min(CONC, total) }, worker));
+
+        if (!subidas.length) { setEstado("No se pudo subir ninguna imagen."); btn.disabled = false; return; }
+
+        setEstado("Registrando obras…");
+        let res;
+        try {
+            const rr = await fetch(cfg.bulk, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": cfg.csrf },
+                body: JSON.stringify({
+                    tipo: tipo.value,
+                    autor_id: autorSel.value || null,
+                    autor_nuevo: nuevo || null,
+                    imagenes: subidas,
+                }),
+            });
+            res = await rr.json();
+            if (!rr.ok) throw new Error(res.error || "Error al registrar");
+        } catch (e) {
+            setEstado("Error al registrar las obras: " + e.message);
+            btn.disabled = false; return;
+        }
+
+        setEstado("¡Listo!");
+        let html = `<div class="admin-flash admin-flash-info"><strong>${res.creadas}</strong> obras creadas`
+            + (res.autor ? ` · autor: ${res.autor}` : "") + ".</div>";
+        if (fallidas.length) html += `<div class="admin-flash admin-flash-error">No se pudieron subir ${fallidas.length}: ${fallidas.join(", ")}</div>`;
+        if (res.sin_hueco && res.sin_hueco.length) html += `<div class="admin-flash admin-flash-error">Sin hueco (zonas llenas), ${res.sin_hueco.length}: ${res.sin_hueco.join(", ")}</div>`;
+        html += `<p style="margin-top:1rem;"><a class="admin-btn-sm" href="${cfg.volver}">Ver la sala</a></p>`;
+        resultado.innerHTML = html;
+    }
+
+    btn.addEventListener("click", run);
+})();
+</script>
+{% endblock %}

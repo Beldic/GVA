@@ -14,7 +14,10 @@
         <h1 class="admin-h1">{{ sala.nombre }}</h1>
         <span class="admin-muted">{{ nombre_plantilla(sala.plantilla_3d) }}</span>
     </div>
-    <a class="admin-btn-sm" href="{{ url_for('admin.sala_editar', sala_id=sala.id) }}">Editar sala</a>
+    <div class="admin-actions">
+        <a class="admin-btn-sm" href="{{ url_for('admin.obras_subir_form', sala_id=sala.id) }}">⬆ Subir varias obras</a>
+        <a class="admin-btn-sm" href="{{ url_for('admin.sala_editar', sala_id=sala.id) }}">Editar sala</a>
+    </div>
 </div>
 
 {% for z in sala.zonas %}

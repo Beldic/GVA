@@ -17,7 +17,30 @@
       "PowerShell(& \".\\\\venv\\\\Scripts\\\\python.exe\" -m pip install -r requirements.txt --quiet; if \\($?\\) { \"=== OK install ===\" } else { \"=== FALLO install ===\" })",
       "PowerShell($env:FLASK_SKIP_DOTENV='1'; python -c \"from backend.app import create_app; from backend.app.services import cloudinary_service; app=create_app\\(\\); ctx=app.app_context\\(\\); ctx.push\\(\\); print\\('configurado:', cloudinary_service.esta_configurado\\(\\)\\); print\\('cloud_name:', app.config['CLOUDINARY_CLOUD_NAME']\\)\")",
       "PowerShell($env:FLASK_SKIP_DOTENV='1'; python _test_cloudinary.py)",
-      "Bash(FLASK_SKIP_DOTENV=1 venv/Scripts/python.exe -c ' *)"
+      "Bash(FLASK_SKIP_DOTENV=1 venv/Scripts/python.exe -c ' *)",
+      "PowerShell(Copy-Item *)",
+      "PowerShell($py=\".\\\\venv\\\\Scripts\\\\python.exe\"; & $py \"C:\\\\Users\\\\jordi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-jordi-Desktop-Proyectos-Galeria\\\\1158f728-9525-4ce7-ae90-48b0cc924092\\\\scratchpad\\\\test_aislamiento.py\")",
+      "PowerShell($env:PYTHONPATH=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; $py=\".\\\\venv\\\\Scripts\\\\python.exe\"; & $py \"C:\\\\Users\\\\jordi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-jordi-Desktop-Proyectos-Galeria\\\\1158f728-9525-4ce7-ae90-48b0cc924092\\\\scratchpad\\\\test_aislamiento.py\")",
+      "PowerShell($py=\".\\\\venv\\\\Scripts\\\\python.exe\"; & $py -c \"import importlib.util as u; print\\('playwright:', bool\\(u.find_spec\\('playwright'\\)\\)\\); print\\('selenium:', bool\\(u.find_spec\\('selenium'\\)\\)\\)\")",
+      "PowerShell($env:FLASK_SKIP_DOTENV=\"1\"; $env:PYTHONPATH=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; $py=\".\\\\venv\\\\Scripts\\\\python.exe\"; & $py app.py)",
+      "PowerShell($env:FLASK_APP=\"app.py\"; $env:FLASK_SKIP_DOTENV=\"1\"; $py=\".\\\\venv\\\\Scripts\\\\python.exe\"; & $py -m flask db upgrade; & $py -m flask db current)",
+      "PowerShell($env:PYTHONPATH=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; $py=\".\\\\venv\\\\Scripts\\\\python.exe\"; & $py \"C:\\\\Users\\\\jordi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-jordi-Desktop-Proyectos-Galeria\\\\1158f728-9525-4ce7-ae90-48b0cc924092\\\\scratchpad\\\\test_fase_c.py\")",
+      "PowerShell(git add *)",
+      "Bash(curl -s \"http://127.0.0.1:5000/\")",
+      "Bash(node --check backend/app/static/js/gallery/main.js)",
+      "PowerShell($root=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; $m=\"C:\\\\Users\\\\jordi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-jordi-Desktop-Proyectos-Galeria\\\\1158f728-9525-4ce7-ae90-48b0cc924092\\\\scratchpad\"; git -C $root add backend/app/static/js/gallery/room.js backend/app/static/js/gallery/camera.js backend/app/static/js/gallery/scene.js; git -C $root commit -F \"$m\\\\msg_motor.txt\"; git -C $root log --oneline -1)",
+      "Bash(node --check room.js)",
+      "PowerShell($env:PYTHONPATH=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; $env:FLASK_SKIP_DOTENV=\"1\"; $py=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\\\\venv\\\\Scripts\\\\python.exe\"; & $py \"C:\\\\Users\\\\jordi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-jordi-Desktop-Proyectos-Galeria\\\\1158f728-9525-4ce7-ae90-48b0cc924092\\\\scratchpad\\\\seed_t.py\")",
+      "Bash(curl -s -o /dev/null -w \"/g/demo-planta-t -> %{http_code}\\\\n\" \"http://127.0.0.1:5000/g/demo-planta-t\")",
+      "Bash(curl -s \"http://127.0.0.1:5000/static/js/gallery/room.js\")",
+      "PowerShell($root=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; $m=\"C:\\\\Users\\\\jordi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-jordi-Desktop-Proyectos-Galeria\\\\1158f728-9525-4ce7-ae90-48b0cc924092\\\\scratchpad\"; git -C $root add backend/app/static/js/gallery/room.js backend/app/static/js/gallery/scene.js backend/app/plantillas.py; git -C $root commit -F \"$m\\\\msg_t.txt\"; git -C $root log --oneline -3)",
+      "PowerShell($env:PYTHONPATH=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; $env:FLASK_SKIP_DOTENV=\"1\"; $py=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\\\\venv\\\\Scripts\\\\python.exe\"; & $py \"C:\\\\Users\\\\jordi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-jordi-Desktop-Proyectos-Galeria\\\\1158f728-9525-4ce7-ae90-48b0cc924092\\\\scratchpad\\\\seed_shape.py\" planta-pentagono demo-planta-pentagono \"Demo Planta Pentagonal\")",
+      "Bash(curl -s -o /dev/null -w \"/g/demo-planta-pentagono -> %{http_code}\\\\n\" \"http://127.0.0.1:5000/g/demo-planta-pentagono\")",
+      "PowerShell($root=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; git -C $root status --short; Write-Output \"--- commit actual ---\"; git -C $root log --oneline -1)",
+      "PowerShell($root=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; git -C $root checkout -- backend/app/static/js/gallery/room.js backend/app/static/js/gallery/scene.js backend/app/plantillas.py; Write-Output \"=== estado tras revertir ===\"; git -C $root status --short)",
+      "PowerShell($root=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; git -C $root status -sb | Select-Object -First 1; Write-Output \"--- commits sin publicar ---\"; git -C $root log --oneline origin/main..HEAD)",
+      "Bash(python -c \"import secrets; print\\('SECRET_KEY        =', secrets.token_urlsafe\\(48\\)\\); print\\('LEGACY_ORG_PASSWORD=', secrets.token_urlsafe\\(12\\)\\)\")",
+      "Bash(python3 -c \"import secrets; print\\('SECRET_KEY        =', secrets.token_urlsafe\\(48\\)\\); print\\('LEGACY_ORG_PASSWORD=', secrets.token_urlsafe\\(12\\)\\)\")"
     ]
   }
 }
