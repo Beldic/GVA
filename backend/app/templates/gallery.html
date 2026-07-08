@@ -4,6 +4,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/door.css') }}">
 {% endblock %}
 
 {% block body_class %}gallery-page{% endblock %}
@@ -12,7 +13,7 @@
 <canvas id="renderCanvas" touch-action="none"></canvas>
 
 <div id="hud-top" class="hud hud-top">
-    <a href="{{ url_for('main.index') }}" class="hud-link" title="Volver a la entrada">
+    <a href="{{ url_for('main.index') }}" id="salir-link" class="hud-link" title="Salir al portal">
         <span aria-hidden="true">‹</span> Salir
     </a>
     {% if datos %}
@@ -20,33 +21,77 @@
     {% endif %}
 </div>
 
+{% if datos %}
+{# Puerta: transición cinematográfica de entrada y de salida de la galería #}
+<div id="door-layer" class="door-page door-transition">
+    <div class="door-glow" aria-hidden="true"></div>
+    <div class="door-stage">
+        <header class="door-header">
+            <span class="door-emblem" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="20" y="20" width="24" height="24" rx="3"/>
+                    <rect x="27" y="27" width="10" height="10" rx="1.5"/>
+                    <path d="M26 20v-9M38 20v-9M26 44v9M38 44v9M20 26h-9M20 38h-9M44 26h9M44 38h9"/>
+                    <circle cx="32" cy="32" r="1.6" fill="currentColor" stroke="none"/>
+                </svg>
+            </span>
+            {% if datos.exposicion.organizador %}
+            <p class="brand-eyebrow">{{ datos.exposicion.organizador }}</p>
+            {% endif %}
+            <h1 class="brand-title">{{ datos.exposicion.titulo }}</h1>
+            <p class="brand-subtitle">{{ datos.sala.nombre }}</p>
+        </header>
+
+        <section class="door-frame" aria-label="Puerta de acceso a la sala">
+            <div class="door-arch">
+                <div class="door door-left">
+                    <div class="door-panel door-panel--top"></div>
+                    <div class="door-panel door-panel--bottom"></div>
+                    <div class="door-handle" aria-hidden="true"></div>
+                </div>
+                <div class="door door-right">
+                    <div class="door-panel door-panel--top"></div>
+                    <div class="door-panel door-panel--bottom"></div>
+                    <div class="door-handle" aria-hidden="true"></div>
+                </div>
+                <div class="door-threshold" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <footer class="door-actions">
+            <button id="enter-btn" type="button" class="enter-btn">
+                <span class="enter-btn__label">Entrar</span>
+                <span class="enter-btn__line" aria-hidden="true"></span>
+            </button>
+            <p class="door-hint">WASD moverse · Ratón mirar · Esc liberar cursor</p>
+        </footer>
+    </div>
+</div>
+
+{# Overlay ligero para reanudar la visita tras pulsar Esc #}
+<div id="resume" class="overlay is-hidden">
+    <div class="overlay-card">
+        <p class="overlay-eyebrow">{{ datos.exposicion.titulo }}</p>
+        <h2 class="overlay-title">{{ datos.sala.nombre }}</h2>
+        <p class="overlay-text">Haz clic para continuar la visita.</p>
+        <button id="resume-btn" type="button" class="overlay-btn">Continuar</button>
+        <button id="resume-salir" type="button" class="overlay-exit">Salir al portal</button>
+    </div>
+</div>
+{% else %}
 <div id="overlay" class="overlay">
     <div class="overlay-card">
-        {% if datos %}
-        <p class="overlay-eyebrow">
-            {{ datos.exposicion.titulo }}{% if datos.exposicion.organizador %} · por {{ datos.exposicion.organizador }}{% endif %}
-        </p>
-        <h2 class="overlay-title">{{ datos.sala.nombre }}</h2>
-        <p class="overlay-text">
-            Haz clic en la pantalla para tomar el control y comenzar la visita.
-        </p>
-        <ul class="overlay-keys">
-            <li><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> — desplazarse</li>
-            <li><kbd>Ratón</kbd> — mirar alrededor</li>
-            <li><kbd>Esc</kbd> — liberar el cursor</li>
-        </ul>
-        <button id="start-btn" type="button" class="overlay-btn">Entrar a la sala</button>
-        {% else %}
         <p class="overlay-eyebrow">Plataforma de Exposiciones Virtuales</p>
         <h2 class="overlay-title">No hay exposición disponible</h2>
         <p class="overlay-text">
             Todavía no hay ninguna exposición publicada. Vuelve pronto para
             visitar la sala.
         </p>
-        <a href="{{ url_for('main.index') }}" class="overlay-btn">Volver a la entrada</a>
-        {% endif %}
+        <a href="{{ url_for('main.index') }}" class="overlay-btn">Volver al portal</a>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}

@@ -62,6 +62,7 @@ def register_commands(app) -> None:
             TIPO_DIBUJO,
         )
         from backend.app.plantillas import sembrar_zonas
+        from backend.app.seeds import organizador_demo
         from backend.app.utils import slugify
 
         slug = slugify("afesol_cero")
@@ -74,16 +75,22 @@ def register_commands(app) -> None:
             db.session.commit()
             click.echo("Exposición anterior borrada (--reset).")
 
+        owner = organizador_demo()
+
         # Autor placeholder (reutilizado por todas las obras de ejemplo)
-        autor = Autor.query.filter_by(nombre="Autor de ejemplo").first()
+        autor = Autor.query.filter_by(
+            nombre="Autor de ejemplo", usuario_id=owner.id
+        ).first()
         if autor is None:
             autor = Autor(
+                propietario=owner,
                 nombre="Autor de ejemplo",
                 bio="Autor ficticio para los datos de ejemplo.",
             )
             db.session.add(autor)
 
         expo = Exposicion(
+            propietario=owner,
             titulo="afesol_cero",
             slug=slug,
             descripcion="Exposición de ejemplo con imágenes y textos provisionales (placeholders).",

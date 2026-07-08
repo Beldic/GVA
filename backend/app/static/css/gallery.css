@@ -152,3 +152,25 @@ html, body {
     letter-spacing: 0.45em;
     outline: none;
 }
+
+.overlay-exit {
+    display: block;
+    margin: 1.1rem auto 0;
+    background: none;
+    border: none;
+    color: var(--color-soft);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: color 0.2s var(--easing-soft), opacity 0.2s var(--easing-soft);
+}
+
+.overlay-exit:hover,
+.overlay-exit:focus-visible {
+    color: var(--color-white);
+    opacity: 1;
+    outline: none;
+}

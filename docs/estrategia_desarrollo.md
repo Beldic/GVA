@@ -4,21 +4,28 @@
 > programada** (corte de sesión, cambio de equipo, pausa larga). Resume qué se
 > está construyendo, cómo, en qué punto estamos y cómo continuar.
 >
-> Última actualización: 2026-06-02 — **Fase 3 completa** (CRUD del dashboard).
+> Última actualización: 2026-07-08 — **Cambio de rumbo: plataforma
+> multi-organizador**. Fases A–C + portal público + rebranding completados.
 
 ---
 
 ## 1. Visión del proyecto
 
-Galería Web en **3D** para mostrar las exposiciones de arte de la asociación
-**AFESOL**. El visitante recorre en primera persona unas salas virtuales
-(Babylon.js) donde cuelgan las obras. Un **comisario/admin** gestiona todo desde
-un panel: crea exposiciones, sube imágenes y las coloca en las salas.
+**Plataforma de Exposiciones Virtuales**: galería Web en **3D** multi-organizador.
 
-Estética: azul y blanco, elegante y homogénea. Fuente *Cormorant Garamond*.
+> ⚠️ **Cambio de rumbo (jul-2026):** de piloto single-tenant de AFESOL (admin
+> único, una exposición publicada) a **plataforma con varios organizadores**,
+> cada uno dueño de sus propias exposiciones, autores y obras.
 
-Primera exposición real: **40 dibujos A3 + 15 cuadros de ~1,5 m** (55 piezas)
-repartidos en **varias salas conectadas**.
+Tres tipos de sesión:
+- **Visitante** (anónimo): portal `/` con *cards* de las galerías publicadas →
+  `/g/<slug>` recorre en primera persona la sala en 3D (Babylon.js).
+- **Organizador** (`/admin`): gestiona SOLO sus exposiciones/salas/obras/autores.
+  Alta **solo por invitación** (los crea el superadmin).
+- **Superadmin** (`/plataforma`): CRUD de organizadores + estadísticas de visitas.
+
+Estética: azul/blanco. Portal navy + acento cian; panel admin claro. Marca
+**"Plataforma de Exposiciones Virtuales"** (ya no "SIT").
 
 ---
 
@@ -68,43 +75,47 @@ Galeria/
 
 ## 4. Modelo de datos (confirmado)
 
-Jerarquía: `exposicion 1─<N sala 1─<N zona 1─<N obra >─N─1 autor`. Más `usuario`.
+Jerarquía: `usuario 1─<N exposicion 1─<N sala 1─<N zona 1─<N obra >─N─1 autor`. Más `visita`.
 
 | Tabla | Campos clave | Relaciones |
 |---|---|---|
-| **usuario** | email, password_hash, rol | login del panel |
-| **autor** | nombre, bio, foto_url, contacto | 1 ─< N obra |
-| **exposicion** | titulo, slug, descripcion, fechas, **estado** (borrador/publicada) | 1 ─< N sala |
+| **usuario** | email, password_hash, **nombre**, **rol** (`superadmin`/`organizador`), **activo** | dueño de exposiciones y autores |
+| **autor** | **usuario_id (dueño)**, nombre, bio, foto_url, contacto | 1 ─< N obra |
+| **exposicion** | **usuario_id (dueño)**, titulo, slug (único global), descripcion, fechas, **estado** (borrador/publicada) | 1 ─< N sala |
 | **sala** | nombre, plantilla_3d, orden | 1 ─< N zona |
 | **zona** | nombre, codigo, capacidad, tipo_admitido | 1 ─< N obra |
 | **obra** | titulo, anio, tecnica, **ancho_cm/alto_cm**, tipo, descripcion, `cloudinary_public_id`, `cloudinary_url`, **orden** | → autor, → zona |
+| **visita** | exposicion_id, created_at | estadísticas (1 por expo y sesión) |
 
 **Decisiones de diseño:**
-- La obra llega a su exposición por la cadena `obra→zona→sala→exposicion` (sin duplicar `exposicion_id`).
-- **Posición = `zona_id` + `orden`**, con `UNIQUE(zona_id, orden)`. El 3D reparte y dimensiona las obras automáticamente según `ancho_cm/alto_cm`. **No hay coordenadas en BD.**
-- Las **zonas las predefine la plantilla de sala** (se siembran al crear la sala); el comisario solo asigna obras.
-- La **geometría 3D** (salas, puertas, coordenadas de zonas) vive en el **frontend**, no en BD.
-- Una obra pertenece a **una sola** exposición; para recolocar se crean exposiciones nuevas. **Un autor por obra**.
-- Solo **una exposición publicada** a la vez (la galería pública muestra esa).
+- **Propiedad:** exposiciones y autores tienen `usuario_id`. Los organizadores solo ven/tocan lo suyo; el superadmin es transversal. La propiedad de sala/zona/obra se hereda por la cadena hasta `exposicion.usuario_id` (`authz.exigir_acceso_exposicion`).
+- **Autores privados** por organizador; la obra llega a su exposición por la cadena `obra→zona→sala→exposicion` (sin duplicar `exposicion_id`).
+- **Posición = `zona_id` + `orden`**, con `UNIQUE(zona_id, orden)`. El 3D reparte y dimensiona según `ancho_cm/alto_cm`. **No hay coordenadas en BD.**
+- Las **zonas las predefine la plantilla de sala**; el organizador solo asigna obras.
+- La **geometría 3D** vive en el **frontend**, no en BD.
+- **Cada organizador publica de forma independiente** (varias exposiciones publicadas a la vez; el portal `/g/<slug>` sirve cada una por su slug). Ya NO hay "una sola publicada global".
 
 **Aparcado para fases posteriores:** conexiones/puertas entre salas en BD y
-tabla de **estadísticas** de clicks por obra (engagement).
+estadísticas de **clicks por obra** (engagement; las visitas por exposición ya están).
 
 ---
 
 ## 5. Hoja de ruta por fases
 
-| # | Fase | Estado |
+**Base single-tenant (1–6):** andamiaje ORM, autenticación, dashboard CRUD
+(autores/exposiciones/salas/obras), Cloudinary, 3D dinámico y despliegue en
+Railway — todo ✅ hecho antes del cambio de rumbo.
+
+**Cambio de rumbo → plataforma multi-organizador:**
+
+| Fase | Contenido | Estado |
 |---|---|---|
-| 1 | **Andamiaje ORM** — extensiones, config, modelos, 1ª migración, BD SQLite | ✅ Hecho |
-| 2 | **Autenticación** — Flask-Login, login/logout, `/admin` protegido, comando `crear-admin` | ✅ Hecho |
-| 3 | **Dashboard CRUD** (Flask-WTF + CSRF) | ✅ Hecho |
-| ↳ 3a | Autores + Exposiciones (publicar/despublicar) | ✅ Hecho |
-| ↳ 3b | Salas (dentro del detalle de expo) + zonas sembradas desde plantilla | ✅ Hecho |
-| ↳ 3c | Obras colgadas en zona (hueco automático, tipo por zona, placeholder) | ✅ Hecho |
-| 4 | **Cloudinary** — subida en el formulario de obra (`public_id`/`secure_url`) | ⏳ Siguiente |
-| 5 | **API + 3D dinámico** — endpoint de la expo publicada; `painting.js` deja de estar hardcodeado | ⬜ |
-| 6 | **Postgres en Railway** — provisionar BD, variables, migraciones en prod, deploy | ⬜ |
+| **A** | Modelo multi-organizador: roles `superadmin`/`organizador`, `usuario_id` en exposicion/autor, migración con backfill (organizador legado) | ✅ Hecho |
+| **B** | Autorización y aislamiento: `authz.py`, scoping de `/admin` por dueño, publicación independiente, login de cuentas activas | ✅ Hecho |
+| **C** | Panel de plataforma `/plataforma` (superadmin): CRUD de organizadores + **estadísticas de visitas** (tabla `visita`); login enruta por rol | ✅ Hecho |
+| **Portal** | Portada pública con *cards* de galerías abiertas + `/g/<slug>`; rebranding SIT → Plataforma; puerta como transición de entrada/salida | ✅ Hecho |
+| **E** | Pulido: seeds con dueño, docs y memoria al día | ✅ Hecho |
+| — | **Pendiente:** desplegar el pivote en Railway (aplicar migraciones `a1b2c3d4e5f6` y `b2c3d4e5f6a7`); autoservicio de imágenes; clicks por obra | ⬜ |
 
 > Cada fase se diseña/consensúa antes de implementar y se cierra con un commit.
 

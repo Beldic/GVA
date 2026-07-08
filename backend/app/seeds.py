@@ -1,7 +1,32 @@
 """Siembra de datos de ejemplo (placeholders), reutilizable por la CLI y el
 arranque en producción. Las imágenes usan el placeholder; el contenido real se
 gestiona luego desde el panel."""
+import os
+import secrets
+
 from backend.app.extensions import db
+
+
+def organizador_demo():
+    """Devuelve el organizador dueño de los datos de ejemplo: el primero que
+    exista o, si no hay ninguno, uno creado al vuelo (contraseña de entorno o
+    aleatoria). Necesario porque exposiciones y autores requieren dueño."""
+    from backend.app.models import Usuario
+    from backend.app.models.usuario import ROL_ORGANIZADOR
+
+    owner = (
+        Usuario.query.filter_by(rol=ROL_ORGANIZADOR).order_by(Usuario.id).first()
+    )
+    if owner is None:
+        email = os.environ.get("LEGACY_ORG_EMAIL", "afesol@galeria.local")
+        pwd = os.environ.get("LEGACY_ORG_PASSWORD") or secrets.token_urlsafe(12)
+        owner = Usuario(
+            email=email, nombre="AFESOL", rol=ROL_ORGANIZADOR, activo=True
+        )
+        owner.set_password(pwd)
+        db.session.add(owner)
+        db.session.flush()
+    return owner
 
 
 def sembrar_rectangular(reset: bool = False, publicar: bool = False):
@@ -26,21 +51,22 @@ def sembrar_rectangular(reset: bool = False, publicar: bool = False):
         db.session.delete(existente)
         db.session.commit()
 
-    autor = Autor.query.filter_by(nombre="Autor de ejemplo").first()
+    owner = organizador_demo()
+
+    autor = Autor.query.filter_by(
+        nombre="Autor de ejemplo", usuario_id=owner.id
+    ).first()
     if autor is None:
         autor = Autor(
+            propietario=owner,
             nombre="Autor de ejemplo",
             bio="Autor ficticio para los datos de ejemplo.",
         )
         db.session.add(autor)
 
-    if publicar:
-        # Solo una publicada a la vez: despublica las demás.
-        Exposicion.query.filter(Exposicion.estado == ESTADO_PUBLICADA).update(
-            {"estado": ESTADO_BORRADOR}
-        )
-
+    # Cada organizador publica de forma independiente (sin despublicar las demás).
     expo = Exposicion(
+        propietario=owner,
         titulo="Exposición de demostración",
         slug=slug,
         descripcion="Sala rectangular de prueba (placeholders).",
