@@ -6,6 +6,7 @@ const enterBtn = document.getElementById("enter-btn");
 const resume = document.getElementById("resume");
 const resumeBtn = document.getElementById("resume-btn");
 const salirLink = document.getElementById("salir-link");
+const flash = document.getElementById("door-flash");
 const portalUrl = salirLink ? salirLink.href : "/";
 
 // Datos de la sala incrustados por el servidor (gallery.html).
@@ -72,11 +73,13 @@ if (typeof BABYLON === "undefined") {
         if (abriendo || saliendo) return;
         abriendo = true;
         doorLayer.classList.add("is-opening");
+        // Destello luminoso justo cuando las hojas se abren.
+        window.setTimeout(() => { if (flash) flash.classList.add("flash-on"); }, 1050);
         window.setTimeout(() => doorLayer.classList.add("is-gone"), 1400);
         window.setTimeout(() => {
             entrado = true;
             bloquearPuntero();
-        }, 1600);
+        }, 1750);
     };
 
     if (enterBtn) enterBtn.addEventListener("click", abrirPuertas);

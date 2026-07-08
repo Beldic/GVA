@@ -64,10 +64,27 @@
                 <span class="enter-btn__label">Entrar</span>
                 <span class="enter-btn__line" aria-hidden="true"></span>
             </button>
-            <p class="door-hint">WASD moverse · Ratón mirar · Esc liberar cursor</p>
+
+            <div class="door-controls" aria-label="Controles">
+                <span class="ctrl">
+                    <span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>
+                    <span>Moverte</span>
+                </span>
+                <span class="ctrl">
+                    <span class="keys"><kbd>Ratón</kbd></span>
+                    <span>Mirar</span>
+                </span>
+                <span class="ctrl">
+                    <span class="keys"><kbd>Esc</kbd></span>
+                    <span>Liberar cursor</span>
+                </span>
+            </div>
         </footer>
     </div>
 </div>
+
+{# Destello luminoso: transición suave al cruzar la puerta hacia la galería #}
+<div id="door-flash" class="door-flash" aria-hidden="true"></div>
 
 {# Overlay ligero para reanudar la visita tras pulsar Esc #}
 <div id="resume" class="overlay is-hidden">

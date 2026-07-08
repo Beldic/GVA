@@ -360,6 +360,79 @@
     opacity: 0.7;
 }
 
+/* Panel de controles sutil (bajo el botón Entrar) */
+.door-controls {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem 1.4rem;
+    margin: 1.5rem auto 0;
+    padding: 0.75rem 1.2rem;
+    border: 1px solid rgba(125, 211, 252, 0.22);
+    border-radius: 14px;
+    background: rgba(10, 26, 46, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.door-controls .ctrl {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-mist);
+}
+
+.door-controls .keys {
+    display: inline-flex;
+    gap: 0.22rem;
+}
+
+.door-controls kbd {
+    display: inline-block;
+    min-width: 1.5em;
+    padding: 0.18em 0.42em;
+    text-align: center;
+    border: 1px solid rgba(125, 211, 252, 0.4);
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.08);
+    color: var(--color-white);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* Destello luminoso al cruzar la puerta (transición suave a la galería) */
+.door-flash {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(circle at 50% 55%,
+        rgba(224, 244, 255, 0.95) 0%,
+        rgba(125, 211, 252, 0.5) 32%,
+        rgba(56, 189, 248, 0) 70%);
+}
+
+.door-flash.flash-on {
+    animation: door-bloom 1.3s var(--easing-soft) forwards;
+}
+
+@keyframes door-bloom {
+    0% { opacity: 0; transform: scale(0.55); }
+    35% { opacity: 0.92; }
+    100% { opacity: 0; transform: scale(1.7); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .door-flash.flash-on { animation-duration: 0.4s; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .door,
     .door-header,
