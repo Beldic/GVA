@@ -96,6 +96,28 @@
         <button id="resume-salir" type="button" class="overlay-exit">Salir al portal</button>
     </div>
 </div>
+
+{# Aviso en dispositivos táctiles: el recorrido 3D necesita teclado y ratón #}
+<div id="solo-escritorio" class="overlay is-hidden solo-escritorio">
+    <div class="overlay-card">
+        <span class="solo-emblem" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <rect x="10" y="16" width="44" height="28" rx="3"/>
+                <path d="M24 52h16M28 44v8M36 44v8"/>
+            </svg>
+        </span>
+        <p class="overlay-eyebrow">{{ datos.exposicion.titulo }}</p>
+        <h2 class="overlay-title">Mejor desde un ordenador</h2>
+        <p class="overlay-text">
+            El recorrido en 3D se controla con teclado y ratón (moverte con
+            <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> y mirar con el ratón),
+            así que se disfruta desde un ordenador. Ábrela en tu portátil o
+            sobremesa para entrar en la galería.
+        </p>
+        <a href="{{ url_for('main.index') }}" class="overlay-btn">Volver al portal</a>
+    </div>
+</div>
 {% else %}
 <div id="overlay" class="overlay">
     <div class="overlay-card">

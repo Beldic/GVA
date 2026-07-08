@@ -22,8 +22,24 @@ function leerDatos() {
 }
 
 const datos = leerDatos();
+const soloEscritorio = document.getElementById("solo-escritorio");
 
-if (typeof BABYLON === "undefined") {
+// El recorrido 3D usa teclado + ratón (pointer lock). En dispositivos sin
+// puntero fino (móviles/tablets táctiles) no se puede recorrer, así que
+// avisamos de que se ve mejor en un ordenador y no cargamos la escena.
+function esSoloTactil() {
+    try {
+        return !window.matchMedia("(any-pointer: fine)").matches;
+    } catch (e) {
+        return false;
+    }
+}
+
+if (esSoloTactil()) {
+    if (doorLayer) doorLayer.classList.add("is-gone");
+    if (resume) resume.classList.add("is-hidden");
+    if (soloEscritorio) soloEscritorio.classList.remove("is-hidden");
+} else if (typeof BABYLON === "undefined") {
     console.error("Babylon.js no se ha cargado.");
 } else if (!datos || !datos.sala) {
     console.error("[gallery] sin datos de sala: no se inicia el render.");

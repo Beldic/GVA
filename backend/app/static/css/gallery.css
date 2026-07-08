@@ -174,3 +174,33 @@ html, body {
     opacity: 1;
     outline: none;
 }
+
+/* ---- Aviso "mejor desde ordenador" (dispositivos táctiles) ---- */
+.solo-escritorio {
+    z-index: 40; /* por encima de la puerta y del resto de capas */
+}
+
+.solo-emblem {
+    display: inline-flex;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 1rem;
+    color: var(--color-tech);
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
+}
+
+.solo-emblem svg { width: 100%; height: 100%; }
+
+.solo-escritorio .overlay-text kbd {
+    display: inline-block;
+    min-width: 1.5em;
+    padding: 0.1em 0.4em;
+    margin: 0 0.08em;
+    text-align: center;
+    border: 1px solid rgba(207, 220, 236, 0.35);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    color: var(--color-white);
+}
