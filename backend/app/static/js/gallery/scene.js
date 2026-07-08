@@ -14,7 +14,7 @@ export function createScene(engine, canvas, datos, options = {}) {
     const salaData = datos.sala;
 
     // ---- Geometría (según la plantilla de la sala) ----
-    const room = buildRoom(scene, salaData.plantilla_3d);
+    const planta = buildRoom(scene, salaData.plantilla_3d);
 
     // ---- Iluminación: base ambiental + fila de focos cálidos en el techo ----
     const hemi = new BABYLON.HemisphericLight(
@@ -27,30 +27,41 @@ export function createScene(engine, canvas, datos, options = {}) {
     hemi.groundColor = new BABYLON.Color3(0.2, 0.24, 0.34);
     hemi.specular = new BABYLON.Color3(0, 0, 0);
 
-    // Focos cálidos repartidos a lo largo del eje Z (estilo museo). Cada uno con
-    // una pequeña carcasa visible en el techo.
+    // Focos cálidos estilo museo: una fila por celda a lo largo de su eje más
+    // largo, con una pequeña carcasa visible en el techo.
     const fixtureMat = new BABYLON.StandardMaterial("fixtureMat", scene);
     fixtureMat.diffuseColor = new BABYLON.Color3(0.06, 0.08, 0.14);
     fixtureMat.emissiveColor = new BABYLON.Color3(0.5, 0.45, 0.3); // foco encendido
 
-    const nLuces = Math.max(1, Math.round(room.depth / 4));
-    for (let i = 0; i < nLuces; i++) {
-        const z = -room.depth / 2 + (i + 0.5) * (room.depth / nLuces);
-        const pos = new BABYLON.Vector3(0, room.height - 0.25, z);
+    let li = 0;
+    for (const c of planta.cells) {
+        const alongZ = c.d >= c.w;
+        const largo = alongZ ? c.d : c.w;
+        const nLuces = Math.max(1, Math.round(largo / 4));
+        for (let i = 0; i < nLuces; i++) {
+            const t = -largo / 2 + (i + 0.5) * (largo / nLuces);
+            const x = c.x + (alongZ ? 0 : t);
+            const z = c.z + (alongZ ? t : 0);
 
-        const luz = new BABYLON.PointLight(`luz-${i}`, pos, scene);
-        luz.intensity = 0.55;
-        luz.diffuse = new BABYLON.Color3(1.0, 0.96, 0.86);
-        luz.specular = new BABYLON.Color3(0.3, 0.28, 0.22);
-        luz.range = room.depth; // alcance suficiente para las paredes laterales
+            const luz = new BABYLON.PointLight(
+                `luz-${li}`, new BABYLON.Vector3(x, planta.height - 0.25, z), scene
+            );
+            luz.intensity = 0.55;
+            luz.diffuse = new BABYLON.Color3(1.0, 0.96, 0.86);
+            luz.specular = new BABYLON.Color3(0.3, 0.28, 0.22);
+            luz.range = Math.max(c.w, c.d);
 
-        const carcasa = BABYLON.MeshBuilder.CreateBox(
-            `fixture-${i}`,
-            { width: 0.5, height: 0.08, depth: 0.18 },
-            scene
-        );
-        carcasa.position = new BABYLON.Vector3(0, room.height - 0.05, z);
-        carcasa.material = fixtureMat;
+            const carcasa = BABYLON.MeshBuilder.CreateBox(
+                `fixture-${li}`,
+                alongZ
+                    ? { width: 0.5, height: 0.08, depth: 0.18 }
+                    : { width: 0.18, height: 0.08, depth: 0.5 },
+                scene
+            );
+            carcasa.position = new BABYLON.Vector3(x, planta.height - 0.05, z);
+            carcasa.material = fixtureMat;
+            li++;
+        }
     }
 
     // ---- Obras: cada una en su pared (zona.codigo) y hueco (obra.orden) ----
@@ -58,7 +69,7 @@ export function createScene(engine, canvas, datos, options = {}) {
         for (const obra of zona.obras) {
             const placement = slotPlacement(
                 zona.codigo,
-                room,
+                planta,
                 zona.capacidad,
                 obra.orden
             );
@@ -73,7 +84,7 @@ export function createScene(engine, canvas, datos, options = {}) {
     }
 
     // ---- Cámara primera persona (con salida por la puerta) ----
-    createFirstPersonCamera(scene, canvas, room, options.onExit);
+    createFirstPersonCamera(scene, canvas, planta, options.onExit);
 
     return scene;
 }

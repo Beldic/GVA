@@ -1,62 +1,57 @@
 import { ROOM } from "./room.js";
 
-export function createFirstPersonCamera(scene, canvas, room = ROOM, onExit) {
+export function createFirstPersonCamera(scene, canvas, planta = ROOM, onExit) {
     const eyeHeight = 1.7;
-    const startPos = new BABYLON.Vector3(0, eyeHeight, -room.depth / 2 + 1.2);
+    const s = planta.start || { x: 0, z: 0, lookAt: { x: 0, z: 1 } };
+    const startPos = new BABYLON.Vector3(s.x, eyeHeight, s.z);
     const camera = new BABYLON.UniversalCamera("fpCamera", startPos, scene);
 
-    camera.setTarget(new BABYLON.Vector3(0, eyeHeight, 0));
+    const look = s.lookAt || { x: s.x, z: s.z + 1 };
+    camera.setTarget(new BABYLON.Vector3(look.x, eyeHeight, look.z));
 
-    // Movimiento. En lugar de gravedad + colisiones (que se pueden atravesar al
-    // mirar al suelo y avanzar), fijamos la altura del ojo y acotamos la posición
-    // dentro de la sala: límite determinista, imposible salirse o hundirse.
+    // Movimiento con COLISIONES reales contra los colisores de pared (permite
+    // recorrer pasillos y cruzar huecos entre estancias). La altura del ojo se
+    // fija cada frame para que mirar al suelo no hunda la cámara.
     camera.applyGravity = false;
-    camera.checkCollisions = false;
+    camera.checkCollisions = true;
+    camera.ellipsoid = new BABYLON.Vector3(0.4, eyeHeight / 2, 0.4);
+    camera.ellipsoidOffset = new BABYLON.Vector3(0, eyeHeight / 2, 0);
 
-    const margin = 0.6; // separación a las paredes para no pegarse a los cuadros
-    const limX = room.width / 2 - margin;
-    const limZ = room.depth / 2 - margin;
-    // Puerta en la pared near (z = -depth/2): por su hueco se puede cruzar y salir.
-    const door = room.door && room.door.wall === "near" ? room.door : null;
-    const doorHalf = door ? door.width / 2 : 0;
+    // Puerta de salida: al cruzar su umbral hacia fuera, se dispara onExit.
+    const door = planta.door || null;
     let saliendo = false;
-    const clamp = (v, lim) => Math.max(-lim, Math.min(lim, v));
 
     scene.onBeforeRenderObservable.add(() => {
         const p = camera.position;
-        p.y = eyeHeight; // altura del ojo constante (a la altura de los cuadros)
-        p.x = clamp(p.x, limX);
+        p.y = eyeHeight; // altura del ojo constante
 
-        const enPuerta = door && Math.abs(p.x) <= doorHalf;
-        if (enPuerta) {
-            // Dentro del hueco de la puerta: dejamos avanzar hacia -Z y, al
-            // cruzar el umbral, salimos a la entrada.
-            if (p.z < -room.depth / 2 && !saliendo) {
+        if (door && !saliendo) {
+            const out = door.out; // normal hacia fuera de la puerta
+            const along = { x: -out.z, z: out.x }; // eje a lo largo de la pared
+            const dx = p.x - door.x;
+            const dz = p.z - door.z;
+            const fuera = dx * out.x + dz * out.z; // >0 = ya cruzó el umbral
+            const lateral = Math.abs(dx * along.x + dz * along.z); // dist. al centro
+            if (fuera > 0 && lateral <= door.width / 2) {
                 saliendo = true;
                 if (typeof onExit === "function") onExit();
             }
-            if (p.z > limZ) p.z = limZ; // tope del fondo (far)
-        } else {
-            p.z = clamp(p.z, limZ);
         }
     });
 
     camera.speed = 0.18;
-    camera.angularSensibility = 1800; // mayor = más lento
+    camera.angularSensibility = 1800;
     camera.inertia = 0.6;
     camera.minZ = 0.05;
     camera.fov = 1.05;
 
-    // WASD además de las flechas
-    camera.keysUp = [87, 38];    // W, ↑
-    camera.keysDown = [83, 40];  // S, ↓
-    camera.keysLeft = [65, 37];  // A, ←
+    camera.keysUp = [87, 38]; // W, ↑
+    camera.keysDown = [83, 40]; // S, ↓
+    camera.keysLeft = [65, 37]; // A, ←
     camera.keysRight = [68, 39]; // D, →
 
-    // Control activado siempre; el pointer lock se gestiona en main.js
     camera.attachControl(canvas, true);
 
-    // Evitar mirar completamente al cielo o al suelo
     camera.upperBetaLimit = Math.PI - 0.1;
     camera.lowerBetaLimit = 0.1;
 
