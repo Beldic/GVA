@@ -180,16 +180,30 @@ html, body {
     z-index: 40; /* por encima de la puerta y del resto de capas */
 }
 
-.solo-emblem {
+.badge-2d {
     display: inline-flex;
-    width: 56px;
-    height: 56px;
-    margin-bottom: 1rem;
-    color: var(--color-tech);
-    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
+    align-items: center;
+    justify-content: center;
+    min-width: 3.4rem;
+    height: 3.4rem;
+    padding: 0 0.9rem;
+    margin-bottom: 1.1rem;
+    border-radius: 16px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.45rem;
+    letter-spacing: 0.04em;
+    color: #04101f;
+    background: linear-gradient(135deg, var(--color-tech-soft), var(--color-tech));
+    box-shadow: 0 0 28px rgba(56, 189, 248, 0.55);
 }
 
-.solo-emblem svg { width: 100%; height: 100%; }
+.badge-soon {
+    color: #3b2600;
+    background: linear-gradient(135deg, #ffd27d, #f6a94b);
+    box-shadow: 0 0 28px rgba(246, 169, 75, 0.5);
+    font-size: 1.7rem;
+}
 
 .solo-escritorio .overlay-text kbd {
     display: inline-block;
