@@ -27,42 +27,55 @@ export function createScene(engine, canvas, datos, options = {}) {
     hemi.groundColor = new BABYLON.Color3(0.2, 0.24, 0.34);
     hemi.specular = new BABYLON.Color3(0, 0, 0);
 
-    // Focos cálidos estilo museo: una fila por celda a lo largo de su eje más
-    // largo, con una pequeña carcasa visible en el techo.
-    const fixtureMat = new BABYLON.StandardMaterial("fixtureMat", scene);
-    fixtureMat.diffuseColor = new BABYLON.Color3(0.06, 0.08, 0.14);
-    fixtureMat.emissiveColor = new BABYLON.Color3(0.5, 0.45, 0.3); // foco encendido
+    // Iluminación: lucernarios (claraboyas cenitales que hacen de ventanas), un
+    // panel luminoso alargado por celda con luz cálida repartida bajo él.
+    const skyMat = new BABYLON.StandardMaterial("skyMat", scene);
+    skyMat.emissiveColor = new BABYLON.Color3(0.92, 0.95, 1.0); // luz de día
+    skyMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    skyMat.specularColor = new BABYLON.Color3(0, 0, 0);
+    skyMat.disableLighting = true; // brilla uniforme, no depende de otras luces
+
+    const skyFrameMat = new BABYLON.StandardMaterial("skyFrameMat", scene);
+    skyFrameMat.diffuseColor = new BABYLON.Color3(0.05, 0.07, 0.12);
+    skyFrameMat.specularColor = new BABYLON.Color3(0, 0, 0);
 
     let li = 0;
-    for (const c of planta.cells) {
+    planta.cells.forEach((c, ci) => {
         const alongZ = c.d >= c.w;
         const largo = alongZ ? c.d : c.w;
-        const nLuces = Math.max(1, Math.round(largo / 4));
+        const stripLen = Math.max(1, largo - 2.5);
+        const stripW = 1.6;
+        const dims = (extra) => (alongZ
+            ? { width: stripW + extra, height: stripLen + extra }
+            : { width: stripLen + extra, height: stripW + extra });
+
+        // Marco oscuro recedido + panel luminoso, pegados al techo mirando abajo.
+        const frame = BABYLON.MeshBuilder.CreateGround(`sky-frame-${ci}`, dims(0.35), scene);
+        frame.position = new BABYLON.Vector3(c.x, planta.height - 0.01, c.z);
+        frame.rotation.x = Math.PI;
+        frame.material = skyFrameMat;
+
+        const panel = BABYLON.MeshBuilder.CreateGround(`sky-${ci}`, dims(0), scene);
+        panel.position = new BABYLON.Vector3(c.x, planta.height - 0.03, c.z);
+        panel.rotation.x = Math.PI;
+        panel.material = skyMat;
+
+        // Focos cálidos bajo el lucernario, a lo largo del eje mayor.
+        const nLuces = Math.max(2, Math.round(largo / 5));
         for (let i = 0; i < nLuces; i++) {
             const t = -largo / 2 + (i + 0.5) * (largo / nLuces);
             const x = c.x + (alongZ ? 0 : t);
             const z = c.z + (alongZ ? t : 0);
-
             const luz = new BABYLON.PointLight(
-                `luz-${li}`, new BABYLON.Vector3(x, planta.height - 0.25, z), scene
+                `luz-${li}`, new BABYLON.Vector3(x, planta.height - 0.5, z), scene
             );
-            luz.intensity = 0.55;
-            luz.diffuse = new BABYLON.Color3(1.0, 0.96, 0.86);
-            luz.specular = new BABYLON.Color3(0.3, 0.28, 0.22);
-            luz.range = Math.max(c.w, c.d);
-
-            const carcasa = BABYLON.MeshBuilder.CreateBox(
-                `fixture-${li}`,
-                alongZ
-                    ? { width: 0.5, height: 0.08, depth: 0.18 }
-                    : { width: 0.18, height: 0.08, depth: 0.5 },
-                scene
-            );
-            carcasa.position = new BABYLON.Vector3(x, planta.height - 0.05, z);
-            carcasa.material = fixtureMat;
+            luz.intensity = 0.42;
+            luz.diffuse = new BABYLON.Color3(1.0, 0.96, 0.88);
+            luz.specular = new BABYLON.Color3(0.2, 0.2, 0.18);
+            luz.range = Math.max(c.w, c.d) * 1.15;
             li++;
         }
-    }
+    });
 
     // ---- Obras: cada una en su pared (zona.codigo) y hueco (obra.orden) ----
     for (const zona of salaData.zonas) {

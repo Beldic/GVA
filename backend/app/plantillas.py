@@ -31,6 +31,20 @@ PLANTILLAS = {
             {"codigo": "right", "nombre": "Pared derecha", "tipo_admitido": TIPO_DIBUJO, "capacidad": 20, "orden": 3},
         ],
     },
+    "planta-t": {
+        "nombre": "Planta en T (pasillo + estancia)",
+        "descripcion": "Entras por un pasillo con dibujos a los lados que desemboca, "
+        "por un arco, en una estancia amplia con cuadros bien espaciados al fondo y "
+        "al frente. Iluminación por lucernarios. Capacidad: 10 cuadros + 36 dibujos.",
+        "zonas": [
+            {"codigo": "fondo", "nombre": "Estancia · pared del fondo", "tipo_admitido": TIPO_CUADRO, "capacidad": 6, "orden": 0},
+            {"codigo": "hall_frente", "nombre": "Estancia · frente (junto al arco)", "tipo_admitido": TIPO_CUADRO, "capacidad": 4, "orden": 1},
+            {"codigo": "hall_izq", "nombre": "Estancia · pared izquierda", "tipo_admitido": TIPO_DIBUJO, "capacidad": 8, "orden": 2},
+            {"codigo": "hall_der", "nombre": "Estancia · pared derecha", "tipo_admitido": TIPO_DIBUJO, "capacidad": 8, "orden": 3},
+            {"codigo": "pasillo_izq", "nombre": "Pasillo · pared izquierda", "tipo_admitido": TIPO_DIBUJO, "capacidad": 10, "orden": 4},
+            {"codigo": "pasillo_der", "nombre": "Pasillo · pared derecha", "tipo_admitido": TIPO_DIBUJO, "capacidad": 10, "orden": 5},
+        ],
+    },
 }
 
 

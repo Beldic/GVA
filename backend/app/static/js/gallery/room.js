@@ -36,9 +36,43 @@ function rectPlanta(width, depth, height, door = null) {
     };
 }
 
+// ---- Planta en T: pasillo (stem) que abre a una estancia amplia (hall) ----
+// Entras por el fondo del pasillo (dibujos a los lados), avanzas y desemboca
+// por un arco en una estancia ancha con cuadros bien espaciados. La pared del
+// tabique de la puerta queda limpia (sin obra), solo con su arco de acceso.
+function plantaT() {
+    const height = 4.2;
+    // Pasillo: x∈[-2.5,2.5], z∈[-15,-3]. Estancia: x∈[-10,10], z∈[-3,5].
+    return {
+        height,
+        cells: [
+            { x: 0, z: -9, w: 5, d: 12 }, // pasillo
+            { x: 0, z: 1, w: 20, d: 8 }, // estancia
+        ],
+        walls: [
+            // Pasillo — el tabique de la entrada es estructural (sin codigo → sin obra)
+            { x1: -2.5, z1: -15, x2: 2.5, z2: -15, nx: 0, nz: 1, door: { width: 1.4, height: 2.6 } },
+            { codigo: "pasillo_izq", x1: -2.5, z1: -15, x2: -2.5, z2: -3, nx: 1, nz: 0 },
+            { codigo: "pasillo_der", x1: 2.5, z1: -15, x2: 2.5, z2: -3, nx: -1, nz: 0 },
+            // Estancia
+            { codigo: "fondo", x1: -10, z1: 5, x2: 10, z2: 5, nx: 0, nz: -1 },
+            { codigo: "hall_izq", x1: -10, z1: -3, x2: -10, z2: 5, nx: 1, nz: 0 },
+            { codigo: "hall_der", x1: 10, z1: -3, x2: 10, z2: 5, nx: -1, nz: 0 },
+            // Pared de unión estancia↔pasillo, con arco central (ancho del pasillo)
+            {
+                codigo: "hall_frente", x1: -10, z1: -3, x2: 10, z2: -3, nx: 0, nz: 1,
+                door: { width: 5, height: 3.0 },
+            },
+        ],
+        door: { x: 0, z: -15, width: 1.4, height: 2.6, out: { x: 0, z: -1 } },
+        start: { x: 0, z: -13.8, lookAt: { x: 0, z: 0 } },
+    };
+}
+
 export const PLANTAS_GEO = {
     "sala-clasica": rectPlanta(8, 6, 3.2),
     "sala-rectangular": rectPlanta(11, 16, 3.4, { wall: "near", width: 1.4, height: 2.3 }),
+    "planta-t": plantaT(),
 };
 
 export const DEFAULT_PLANTA = "sala-clasica";
@@ -68,15 +102,18 @@ export function buildRoom(scene, plantilla) {
     wallMat.specularColor = new BABYLON.Color3(0.02, 0.02, 0.03);
     wallMat.ambientColor = new BABYLON.Color3(0.6, 0.62, 0.7);
     wallMat.backFaceCulling = false; // visible desde ambos lados (pasillos)
+    wallMat.maxSimultaneousLights = 8;
 
     const ceilingMat = new BABYLON.StandardMaterial("ceilingMat", scene);
     ceilingMat.diffuseColor = new BABYLON.Color3(0.97, 0.97, 0.98);
     ceilingMat.specularColor = new BABYLON.Color3(0, 0, 0);
+    ceilingMat.maxSimultaneousLights = 8;
 
     const floorMat = new BABYLON.StandardMaterial("floorMat", scene);
     floorMat.diffuseColor = new BABYLON.Color3(0.12, 0.16, 0.24);
     floorMat.specularColor = new BABYLON.Color3(0.25, 0.3, 0.45);
     floorMat.specularPower = 96;
+    floorMat.maxSimultaneousLights = 8;
 
     const baseboardMat = new BABYLON.StandardMaterial("baseboardMat", scene);
     baseboardMat.diffuseColor = new BABYLON.Color3(0.08, 0.13, 0.22);
