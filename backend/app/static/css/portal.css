@@ -9,6 +9,13 @@
     min-height: 100dvh;
 }
 
+/* Fondo animado de olas (Vanta.js). Queda tras todo el contenido. */
+.vanta-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+}
+
 .portal-glow {
     position: fixed;
     inset: -20% 0 auto 0;

@@ -9,6 +9,7 @@
 {% block body_class %}portal-page{% endblock %}
 
 {% block content %}
+<div id="vanta-bg" class="vanta-bg" aria-hidden="true"></div>
 <div class="portal-glow" aria-hidden="true"></div>
 
 <main class="portal">
@@ -69,4 +70,35 @@
     </section>
     {% endif %}
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+<script>
+(function () {
+    // Respetar "reducir movimiento" y no romper si el CDN o WebGL fallan.
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !window.VANTA || !window.VANTA.WAVES) return;
+    try {
+        window.VANTA.WAVES({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.0,
+            minWidth: 200.0,
+            scale: 1.0,
+            scaleMobile: 1.0,
+            color: 0x0e2a4d,      // navy agua (paleta del portal)
+            shininess: 35.0,
+            waveHeight: 14.0,
+            waveSpeed: 0.85,
+            zoom: 0.92,
+        });
+    } catch (e) {
+        console.warn("[vanta] no se pudo iniciar el fondo animado:", e);
+    }
+})();
+</script>
 {% endblock %}
