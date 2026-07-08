@@ -54,9 +54,8 @@ def resumen_exposicion(expo) -> dict:
         "titulo": expo.titulo,
         "slug": expo.slug,
         "descripcion": expo.descripcion,
-        "organizador": (propietario.nombre or propietario.email)
-        if propietario
-        else None,
+        # Solo el nombre visible; nunca el email en público.
+        "organizador": propietario.nombre if propietario else None,
         "fecha_inicio": expo.fecha_inicio,
         "fecha_fin": expo.fecha_fin,
         "n_salas": len(expo.salas),
@@ -70,11 +69,8 @@ def serializar_sala(sala) -> dict:
     """Estructura completa de una sala lista para el 3D. Las relaciones ya
     vienen ordenadas por `orden` (definido en los modelos)."""
     expo = sala.exposicion
-    organizador = (
-        (expo.propietario.nombre or expo.propietario.email)
-        if expo.propietario
-        else None
-    )
+    # Solo el nombre visible; nunca el email en público.
+    organizador = expo.propietario.nombre if expo.propietario else None
     return {
         "exposicion": {
             "titulo": expo.titulo,

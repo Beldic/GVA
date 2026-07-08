@@ -40,7 +40,9 @@
       "PowerShell($root=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; git -C $root checkout -- backend/app/static/js/gallery/room.js backend/app/static/js/gallery/scene.js backend/app/plantillas.py; Write-Output \"=== estado tras revertir ===\"; git -C $root status --short)",
       "PowerShell($root=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; git -C $root status -sb | Select-Object -First 1; Write-Output \"--- commits sin publicar ---\"; git -C $root log --oneline origin/main..HEAD)",
       "Bash(python -c \"import secrets; print\\('SECRET_KEY        =', secrets.token_urlsafe\\(48\\)\\); print\\('LEGACY_ORG_PASSWORD=', secrets.token_urlsafe\\(12\\)\\)\")",
-      "Bash(python3 -c \"import secrets; print\\('SECRET_KEY        =', secrets.token_urlsafe\\(48\\)\\); print\\('LEGACY_ORG_PASSWORD=', secrets.token_urlsafe\\(12\\)\\)\")"
+      "Bash(python3 -c \"import secrets; print\\('SECRET_KEY        =', secrets.token_urlsafe\\(48\\)\\); print\\('LEGACY_ORG_PASSWORD=', secrets.token_urlsafe\\(12\\)\\)\")",
+      "PowerShell($root=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; $m=\"C:\\\\Users\\\\jordi\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-jordi-Desktop-Proyectos-Galeria\\\\1158f728-9525-4ce7-ae90-48b0cc924092\\\\scratchpad\"; git -C $root add backend/app/services/cloudinary_service.py backend/app/routes/admin.py backend/app/templates/admin/obras_bulk.html backend/app/templates/admin/sala_detail.html; git -C $root commit -F \"$m\\\\msg_bulk.txt\"; git -C $root log --oneline -1)",
+      "PowerShell($root=\"C:\\\\Users\\\\jordi\\\\Desktop\\\\Proyectos\\\\Galeria\"; git -C $root add backend/app/plantillas.py; git -C $root commit -m \"Ampliar planta en T a 40 dibujos \\(pasillo 12+12\\)\" -m \"Sube la capacidad de dibujo de los pasillos de 10 a 12 \\(huecos de 1 m, holgados para A3\\) para que quepan lotes de hasta 40 dibujos. Solo afecta a salas nuevas. Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>\"; git -C $root log --oneline -1)"
     ]
   }
 }
