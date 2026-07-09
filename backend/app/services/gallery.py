@@ -62,6 +62,8 @@ def resumen_exposicion(expo) -> dict:
         "n_obras": _contar_obras(expo),
         "portada": _portada_url(expo),
         "visitable": bool(expo.salas),
+        "apertura": expo.apertura,
+        "privada": expo.requiere_codigo,
     }
 
 

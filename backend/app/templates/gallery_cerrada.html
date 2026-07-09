@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}{{ expo.titulo }} · {{ 'Próximamente' if expo.apertura == 'proximamente' else 'Cerrada' }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block body_class %}admin-auth-page{% endblock %}
+
+{% block content %}
+<div class="admin-auth">
+    <div class="admin-auth-card">
+        <p class="admin-eyebrow">Galería Virtual</p>
+        <h1 class="admin-auth-title">{{ expo.titulo }}</h1>
+        {% if expo.apertura == 'proximamente' %}
+        <p class="admin-muted">
+            Esta exposición todavía no ha abierto sus puertas.
+            {% if expo.fecha_inicio %}Abre el {{ expo.fecha_inicio.strftime('%d/%m/%Y') }}.{% else %}Vuelve pronto.{% endif %}
+        </p>
+        {% else %}
+        <p class="admin-muted">Esta exposición está cerrada. Gracias por tu interés.</p>
+        {% endif %}
+        <p class="admin-muted"><a href="{{ url_for('main.index') }}">← Volver al portal</a></p>
+    </div>
+</div>
+{% endblock %}

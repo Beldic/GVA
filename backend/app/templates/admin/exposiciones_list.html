@@ -26,6 +26,16 @@
                 {% else %}
                     <span class="admin-badge">Borrador</span>
                 {% endif %}
+                {% if e.requiere_codigo %}
+                    <br><small class="admin-muted">🔒 Con código</small>
+                {% elif not e.es_publica %}
+                    <br><small class="admin-muted">🔗 Enlace secreto</small>
+                {% endif %}
+                {% if e.apertura == 'cerrada' %}
+                    <br><small class="admin-muted">⛔ Cerrada{{ ' (a mano)' if e.cerrada_manual }}</small>
+                {% elif e.apertura == 'proximamente' %}
+                    <br><small class="admin-muted">🕐 Próximamente</small>
+                {% endif %}
             </td>
             <td class="admin-muted">
                 {{ e.fecha_inicio.strftime('%d/%m/%Y') if e.fecha_inicio else '—' }}
@@ -42,6 +52,17 @@
                 <form method="post" action="{{ url_for('admin.exposicion_publicar', exposicion_id=e.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="admin-link">Publicar</button>
+                </form>
+                {% endif %}
+                {% if e.cerrada_manual %}
+                <form method="post" action="{{ url_for('admin.exposicion_reabrir', exposicion_id=e.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="admin-link">Reabrir</button>
+                </form>
+                {% else %}
+                <form method="post" action="{{ url_for('admin.exposicion_cerrar', exposicion_id=e.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="admin-link">Cerrar</button>
                 </form>
                 {% endif %}
                 <form method="post" action="{{ url_for('admin.exposicion_borrar', exposicion_id=e.id) }}"

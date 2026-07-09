@@ -43,6 +43,20 @@ class ExposicionForm(FlaskForm):
     descripcion = TextAreaField("Descripción", validators=[Optional()])
     fecha_inicio = DateField("Fecha de inicio", validators=[Optional()])
     fecha_fin = DateField("Fecha de fin", validators=[Optional()])
+    visibilidad = SelectField(
+        "Visibilidad",
+        choices=[
+            ("publica", "Pública — aparece en el portal"),
+            ("enlace", "Enlace secreto — solo quien tenga la URL"),
+            ("codigo", "Privada — pide un código de acceso"),
+        ],
+        default="publica",
+    )
+    codigo_acceso = StringField(
+        "Código de acceso",
+        validators=[Optional(), Length(min=4, max=64)],
+        description="Mínimo 4 caracteres. Al editar, déjalo vacío para conservar el actual.",
+    )
     submit = SubmitField("Guardar")
 
 

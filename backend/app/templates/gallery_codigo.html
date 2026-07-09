@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ expo.titulo }} · Acceso privado{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block body_class %}admin-auth-page{% endblock %}
+
+{% block content %}
+<div class="admin-auth">
+    <div class="admin-auth-card">
+        <p class="admin-eyebrow">Galería Virtual · Exposición privada</p>
+        <h1 class="admin-auth-title">{{ expo.titulo }}</h1>
+        <p class="admin-muted">
+            Esta exposición requiere un código de acceso.
+            Si no lo tienes, pídeselo a quien la organiza.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, msg in messages %}
+                <div class="admin-flash admin-flash-{{ category }}">{{ msg }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="post" action="{{ url_for('main.gallery_codigo', slug=expo.slug) }}" class="admin-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label class="admin-field">
+                <span>Código de acceso</span>
+                <input type="password" name="codigo" required autofocus autocomplete="off">
+            </label>
+            <button type="submit" class="admin-btn">Entrar</button>
+        </form>
+
+        <p class="admin-muted"><a href="{{ url_for('main.index') }}">← Volver al portal</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -173,6 +173,46 @@
     box-shadow: 0 0 8px var(--color-tech);
 }
 
+.gcard-badge--soon { border-color: rgba(251, 191, 36, 0.45); }
+.gcard-badge--soon .gcard-badge-dot {
+    background: #fbbf24;
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
+}
+
+.gcard-badge--closed {
+    border-color: rgba(148, 163, 184, 0.35);
+    color: rgba(226, 232, 240, 0.75);
+}
+
+/* Candado de exposición privada (con código) */
+.gcard-lock {
+    position: absolute;
+    z-index: 1;
+    top: 0.85rem;
+    right: 0.85rem;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: #eafaff;
+    background: rgba(7, 20, 38, 0.6);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    backdrop-filter: blur(6px);
+}
+.gcard-lock svg { width: 15px; height: 15px; }
+
+/* Card no visitable (cerrada o próximamente) */
+.gcard--off .gcard-cover { filter: saturate(0.55) brightness(0.82); }
+.gcard--off:hover,
+.gcard--off:focus-within {
+    transform: none;
+    border-color: rgba(125, 211, 252, 0.14);
+    box-shadow: none;
+}
+
+.gcard-cta--off { color: rgba(186, 214, 240, 0.6); }
+
 /* Cuerpo */
 .gcard-body {
     display: flex;

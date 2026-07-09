@@ -18,7 +18,12 @@ from backend.app.authz import exigir_acceso_exposicion, exigir_propietario
 from backend.app.extensions import db
 from backend.app.forms import AutorForm, ExposicionForm, ObraForm, SalaForm
 from backend.app.models import Autor, Exposicion, Obra, Sala, Usuario, Zona
-from backend.app.models.exposicion import ESTADO_BORRADOR, ESTADO_PUBLICADA
+from backend.app.models.exposicion import (
+    APERTURA_CERRADA,
+    ESTADO_BORRADOR,
+    ESTADO_PUBLICADA,
+    VISIBILIDAD_CODIGO,
+)
 from backend.app.models.obra import PLACEHOLDER_IMAGEN, TIPO_CUADRO, TIPO_DIBUJO
 from backend.app.models.zona import TIPO_MIXTO
 from backend.app.plantillas import (
@@ -175,6 +180,23 @@ def _slug_unico(base: str, exclude_id=None) -> str:
         i += 1
 
 
+def _aplicar_visibilidad(expo, form) -> bool:
+    """Vuelca visibilidad y código de acceso del formulario a la exposición.
+    Devuelve False (con error en el campo) si la modalidad con código queda
+    sin ningún código fijado."""
+    codigo = (form.codigo_acceso.data or "").strip()
+    if form.visibilidad.data == VISIBILIDAD_CODIGO and not codigo:
+        if not expo.codigo_acceso_hash:
+            form.codigo_acceso.errors.append(
+                "Fija un código de acceso para la modalidad privada."
+            )
+            return False
+    expo.visibilidad = form.visibilidad.data
+    if codigo:
+        expo.set_codigo_acceso(codigo)
+    return True
+
+
 @bp.get("/exposiciones")
 @login_required
 def exposiciones_list():
@@ -205,10 +227,11 @@ def exposicion_nueva():
             fecha_fin=form.fecha_fin.data,
             estado=ESTADO_BORRADOR,
         )
-        db.session.add(expo)
-        db.session.commit()
-        flash("Exposición creada.", "info")
-        return redirect(url_for("admin.exposiciones_list"))
+        if _aplicar_visibilidad(expo, form):
+            db.session.add(expo)
+            db.session.commit()
+            flash("Exposición creada.", "info")
+            return redirect(url_for("admin.exposiciones_list"))
     return render_template(
         "admin/exposicion_form.html", form=form, titulo="Nueva exposición"
     )
@@ -220,7 +243,7 @@ def exposicion_editar(exposicion_id):
     expo = db.get_or_404(Exposicion, exposicion_id)
     exigir_acceso_exposicion(expo)
     form = ExposicionForm(obj=expo)
-    if form.validate_on_submit():
+    if form.validate_on_submit() and _aplicar_visibilidad(expo, form):
         expo.titulo = form.titulo.data.strip()
         base = slugify(form.slug.data or form.titulo.data)
         expo.slug = _slug_unico(base, exclude_id=expo.id)
@@ -255,6 +278,35 @@ def exposicion_despublicar(exposicion_id):
     expo.estado = ESTADO_BORRADOR
     db.session.commit()
     flash(f"«{expo.titulo}» pasó a borrador.", "info")
+    return redirect(url_for("admin.exposiciones_list"))
+
+
+@bp.post("/exposiciones/<int:exposicion_id>/cerrar")
+@login_required
+def exposicion_cerrar(exposicion_id):
+    expo = db.get_or_404(Exposicion, exposicion_id)
+    exigir_acceso_exposicion(expo)
+    expo.cerrada_manual = True
+    db.session.commit()
+    flash(f"«{expo.titulo}» está cerrada: su card se ve pero nadie puede entrar.", "info")
+    return redirect(url_for("admin.exposiciones_list"))
+
+
+@bp.post("/exposiciones/<int:exposicion_id>/reabrir")
+@login_required
+def exposicion_reabrir(exposicion_id):
+    expo = db.get_or_404(Exposicion, exposicion_id)
+    exigir_acceso_exposicion(expo)
+    expo.cerrada_manual = False
+    db.session.commit()
+    if expo.apertura == APERTURA_CERRADA:
+        flash(
+            f"«{expo.titulo}» ya no está cerrada a mano, pero su fecha de fin "
+            "ya pasó: amplía las fechas para reabrirla.",
+            "error",
+        )
+    else:
+        flash(f"«{expo.titulo}» reabierta.", "info")
     return redirect(url_for("admin.exposiciones_list"))
 
 

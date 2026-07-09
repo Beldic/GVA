@@ -31,8 +31,13 @@
     {% if galerias %}
     <section class="portal-grid" aria-label="Galerías abiertas">
         {% for g in galerias %}
-        <article class="gcard">
+        {% set visitable = g.apertura == 'abierta' %}
+        <article class="gcard{% if not visitable %} gcard--off{% endif %}">
+            {% if visitable %}
             <a class="gcard-link" href="{{ url_for('main.gallery', slug=g.slug) }}">
+            {% else %}
+            <div class="gcard-link">
+            {% endif %}
                 <div class="gcard-cover{% if not g.portada %} gcard-cover--empty{% endif %}"
                      {% if g.portada %}style="background-image: url('{{ g.portada }}');"{% endif %}>
                     {% if not g.portada %}
@@ -44,7 +49,22 @@
                         </svg>
                     </span>
                     {% endif %}
+                    {% if g.apertura == 'abierta' %}
                     <span class="gcard-badge"><span class="gcard-badge-dot" aria-hidden="true"></span>Abierta</span>
+                    {% elif g.apertura == 'proximamente' %}
+                    <span class="gcard-badge gcard-badge--soon"><span class="gcard-badge-dot" aria-hidden="true"></span>Próximamente</span>
+                    {% else %}
+                    <span class="gcard-badge gcard-badge--closed">Cerrada</span>
+                    {% endif %}
+                    {% if g.privada %}
+                    <span class="gcard-lock" title="Requiere código de acceso" aria-label="Requiere código de acceso">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="5" y="11" width="14" height="9" rx="2"/>
+                            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+                        </svg>
+                    </span>
+                    {% endif %}
                 </div>
                 <div class="gcard-body">
                     {% if g.organizador %}<p class="gcard-org">{{ g.organizador }}</p>{% endif %}
@@ -57,9 +77,15 @@
                         <span>{{ g.fecha_inicio.strftime('%d/%m/%Y') }}{% if g.fecha_fin %} – {{ g.fecha_fin.strftime('%d/%m/%Y') }}{% endif %}</span>
                         {% endif %}
                     </div>
-                    <span class="gcard-cta">Visitar galería <span class="gcard-cta-arrow" aria-hidden="true">→</span></span>
+                    {% if visitable %}
+                    <span class="gcard-cta">{{ 'Entrar con código' if g.privada else 'Visitar galería' }} <span class="gcard-cta-arrow" aria-hidden="true">→</span></span>
+                    {% elif g.apertura == 'proximamente' %}
+                    <span class="gcard-cta gcard-cta--off">Abre pronto{% if g.fecha_inicio %} · {{ g.fecha_inicio.strftime('%d/%m/%Y') }}{% endif %}</span>
+                    {% else %}
+                    <span class="gcard-cta gcard-cta--off">Exposición cerrada</span>
+                    {% endif %}
                 </div>
-            </a>
+            {% if visitable %}</a>{% else %}</div>{% endif %}
         </article>
         {% endfor %}
     </section>
