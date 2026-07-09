@@ -42,7 +42,14 @@ export function createFirstPersonCamera(scene, canvas, planta = ROOM, onExit) {
     camera.speed = 0.18;
     camera.angularSensibility = 1800;
     camera.inertia = 0.6;
-    camera.minZ = 0.05;
+    // Plano cercano/lejano acotados: la relación maxZ/minZ determina la precisión
+    // del buffer de profundidad. Con 0.05→10000 (relación 200.000) las superficies
+    // casi coplanares peleaban por la profundidad (Z-fighting: cuadros blancos que
+    // saltaban en las GPU Apple/M1). Con 0.3→80 la relación baja a ~267 y desaparece.
+    // El ojo va a 1.7 m y la colisión frena a 0.4 m de la pared, así que 0.3 sobra;
+    // la sala mayor mide ~20 m, así que 80 va holgado.
+    camera.minZ = 0.3;
+    camera.maxZ = 80;
     camera.fov = 1.05;
 
     camera.keysUp = [87, 38]; // W, ↑

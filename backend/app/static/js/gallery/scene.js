@@ -49,14 +49,16 @@ export function createScene(engine, canvas, datos, options = {}) {
             ? { width: stripW + extra, height: stripLen + extra }
             : { width: stripLen + extra, height: stripW + extra });
 
-        // Marco oscuro recedido + panel luminoso, pegados al techo mirando abajo.
+        // Marco oscuro recedido + panel luminoso, colgando bajo el techo mirando
+        // abajo. Separación holgada entre techo / marco / panel para no depender del
+        // filo de la precisión de profundidad (evita Z-fighting con el techo).
         const frame = BABYLON.MeshBuilder.CreateGround(`sky-frame-${ci}`, dims(0.35), scene);
-        frame.position = new BABYLON.Vector3(c.x, planta.height - 0.01, c.z);
+        frame.position = new BABYLON.Vector3(c.x, planta.height - 0.04, c.z);
         frame.rotation.x = Math.PI;
         frame.material = skyFrameMat;
 
         const panel = BABYLON.MeshBuilder.CreateGround(`sky-${ci}`, dims(0), scene);
-        panel.position = new BABYLON.Vector3(c.x, planta.height - 0.03, c.z);
+        panel.position = new BABYLON.Vector3(c.x, planta.height - 0.09, c.z);
         panel.rotation.x = Math.PI;
         panel.material = skyMat;
 
