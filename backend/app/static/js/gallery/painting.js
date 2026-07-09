@@ -70,7 +70,9 @@ export function buildPainting(scene, obra, placement) {
     canvasMat.emissiveTexture = canvasTexture; // que el cuadro brille por sí solo
     canvasMat.emissiveColor = new BABYLON.Color3(0.35, 0.35, 0.35);
     canvasMat.specularColor = new BABYLON.Color3(0, 0, 0);
-    canvasMat.backFaceCulling = false;
+    // Sin backFaceCulling=false: el lienzo es DOUBLESIDE (ya trae sus dos caras).
+    // Quitar el culling dibujaba las dos coincidentes a igual profundidad y podían
+    // pelear por el z-buffer en GPU Apple (mismo bug que se corrigió en las paredes).
 
     const canvasPlane = BABYLON.MeshBuilder.CreatePlane(
         `canvas-${id}`,
