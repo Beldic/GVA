@@ -101,7 +101,12 @@ export function buildRoom(scene, plantilla) {
     wallMat.diffuseColor = new BABYLON.Color3(0.94, 0.95, 0.97);
     wallMat.specularColor = new BABYLON.Color3(0.02, 0.02, 0.03);
     wallMat.ambientColor = new BABYLON.Color3(0.6, 0.62, 0.7);
-    wallMat.backFaceCulling = false; // visible desde ambos lados (pasillos)
+    // NO se desactiva el backface culling: las paredes usan geometría DOUBLESIDE
+    // (ya trae sus dos caras), así que quitar el culling dibujaba las dos caras
+    // coincidentes a la MISMA profundidad y peleaban por el z-buffer. En GPU Apple
+    // (M1) eso salía como rectángulos blancos que parpadeaban al girar la cámara.
+    // Con el culling activo (por defecto), cada cara se ve por su lado, sin pelea,
+    // y las paredes siguen siendo visibles por ambos lados en los pasillos.
     wallMat.maxSimultaneousLights = 8;
 
     const ceilingMat = new BABYLON.StandardMaterial("ceilingMat", scene);
