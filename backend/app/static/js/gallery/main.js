@@ -1,4 +1,8 @@
-import { createScene } from "./scene.js";
+import { createScene } from "./scene.js?v=2";
+
+// Marca de build: sirve para comprobar en la consola del navegador que se está
+// cargando la versión NUEVA del visor y no una cacheada. Súbela al desplegar.
+console.log("[gallery] visor build v2");
 
 const canvas = document.getElementById("renderCanvas");
 const doorLayer = document.getElementById("door-layer");
@@ -54,8 +58,11 @@ if (esSoloTactil()) {
 } else if (!datos || !datos.sala) {
     console.error("[gallery] sin datos de sala: no se inicia el render.");
 } else {
+    // preserveDrawingBuffer se quita a propósito: en las GPU Apple (Metal) forzaba
+    // un camino de compositor que dibujaba rectángulos blancos a medio renderizar
+    // mientras se movía la cámara (limpio al parar). No lo necesitamos: no hay
+    // capturas de pantalla que requieran conservar el búfer entre fotogramas.
     const engine = new BABYLON.Engine(canvas, true, {
-        preserveDrawingBuffer: true,
         stencil: true,
         adaptToDeviceRatio: true,
     });

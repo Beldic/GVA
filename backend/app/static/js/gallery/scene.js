@@ -1,6 +1,6 @@
-import { buildRoom, slotPlacement } from "./room.js";
-import { buildPainting } from "./painting.js";
-import { createFirstPersonCamera } from "./camera.js";
+import { buildRoom, slotPlacement } from "./room.js?v=2";
+import { buildPainting } from "./painting.js?v=2";
+import { createFirstPersonCamera } from "./camera.js?v=2";
 
 export function createScene(engine, canvas, datos, options = {}) {
     const scene = new BABYLON.Scene(engine);

@@ -1,4 +1,4 @@
-import { ROOM } from "./room.js";
+import { ROOM } from "./room.js?v=2";
 
 export function createFirstPersonCamera(scene, canvas, planta = ROOM, onExit) {
     const eyeHeight = 1.7;
