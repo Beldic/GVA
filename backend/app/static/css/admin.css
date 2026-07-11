@@ -13,6 +13,9 @@
     background: var(--gva-crema);
     color: var(--gva-azul);
     min-height: 100vh;
+    /* main.css fija height:100% en html/body; sin esto, en páginas más altas
+       que el viewport el fondo crema termina y asoma el azul del html. */
+    height: auto;
 }
 
 /* ---- Login ---- */
@@ -351,6 +354,23 @@
 
 .admin-actions form {
     display: inline;
+}
+
+/* En celdas de tabla, .admin-actions no puede ser flex: el td dejaría de ser
+   table-cell y perdería el centrado vertical respecto al resto de la fila. */
+td.admin-actions {
+    display: table-cell;
+}
+
+td.admin-actions > a,
+td.admin-actions > form,
+td.admin-actions > form > button {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+td.admin-actions > *:not(:last-child) {
+    margin-right: 0.8rem;
 }
 
 /* ---- Badges de estado ---- */

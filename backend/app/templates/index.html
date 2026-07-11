@@ -67,7 +67,14 @@
                     {% endif %}
                 </div>
                 <div class="gcard-body">
-                    {% if g.organizador %}<p class="gcard-org">{{ g.organizador }}</p>{% endif %}
+                    {% if g.organizador %}
+                    <p class="gcard-org">
+                        {% if g.organizador_logo %}
+                        <img class="gcard-org-logo" src="{{ g.organizador_logo }}" alt="" loading="lazy">
+                        {% endif %}
+                        {{ g.organizador }}
+                    </p>
+                    {% endif %}
                     <h2 class="gcard-title">{{ g.titulo }}</h2>
                     {% if g.descripcion %}<p class="gcard-desc">{{ g.descripcion }}</p>{% endif %}
                     <div class="gcard-meta">
