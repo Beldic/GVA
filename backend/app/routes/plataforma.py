@@ -12,13 +12,14 @@ from flask import (
     flash,
     redirect,
     render_template,
+    request,
     url_for,
 )
 from flask_login import current_user
 
 from backend.app.extensions import db
 from backend.app.forms import OrganizadorEditForm, OrganizadorForm
-from backend.app.models import Usuario
+from backend.app.models import Exposicion, Usuario
 from backend.app.models.usuario import ROL_ORGANIZADOR
 from backend.app.services import stats
 
@@ -140,6 +141,78 @@ def organizador_borrar(usuario_id):
     db.session.commit()
     flash(f"Organizador «{email}» y todo su contenido borrados.", "info")
     return redirect(url_for("plataforma.organizadores_list"))
+
+
+# --------------------------------------------------------------------------
+# Exposiciones (visión transversal + reasignación de dueño)
+# --------------------------------------------------------------------------
+@bp.get("/exposiciones")
+def exposiciones_list():
+    exposiciones = Exposicion.query.order_by(Exposicion.created_at.desc()).all()
+    organizadores = (
+        Usuario.query.filter_by(rol=ROL_ORGANIZADOR, activo=True)
+        .order_by(Usuario.nombre)
+        .all()
+    )
+    return render_template(
+        "plataforma/exposiciones_list.html",
+        exposiciones=exposiciones,
+        organizadores=organizadores,
+    )
+
+
+def _mover_autores(expo, origen_id, destino) -> tuple[list, list]:
+    """Al reasignar una exposición, mueve con ella los autores de sus obras.
+    Un autor solo se mueve si TODAS sus obras cuelgan en esta exposición; si
+    también tiene obras en otras del dueño anterior, se queda (compartido) y
+    se avisa. Devuelve (movidos, compartidos) por nombre."""
+    obras_expo = {
+        o.id for sala in expo.salas for zona in sala.zonas for o in zona.obras
+    }
+    autores = {
+        o.autor for sala in expo.salas for zona in sala.zonas for o in zona.obras
+    }
+    movidos, compartidos = [], []
+    for autor in autores:
+        if autor.usuario_id != origen_id:
+            continue
+        if all(obra.id in obras_expo for obra in autor.obras):
+            autor.usuario_id = destino.id
+            movidos.append(autor.nombre)
+        else:
+            compartidos.append(autor.nombre)
+    return movidos, compartidos
+
+
+@bp.post("/exposiciones/<int:exposicion_id>/reasignar")
+def exposicion_reasignar(exposicion_id):
+    expo = db.get_or_404(Exposicion, exposicion_id)
+    destino_id = request.form.get("usuario_id", type=int)
+    if destino_id is None:
+        flash("Elige el organizador de destino.", "error")
+        return redirect(url_for("plataforma.exposiciones_list"))
+    destino = _get_organizador(destino_id)
+    if destino.id == expo.usuario_id:
+        flash(f"«{expo.titulo}» ya pertenece a ese organizador.", "info")
+        return redirect(url_for("plataforma.exposiciones_list"))
+
+    origen_id = expo.usuario_id
+    expo.usuario_id = destino.id
+    movidos, compartidos = _mover_autores(expo, origen_id, destino)
+    db.session.commit()
+
+    quien = destino.nombre or destino.email
+    msg = f"«{expo.titulo}» reasignada a {quien}."
+    if movidos:
+        msg += f" Autores movidos: {', '.join(sorted(movidos))}."
+    flash(msg, "info")
+    if compartidos:
+        flash(
+            "Estos autores NO se movieron porque tienen obras en otras "
+            f"exposiciones del dueño anterior: {', '.join(sorted(compartidos))}.",
+            "error",
+        )
+    return redirect(url_for("plataforma.exposiciones_list"))
 
 
 # --------------------------------------------------------------------------

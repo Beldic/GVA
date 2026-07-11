@@ -1,0 +1,68 @@
+{% extends "plataforma/_layout.html" %}
+
+{% block plat_title %}Exposiciones{% endblock %}
+
+{% block plat_content %}
+<div class="admin-head-row">
+    <h1 class="admin-h1">Exposiciones</h1>
+</div>
+<p class="admin-lead">Todas las exposiciones de la plataforma. Desde aquí puedes
+reasignar una exposición a su organizador legítimo (sus autores se mueven con ella).</p>
+
+{% if exposiciones %}
+<table class="admin-table">
+    <thead>
+        <tr><th>Exposición</th><th>Dueño actual</th><th>Estado</th><th>Reasignar a</th></tr>
+    </thead>
+    <tbody>
+        {% for e in exposiciones %}
+        <tr>
+            <td>
+                {{ e.titulo }}
+                <br><small class="admin-muted">/g/{{ e.slug }}</small>
+            </td>
+            <td>
+                {% if e.propietario %}
+                    {{ e.propietario.nombre or '—' }}
+                    <br><small class="admin-muted">{{ e.propietario.email }}</small>
+                    {% if e.propietario.es_superadmin %}
+                    <br><span class="admin-badge admin-badge-off" title="Las exposiciones deberían pertenecer a un organizador">⚠ superadmin</span>
+                    {% endif %}
+                {% else %}
+                    <span class="admin-muted">—</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if e.estado == 'publicada' %}
+                    <span class="admin-badge admin-badge-on">Publicada</span>
+                {% else %}
+                    <span class="admin-badge">Borrador</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if organizadores %}
+                <form method="post" action="{{ url_for('plataforma.exposicion_reasignar', exposicion_id=e.id) }}"
+                      class="admin-actions"
+                      onsubmit="return confirm('¿Reasignar «{{ e.titulo }}» al organizador elegido?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <select name="usuario_id" class="admin-input">
+                        {% for o in organizadores %}
+                        {% if o.id != e.usuario_id %}
+                        <option value="{{ o.id }}">{{ o.nombre or o.email }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="admin-link">Reasignar</button>
+                </form>
+                {% else %}
+                <span class="admin-muted">Crea antes un organizador.</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="admin-empty">No hay exposiciones en la plataforma.</p>
+{% endif %}
+{% endblock %}

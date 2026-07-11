@@ -27,6 +27,8 @@
            class="{{ 'is-active' if request.endpoint == 'plataforma.dashboard' }}">Inicio</a>
         <a href="{{ url_for('plataforma.organizadores_list') }}"
            class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('plataforma.organizador') }}">Organizadores</a>
+        <a href="{{ url_for('plataforma.exposiciones_list') }}"
+           class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('plataforma.exposicion') }}">Exposiciones</a>
         <a href="{{ url_for('plataforma.estadisticas') }}"
            class="{{ 'is-active' if request.endpoint == 'plataforma.estadisticas' }}">Estadísticas</a>
     </nav>
