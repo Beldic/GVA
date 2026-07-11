@@ -6,7 +6,7 @@
 {% block admin_content %}
 <h1 class="admin-h1">{{ titulo }}</h1>
 
-<form method="post" class="admin-form admin-form-wide">
+<form method="post" enctype="multipart/form-data" class="admin-form admin-form-wide">
     {{ form.hidden_tag() }}
     {{ field(form.titulo) }}
     {{ field(form.slug, placeholder="Se genera del título si lo dejas vacío") }}
@@ -20,6 +20,14 @@
         {{ field(form.codigo_acceso, placeholder="El código que compartirás con los visitantes", autocomplete="off") }}
         <small class="admin-muted">{{ form.codigo_acceso.description }}</small>
     </div>
+    {{ field(form.musica) }}
+    <small class="admin-muted">{{ form.musica.description }}</small>
+    {% if tiene_musica %}
+    <label class="admin-check">
+        {{ form.quitar_musica() }} {{ form.quitar_musica.label.text }}
+        <small class="admin-muted">(esta exposición ya tiene hilo musical)</small>
+    </label>
+    {% endif %}
     <div class="admin-form-actions">
         <button type="submit" class="admin-btn">Guardar</button>
         <a href="{{ url_for('admin.exposiciones_list') }}" class="admin-cancel">Cancelar</a>

@@ -197,6 +197,32 @@ def _aplicar_visibilidad(expo, form) -> bool:
     return True
 
 
+def _aplicar_musica(expo, form) -> None:
+    """Vuelca el hilo musical del formulario a la exposición: quitar la pista
+    actual o subir una nueva (reemplazando la anterior). Los fallos de subida
+    se comunican con flash y no interrumpen el guardado del resto."""
+    if form.quitar_musica.data:
+        cloudinary_service.eliminar_audio(expo.musica_public_id)
+        expo.musica_public_id = None
+        expo.musica_url = None
+        return
+    archivo = form.musica.data
+    if not archivo:
+        return
+    if not cloudinary_service.esta_configurado():
+        flash("Cloudinary no está configurado: la música no se subió.", "error")
+        return
+    anterior = expo.musica_public_id
+    try:
+        public_id, url = cloudinary_service.subir_audio(archivo)
+    except cloudinary_service.CloudinaryError:
+        flash("No se pudo subir la música: se conserva la anterior.", "error")
+        return
+    expo.musica_public_id = public_id
+    expo.musica_url = url
+    cloudinary_service.eliminar_audio(anterior)  # limpia la pista antigua
+
+
 @bp.get("/exposiciones")
 @login_required
 def exposiciones_list():
@@ -228,6 +254,7 @@ def exposicion_nueva():
             estado=ESTADO_BORRADOR,
         )
         if _aplicar_visibilidad(expo, form):
+            _aplicar_musica(expo, form)
             db.session.add(expo)
             db.session.commit()
             flash("Exposición creada.", "info")
@@ -250,11 +277,15 @@ def exposicion_editar(exposicion_id):
         expo.descripcion = form.descripcion.data or None
         expo.fecha_inicio = form.fecha_inicio.data
         expo.fecha_fin = form.fecha_fin.data
+        _aplicar_musica(expo, form)
         db.session.commit()
         flash("Exposición actualizada.", "info")
         return redirect(url_for("admin.exposiciones_list"))
     return render_template(
-        "admin/exposicion_form.html", form=form, titulo=f"Editar: {expo.titulo}"
+        "admin/exposicion_form.html",
+        form=form,
+        titulo=f"Editar: {expo.titulo}",
+        tiene_musica=bool(expo.musica_url),
     )
 
 
@@ -315,8 +346,10 @@ def exposicion_reabrir(exposicion_id):
 def exposicion_borrar(exposicion_id):
     expo = db.get_or_404(Exposicion, exposicion_id)
     exigir_acceso_exposicion(expo)
+    musica_public_id = expo.musica_public_id
     db.session.delete(expo)
     db.session.commit()
+    cloudinary_service.eliminar_audio(musica_public_id)  # pista huérfana
     flash("Exposición borrada.", "info")
     return redirect(url_for("admin.exposiciones_list"))
 

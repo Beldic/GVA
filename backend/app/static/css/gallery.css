@@ -59,6 +59,19 @@ html, body {
     color: rgba(207, 220, 236, 0.7);
 }
 
+/* Botón del hilo musical (♪): tachado y atenuado cuando está en silencio */
+.hud-musica {
+    background: none;
+    cursor: pointer;
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.hud-musica--off {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
 /* ---- Overlay inicial ---- */
 .overlay {
     position: fixed;

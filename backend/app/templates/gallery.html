@@ -19,7 +19,15 @@
     {% if datos %}
     <span class="hud-title">{{ datos.sala.nombre }} · {{ datos.exposicion.titulo }}</span>
     {% endif %}
+    {% if datos and datos.exposicion.musica_url %}
+    <button id="musica-btn" type="button" class="hud-link hud-musica"
+            title="Silenciar la música" aria-label="Silenciar la música" hidden>♪</button>
+    {% endif %}
 </div>
+
+{% if datos and datos.exposicion.musica_url %}
+<audio id="hilo-musical" src="{{ datos.exposicion.musica_url }}" loop preload="auto"></audio>
+{% endif %}
 
 {% if datos %}
 {# Puerta: transición cinematográfica de entrada y de salida de la galería #}
@@ -148,5 +156,48 @@
 <script id="gallery-data" type="application/json">{{ datos|tojson }}</script>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script type="module" src="{{ url_for('static', filename='js/gallery/main.js') }}"></script>
+<script>
+(function () {
+    // Hilo musical: arranca con el primer gesto del visitante (el botón
+    // «Entrar» de la puerta o cualquier clic/tecla), porque los navegadores
+    // bloquean el autoplay con sonido. El botón ♪ del HUD lo silencia/reanuda.
+    const audio = document.getElementById("hilo-musical");
+    const btn = document.getElementById("musica-btn");
+    if (!audio || !btn) return;
+
+    audio.volume = 0.35;
+    let iniciada = false;
+
+    function pintar() {
+        const sonando = !audio.paused;
+        btn.classList.toggle("hud-musica--off", !sonando);
+        const titulo = sonando ? "Silenciar la música" : "Reanudar la música";
+        btn.title = titulo;
+        btn.setAttribute("aria-label", titulo);
+    }
+
+    function iniciar() {
+        if (iniciada) return;
+        iniciada = true;
+        audio.play().catch(() => { /* bloqueado: quedará el botón para reanudar */ });
+        btn.hidden = false;
+        pintar();
+    }
+
+    const enterBtn = document.getElementById("enter-btn");
+    if (enterBtn) enterBtn.addEventListener("click", iniciar, { once: true });
+    window.addEventListener("pointerdown", iniciar, { once: true });
+    window.addEventListener("keydown", iniciar, { once: true });
+
+    btn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        if (audio.paused) audio.play().catch(() => {});
+        else audio.pause();
+        pintar();
+    });
+    audio.addEventListener("play", pintar);
+    audio.addEventListener("pause", pintar);
+})();
+</script>
 {% endif %}
 {% endblock %}

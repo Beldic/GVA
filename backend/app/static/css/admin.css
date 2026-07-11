@@ -373,6 +373,14 @@ td.admin-actions > *:not(:last-child) {
     margin-right: 0.8rem;
 }
 
+.admin-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--gva-azul-medio);
+}
+
 /* ---- Badges de estado ---- */
 .admin-badge {
     display: inline-block;

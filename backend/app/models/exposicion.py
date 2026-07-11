@@ -47,6 +47,9 @@ class Exposicion(db.Model):
     # obra->exposicion crearía un ciclo con la cadena obra>zona>sala>exposicion;
     # `portada_obra` valida que la obra exista y siga en esta exposición.
     portada_obra_id = db.Column(db.Integer)
+    # Hilo musical de la exposición (audio en Cloudinary, opcional).
+    musica_public_id = db.Column(db.String(255))
+    musica_url = db.Column(db.String(500))
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

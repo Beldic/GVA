@@ -17,6 +17,7 @@ import cloudinary.utils
 from flask import current_app
 
 CARPETA = "afesol/obras"
+CARPETA_MUSICA = "afesol/musica"
 
 
 class CloudinaryError(Exception):
@@ -60,6 +61,34 @@ def eliminar_imagen(public_id) -> None:
     except Exception:
         current_app.logger.exception(
             "No se pudo borrar la imagen de Cloudinary: %s", public_id
+        )
+
+
+def subir_audio(archivo):
+    """Sube una pista de audio (el hilo musical de una exposición).
+    Cloudinary gestiona el audio bajo resource_type «video».
+    Devuelve (public_id, secure_url). Lanza CloudinaryError si falla."""
+    try:
+        resultado = cloudinary.uploader.upload(
+            archivo, folder=CARPETA_MUSICA, resource_type="video"
+        )
+    except Exception as exc:
+        current_app.logger.exception("Fallo al subir audio a Cloudinary")
+        raise CloudinaryError(str(exc)) from exc
+    return resultado["public_id"], resultado["secure_url"]
+
+
+def eliminar_audio(public_id) -> None:
+    """Borra una pista de audio. Best-effort, como eliminar_imagen."""
+    if not public_id:
+        return
+    try:
+        cloudinary.uploader.destroy(
+            public_id, resource_type="video", invalidate=True
+        )
+    except Exception:
+        current_app.logger.exception(
+            "No se pudo borrar el audio de Cloudinary: %s", public_id
         )
 
 

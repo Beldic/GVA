@@ -57,6 +57,16 @@ class ExposicionForm(FlaskForm):
         validators=[Optional(), Length(min=4, max=64)],
         description="Mínimo 4 caracteres. Al editar, déjalo vacío para conservar el actual.",
     )
+    musica = FileField(
+        "Hilo musical",
+        validators=[
+            Optional(),
+            FileAllowed(["mp3", "ogg", "m4a", "aac", "wav"],
+                        "Solo audio (mp3, ogg, m4a, aac, wav)."),
+        ],
+        description="Suena en bucle durante el recorrido 3D; el visitante puede silenciarlo.",
+    )
+    quitar_musica = BooleanField("Quitar el hilo musical actual")
     submit = SubmitField("Guardar")
 
 

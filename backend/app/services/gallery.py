@@ -114,6 +114,7 @@ def serializar_sala(sala) -> dict:
             "titulo": expo.titulo,
             "slug": expo.slug,
             "organizador": organizador,
+            "musica_url": expo.musica_url,
         },
         "sala": {
             "nombre": sala.nombre,
