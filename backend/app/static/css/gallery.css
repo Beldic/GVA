@@ -16,7 +16,9 @@ html, body {
 /* ---- HUD superior ---- */
 .hud {
     position: fixed;
-    z-index: 10;
+    /* Por encima de los overlays (20) para que Salir y ♪ sigan accesibles
+       con una ventana abierta; por debajo de la puerta (30) y el flash (35). */
+    z-index: 25;
     color: var(--color-pale);
     font-family: var(--font-display);
     pointer-events: none;
@@ -144,6 +146,30 @@ html, body {
     font-family: var(--font-display);
     font-size: 0.85rem;
     color: var(--color-white);
+}
+
+/* Casilla del hilo musical en la ventana de instrucciones */
+.overlay-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    margin: 0 0 1.8rem;
+    color: var(--color-mist);
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.overlay-check input {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: var(--color-tech-soft);
+    cursor: pointer;
+}
+
+.overlay-check-nota {
+    color: rgba(207, 220, 236, 0.45);
+    font-size: 0.8rem;
 }
 
 .overlay-btn {

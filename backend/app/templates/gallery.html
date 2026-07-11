@@ -72,27 +72,35 @@
                 <span class="enter-btn__label">Entrar</span>
                 <span class="enter-btn__line" aria-hidden="true"></span>
             </button>
-
-            <div class="door-controls" aria-label="Controles">
-                <span class="ctrl">
-                    <span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>
-                    <span>Moverte</span>
-                </span>
-                <span class="ctrl">
-                    <span class="keys"><kbd>Ratón</kbd></span>
-                    <span>Mirar</span>
-                </span>
-                <span class="ctrl">
-                    <span class="keys"><kbd>Esc</kbd></span>
-                    <span>Liberar cursor</span>
-                </span>
-            </div>
         </footer>
     </div>
 </div>
 
 {# Destello luminoso: transición suave al cruzar la puerta hacia la galería #}
 <div id="door-flash" class="door-flash" aria-hidden="true"></div>
+
+{# Instrucciones: aparece al cruzar la puerta, antes de tomar los mandos #}
+<div id="instrucciones" class="overlay is-hidden">
+    <div class="overlay-card">
+        <p class="overlay-eyebrow">{{ datos.exposicion.titulo }}</p>
+        <h2 class="overlay-title">Cómo moverte</h2>
+        <ul class="overlay-keys">
+            <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> moverte por la sala</li>
+            <li><kbd>Ratón</kbd> mirar alrededor</li>
+            {% if datos.exposicion.musica_url %}
+            <li><kbd>M</kbd> silenciar / reanudar la música</li>
+            {% endif %}
+            <li><kbd>Esc</kbd> liberar el cursor</li>
+        </ul>
+        {% if datos.exposicion.musica_url %}
+        <label class="overlay-check">
+            <input type="checkbox" id="chk-musica" checked>
+            <span>Hilo musical <span class="overlay-check-nota">(el botón ♪ lo silencia durante la visita)</span></span>
+        </label>
+        {% endif %}
+        <button id="comenzar-btn" type="button" class="overlay-btn">Comenzar la visita</button>
+    </div>
+</div>
 
 {# Overlay ligero para reanudar la visita tras pulsar Esc #}
 <div id="resume" class="overlay is-hidden">
@@ -158,15 +166,14 @@
 <script type="module" src="{{ url_for('static', filename='js/gallery/main.js') }}"></script>
 <script>
 (function () {
-    // Hilo musical: arranca con el primer gesto del visitante (el botón
-    // «Entrar» de la puerta o cualquier clic/tecla), porque los navegadores
-    // bloquean el autoplay con sonido. El botón ♪ del HUD lo silencia/reanuda.
+    // Hilo musical: lo arranca la ventana de instrucciones (main.js) según
+    // la casilla del visitante — ese clic es el gesto que exige el navegador
+    // para reproducir con sonido. El botón ♪ del HUD lo silencia/reanuda.
     const audio = document.getElementById("hilo-musical");
     const btn = document.getElementById("musica-btn");
     if (!audio || !btn) return;
 
     audio.volume = 0.35;
-    let iniciada = false;
 
     function pintar() {
         const sonando = !audio.paused;
@@ -176,24 +183,28 @@
         btn.setAttribute("aria-label", titulo);
     }
 
-    function iniciar() {
-        if (iniciada) return;
-        iniciada = true;
-        audio.play().catch(() => { /* bloqueado: quedará el botón para reanudar */ });
-        btn.hidden = false;
-        pintar();
-    }
+    window.__hiloMusical = {
+        iniciar(activar) {
+            btn.hidden = false;
+            if (activar) audio.play().catch(() => { /* quedará el botón ♪ */ });
+            pintar();
+        },
+    };
 
-    const enterBtn = document.getElementById("enter-btn");
-    if (enterBtn) enterBtn.addEventListener("click", iniciar, { once: true });
-    window.addEventListener("pointerdown", iniciar, { once: true });
-    window.addEventListener("keydown", iniciar, { once: true });
-
-    btn.addEventListener("click", (ev) => {
-        ev.stopPropagation();
+    function alternar() {
         if (audio.paused) audio.play().catch(() => {});
         else audio.pause();
         pintar();
+    }
+
+    btn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        alternar();
+    });
+    // Tecla M: silencia/reanuda sin soltar el ratón (con pointer lock no se
+    // puede hacer clic en el HUD; el teclado sí sigue funcionando).
+    window.addEventListener("keydown", (ev) => {
+        if (!btn.hidden && (ev.key === "m" || ev.key === "M")) alternar();
     });
     audio.addEventListener("play", pintar);
     audio.addEventListener("pause", pintar);

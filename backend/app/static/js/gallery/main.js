@@ -2,11 +2,13 @@ import { createScene } from "./scene.js?v=2";
 
 // Marca de build: sirve para comprobar en la consola del navegador que se está
 // cargando la versión NUEVA del visor y no una cacheada. Súbela al desplegar.
-console.log("[gallery] visor build v4");
+console.log("[gallery] visor build v5");
 
 const canvas = document.getElementById("renderCanvas");
 const doorLayer = document.getElementById("door-layer");
 const enterBtn = document.getElementById("enter-btn");
+const instrucciones = document.getElementById("instrucciones");
+const comenzarBtn = document.getElementById("comenzar-btn");
 const resume = document.getElementById("resume");
 const resumeBtn = document.getElementById("resume-btn");
 const salirLink = document.getElementById("salir-link");
@@ -109,17 +111,39 @@ if (esSoloTactil()) {
         // Destello luminoso justo cuando las hojas se abren.
         window.setTimeout(() => { if (flash) flash.classList.add("flash-on"); }, 1050);
         window.setTimeout(() => doorLayer.classList.add("is-gone"), 1400);
+        // Cruzada la puerta, la ventana de instrucciones toma el relevo;
+        // el puntero no se bloquea hasta «Comenzar la visita».
         window.setTimeout(() => {
-            entrado = true;
-            bloquearPuntero();
+            if (instrucciones && comenzarBtn) {
+                instrucciones.classList.remove("is-hidden");
+            } else {
+                entrado = true;
+                bloquearPuntero();
+            }
         }, 1750);
     };
+
+    // ---- Instrucciones -> tomar los mandos (y música según la casilla) ----
+    const comenzarVisita = () => {
+        if (entrado || saliendo) return;
+        entrado = true;
+        if (instrucciones) instrucciones.classList.add("is-hidden");
+        const chk = document.getElementById("chk-musica");
+        if (window.__hiloMusical) window.__hiloMusical.iniciar(!chk || chk.checked);
+        bloquearPuntero();
+    };
+    if (comenzarBtn) comenzarBtn.addEventListener("click", comenzarVisita);
 
     if (enterBtn) enterBtn.addEventListener("click", abrirPuertas);
     const frame = doorLayer && doorLayer.querySelector(".door-frame");
     if (frame) frame.addEventListener("click", abrirPuertas);
     window.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !entrado && !abriendo) abrirPuertas();
+        if (e.key !== "Enter" || entrado) return;
+        if (!abriendo) {
+            abrirPuertas();
+        } else if (instrucciones && !instrucciones.classList.contains("is-hidden")) {
+            comenzarVisita();
+        }
     });
 
     // ---- Reanudar tras liberar el cursor (Esc) ----
