@@ -44,13 +44,24 @@
             <tr>
                 <td><img class="admin-thumb" src="{{ miniatura(o) }}" alt=""></td>
                 <td class="admin-muted">{{ o.orden + 1 }}</td>
-                <td>{{ o.titulo }}{% if o.anio %} <span class="admin-muted">({{ o.anio }})</span>{% endif %}</td>
+                <td>
+                    {{ o.titulo }}{% if o.anio %} <span class="admin-muted">({{ o.anio }})</span>{% endif %}
+                    {% if sala.exposicion.portada_obra_id == o.id %}
+                    <span class="admin-badge admin-badge-on" title="Esta obra es la portada de la card en el portal">★ Portada</span>
+                    {% endif %}
+                </td>
                 <td>{{ o.autor.nombre }}</td>
                 <td class="admin-muted">
                     {%- if o.ancho_cm and o.alto_cm %}{{ o.ancho_cm }}×{{ o.alto_cm }} cm{% else %}—{% endif -%}
                 </td>
                 <td class="admin-actions">
                     <a href="{{ url_for('admin.obra_editar', obra_id=o.id) }}">Editar</a>
+                    <form method="post" action="{{ url_for('admin.obra_portada', obra_id=o.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="admin-link">
+                            {{ 'Quitar portada' if sala.exposicion.portada_obra_id == o.id else 'Hacer portada' }}
+                        </button>
+                    </form>
                     <form method="post" action="{{ url_for('admin.obra_borrar', obra_id=o.id) }}"
                           onsubmit="return confirm('¿Retirar «{{ o.titulo }}»?');">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

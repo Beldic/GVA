@@ -34,18 +34,34 @@ def _serializar_obra(obra) -> dict:
     }
 
 
-def _portada_url(expo):
-    """Miniatura de portada para la card del portal: primera obra con imagen
-    propia en Cloudinary, recortada a proporción de card. `None` si la
-    exposición aún no tiene ninguna imagen real (la plantilla usa un fondo)."""
+def _miniatura_card(obra):
+    return cloudinary_service.url_miniatura(
+        obra.cloudinary_public_id, ancho=800, alto=520
+    )
+
+
+def _primera_obra_url(expo):
+    """Primera obra con imagen propia en Cloudinary, en orden de recorrido."""
     for sala in expo.salas:
         for zona in sala.zonas:
             for obra in zona.obras:
                 if obra.cloudinary_public_id:
-                    return cloudinary_service.url_miniatura(
-                        obra.cloudinary_public_id, ancho=800, alto=520
-                    )
+                    return _miniatura_card(obra)
     return None
+
+
+def _portada_card(expo, propietario):
+    """Portada de la card del portal, por prioridad: obra elegida por el
+    organizador -> logo del organizador (como placeholder centrado) ->
+    primera obra con imagen -> nada (la plantilla pone el emblema).
+    Devuelve (url, es_logo)."""
+    elegida = expo.portada_obra
+    if elegida is not None and elegida.cloudinary_public_id:
+        return _miniatura_card(elegida), False
+    logo = _logo_organizador(propietario)
+    if logo:
+        return logo, True
+    return _primera_obra_url(expo), False
 
 
 def _contar_obras(expo) -> int:
@@ -67,6 +83,7 @@ def _logo_organizador(propietario):
 def resumen_exposicion(expo) -> dict:
     """Datos que muestra la card de una galería publicada en el portal."""
     propietario = expo.propietario
+    portada, portada_es_logo = _portada_card(expo, propietario)
     return {
         "titulo": expo.titulo,
         "slug": expo.slug,
@@ -78,7 +95,8 @@ def resumen_exposicion(expo) -> dict:
         "fecha_fin": expo.fecha_fin,
         "n_salas": len(expo.salas),
         "n_obras": _contar_obras(expo),
-        "portada": _portada_url(expo),
+        "portada": portada,
+        "portada_es_logo": portada_es_logo,
         "visitable": bool(expo.salas),
         "apertura": expo.apertura,
         "privada": expo.requiere_codigo,

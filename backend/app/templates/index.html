@@ -38,9 +38,12 @@
             {% else %}
             <div class="gcard-link">
             {% endif %}
-                <div class="gcard-cover{% if not g.portada %} gcard-cover--empty{% endif %}"
-                     {% if g.portada %}style="background-image: url('{{ g.portada }}');"{% endif %}>
-                    {% if not g.portada %}
+                {% set foto = g.portada if g.portada and not g.portada_es_logo else None %}
+                <div class="gcard-cover{% if not foto %} gcard-cover--empty{% endif %}"
+                     {% if foto %}style="background-image: url('{{ foto }}');"{% endif %}>
+                    {% if g.portada_es_logo %}
+                    <img class="gcard-cover-logo" src="{{ g.portada }}" alt="{{ g.organizador }}" loading="lazy">
+                    {% elif not foto %}
                     <span class="gcard-cover-emblem" aria-hidden="true">
                         <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"
                              stroke-linecap="round" stroke-linejoin="round">

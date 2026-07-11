@@ -145,6 +145,16 @@
 .gcard-cover-emblem { color: rgba(125, 211, 252, 0.55); }
 .gcard-cover-emblem svg { width: 46px; height: 46px; }
 
+/* Logo del organizador como placeholder de portada (sin obra elegida) */
+.gcard-cover-logo {
+    width: clamp(96px, 42%, 150px);
+    height: auto;
+    border-radius: 14px;
+    background: #fff;
+    padding: 0.7rem;
+    box-shadow: 0 10px 30px rgba(2, 12, 27, 0.45);
+}
+
 .gcard-badge {
     position: absolute;
     z-index: 1;

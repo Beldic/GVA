@@ -539,13 +539,34 @@ def obra_editar(obra_id):
     )
 
 
+@bp.post("/obras/<int:obra_id>/portada")
+@login_required
+def obra_portada(obra_id):
+    """Marca la obra como portada de la card de su exposición en el portal
+    (o la desmarca si ya lo era)."""
+    obra = db.get_or_404(Obra, obra_id)
+    expo = obra.zona.sala.exposicion
+    exigir_acceso_exposicion(expo)
+    if expo.portada_obra_id == obra.id:
+        expo.portada_obra_id = None
+        flash("Portada quitada: la card vuelve al logo o a la primera obra.", "info")
+    else:
+        expo.portada_obra_id = obra.id
+        flash(f"«{obra.titulo}» es ahora la portada de la exposición.", "info")
+    db.session.commit()
+    return redirect(url_for("admin.sala_detail", sala_id=obra.zona.sala_id))
+
+
 @bp.post("/obras/<int:obra_id>/borrar")
 @login_required
 def obra_borrar(obra_id):
     obra = db.get_or_404(Obra, obra_id)
-    exigir_acceso_exposicion(obra.zona.sala.exposicion)
+    expo = obra.zona.sala.exposicion
+    exigir_acceso_exposicion(expo)
     sala_id = obra.zona.sala_id
     public_id = obra.cloudinary_public_id
+    if expo.portada_obra_id == obra.id:
+        expo.portada_obra_id = None  # la portada no puede apuntar a una obra retirada
     db.session.delete(obra)
     db.session.commit()
     if public_id and cloudinary_service.esta_configurado():

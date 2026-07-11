@@ -43,6 +43,10 @@ class Exposicion(db.Model):
     codigo_acceso_hash = db.Column(db.String(255))
     # Cierre manual del organizador; se combina con las fechas en `apertura`.
     cerrada_manual = db.Column(db.Boolean, nullable=False, default=False)
+    # Obra elegida como portada de la card del portal. Entero sin FK: una FK
+    # obra->exposicion crearía un ciclo con la cadena obra>zona>sala>exposicion;
+    # `portada_obra` valida que la obra exista y siga en esta exposición.
+    portada_obra_id = db.Column(db.Integer)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
@@ -59,6 +63,19 @@ class Exposicion(db.Model):
         cascade="all, delete-orphan",
         order_by="Sala.orden",
     )
+
+    @property
+    def portada_obra(self):
+        """La obra elegida como portada, o None si no hay elección o la obra
+        ya no cuelga en esta exposición (retirada o movida)."""
+        if self.portada_obra_id is None:
+            return None
+        from backend.app.models.obra import Obra
+
+        obra = db.session.get(Obra, self.portada_obra_id)
+        if obra is None or obra.zona.sala.exposicion_id != self.id:
+            return None
+        return obra
 
     @property
     def apertura(self) -> str:
