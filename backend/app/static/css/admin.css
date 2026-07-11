@@ -381,6 +381,128 @@ td.admin-actions > *:not(:last-child) {
     color: var(--gva-azul-medio);
 }
 
+/* ---- Estadísticas del dashboard ---- */
+.stat-seccion { margin-top: 2.4rem; }
+
+.stat-kpis {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.stat-kpi {
+    padding: 1.1rem 1.3rem;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid var(--gva-borde);
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.stat-kpi strong {
+    font-size: 1.9rem;
+    line-height: 1.1;
+    color: var(--gva-azul);
+}
+
+.stat-kpi span {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #7488a0;
+}
+
+.stat-panel {
+    margin-top: 1.2rem;
+    padding: 1.2rem 1.4rem;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid var(--gva-borde);
+}
+
+.stat-fila {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.2rem;
+}
+
+.stat-fila .stat-panel { margin-top: 1.2rem; }
+
+.stat-titulo {
+    margin: 0 0 1rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gva-azul-claro);
+}
+
+/* Barras verticales (serie diaria) */
+.stat-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 130px;
+}
+
+.stat-bar {
+    flex: 1;
+    min-height: 2px;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(180deg, var(--gva-azul-claro), var(--gva-azul));
+}
+
+.stat-bar:hover { opacity: 0.75; }
+
+.stat-eje {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.4rem;
+    font-size: 0.72rem;
+    color: #7488a0;
+}
+
+/* Barras horizontales (frecuencias y desgloses) */
+.stat-linea {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-top: 0.45rem;
+}
+
+.stat-etiqueta {
+    width: 5.5rem;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: var(--gva-azul-medio);
+}
+
+.stat-pista {
+    flex: 1;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--gva-crema);
+    overflow: hidden;
+}
+
+.stat-relleno {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--gva-azul-claro), var(--gva-azul));
+}
+
+.stat-valor {
+    width: 2.6rem;
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gva-azul);
+}
+
 /* ---- Badges de estado ---- */
 .admin-badge {
     display: inline-block;

@@ -4,7 +4,7 @@
 
 {% block admin_content %}
 <h1 class="admin-h1">Bienvenido al panel</h1>
-<p class="admin-lead">Gestiona tus exposiciones, autores y obras.</p>
+<p class="admin-lead">Gestiona tus exposiciones, autores y obras — y mira cómo respira tu público.</p>
 
 <ul class="admin-cards">
     <li class="admin-card">
@@ -13,6 +13,120 @@
     <li class="admin-card">
         <a href="{{ url_for('admin.autores_list') }}">Autores</a>
     </li>
-    <li class="admin-card admin-card-soon">Obras <span>próximamente</span></li>
 </ul>
+
+{% set k = stats.kpis %}
+<h2 class="admin-h2 stat-seccion">Visitas</h2>
+
+<ul class="stat-kpis">
+    <li class="stat-kpi"><strong>{{ k.visitas_total }}</strong><span>visitas totales</span></li>
+    <li class="stat-kpi"><strong>{{ k.visitas_7d }}</strong><span>últimos 7 días</span></li>
+    <li class="stat-kpi"><strong>{{ k.visitas_30d }}</strong><span>últimos 30 días</span></li>
+    <li class="stat-kpi"><strong>{{ k.abiertas }}/{{ k.publicadas }}</strong><span>abiertas / publicadas</span></li>
+</ul>
+
+{% if k.visitas_total == 0 %}
+<p class="admin-empty">Todavía no hay visitas registradas. En cuanto tu público
+empiece a entrar, aquí verás cuándo y cómo lo hace.</p>
+{% else %}
+
+<div class="stat-panel">
+    <h3 class="stat-titulo">Últimos 30 días</h3>
+    <div class="stat-bars stat-bars-serie" role="img"
+         aria-label="Visitas diarias de los últimos 30 días">
+        {% for p in stats.serie_diaria %}
+        <div class="stat-bar"
+             style="height: {{ (p.visitas / stats.max_dia * 100) | round(1) if stats.max_dia else 0 }}%"
+             title="{{ p.fecha.strftime('%d/%m') }}: {{ p.visitas }} visita{{ 's' if p.visitas != 1 }}"></div>
+        {% endfor %}
+    </div>
+    <div class="stat-eje">
+        <span>{{ stats.serie_diaria[0].fecha.strftime('%d/%m') }}</span>
+        <span>{{ stats.serie_diaria[-1].fecha.strftime('%d/%m') }}</span>
+    </div>
+</div>
+
+<div class="stat-fila">
+    <div class="stat-panel">
+        <h3 class="stat-titulo">Por día de la semana</h3>
+        {% set max_sem = stats.semana | map(attribute='visitas') | max %}
+        {% for d in stats.semana %}
+        <div class="stat-linea">
+            <span class="stat-etiqueta">{{ d.dia }}</span>
+            <div class="stat-pista"><div class="stat-relleno"
+                 style="width: {{ (d.visitas / max_sem * 100) | round(1) if max_sem else 0 }}%"></div></div>
+            <span class="stat-valor">{{ d.visitas }}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="stat-panel">
+        <h3 class="stat-titulo">Por franja horaria</h3>
+        {% set max_fr = stats.franjas | map(attribute='visitas') | max %}
+        {% for f in stats.franjas %}
+        <div class="stat-linea">
+            <span class="stat-etiqueta">{{ f.franja }}</span>
+            <div class="stat-pista"><div class="stat-relleno"
+                 style="width: {{ (f.visitas / max_fr * 100) | round(1) if max_fr else 0 }}%"></div></div>
+            <span class="stat-valor">{{ f.visitas }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="stat-fila">
+    <div class="stat-panel">
+        <h3 class="stat-titulo">Dispositivo</h3>
+        {% for nombre, etiqueta in [('escritorio', 'Ordenador'), ('movil', 'Móvil'), ('desconocido', 'Sin dato')] %}
+        {% set n = stats.dispositivos.get(nombre, 0) %}
+        {% if n %}
+        <div class="stat-linea">
+            <span class="stat-etiqueta">{{ etiqueta }}</span>
+            <div class="stat-pista"><div class="stat-relleno"
+                 style="width: {{ (n / k.visitas_total * 100) | round(1) }}%"></div></div>
+            <span class="stat-valor">{{ (n / k.visitas_total * 100) | round }}%</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="stat-panel">
+        <h3 class="stat-titulo">Recorrido</h3>
+        {% for nombre, etiqueta in [('3d', 'Visita 3D'), ('2d', 'Modo 2D'), ('desconocido', 'Sin dato')] %}
+        {% set n = stats.modos.get(nombre, 0) %}
+        {% if n %}
+        <div class="stat-linea">
+            <span class="stat-etiqueta">{{ etiqueta }}</span>
+            <div class="stat-pista"><div class="stat-relleno"
+                 style="width: {{ (n / k.visitas_total * 100) | round(1) }}%"></div></div>
+            <span class="stat-valor">{{ (n / k.visitas_total * 100) | round }}%</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+{% if stats.expos %}
+<div class="stat-panel">
+    <h3 class="stat-titulo">Por exposición</h3>
+    <table class="admin-table">
+        <thead>
+            <tr><th>Exposición</th><th>Visitas</th><th>Últimos 7 días</th></tr>
+        </thead>
+        <tbody>
+            {% for fila in stats.expos %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('admin.exposicion_detail', exposicion_id=fila.exposicion.id) }}">{{ fila.exposicion.titulo }}</a>
+                </td>
+                <td>{{ fila.total }}</td>
+                <td>{{ fila.recientes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% endif %}
 {% endblock %}

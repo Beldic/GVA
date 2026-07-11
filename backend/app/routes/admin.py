@@ -31,7 +31,7 @@ from backend.app.plantillas import (
     opciones_plantilla,
     sembrar_zonas,
 )
-from backend.app.services import cloudinary_service
+from backend.app.services import cloudinary_service, stats
 from backend.app.utils import slugify
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -93,7 +93,9 @@ def logout():
 @bp.get("/")
 @login_required
 def dashboard():
-    return render_template("admin/dashboard.html")
+    return render_template(
+        "admin/dashboard.html", stats=stats.panel_organizador(current_user.id)
+    )
 
 
 # --------------------------------------------------------------------------

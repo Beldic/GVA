@@ -9,21 +9,41 @@ from flask import (
 )
 from flask_login import current_user
 
+import re
+
 from backend.app.extensions import db
 from backend.app.models import Exposicion, Visita
 from backend.app.models.exposicion import ESTADO_PUBLICADA, VISIBILIDAD_ENLACE
+from backend.app.models.visita import (
+    DISPOSITIVO_ESCRITORIO,
+    DISPOSITIVO_MOVIL,
+    MODO_2D,
+    MODO_3D,
+)
 from backend.app.services.gallery import resumen_exposicion, serializar_sala
 
 bp = Blueprint("main", __name__)
 
+_UA_MOVIL = re.compile(r"Mobi|Android|iPhone|iPad|iPod", re.IGNORECASE)
+
 
 def _registrar_visita(expo) -> None:
     """Cuenta una visita por exposición y sesión de navegador: recargar la
-    página no vuelve a sumar."""
+    página no vuelve a sumar. Guarda dispositivo y modo del primer acceso
+    (dimensiones anónimas; nunca identidad del visitante)."""
     vistas = session.get("expos_vistas", [])
     if expo.id in vistas:
         return
-    db.session.add(Visita(exposicion_id=expo.id))
+    ua = request.headers.get("User-Agent", "")
+    db.session.add(
+        Visita(
+            exposicion_id=expo.id,
+            dispositivo=(
+                DISPOSITIVO_MOVIL if _UA_MOVIL.search(ua) else DISPOSITIVO_ESCRITORIO
+            ),
+            modo=MODO_2D if request.args.get("modo") == "2d" else MODO_3D,
+        )
+    )
     db.session.commit()
     session["expos_vistas"] = vistas + [expo.id]
 
