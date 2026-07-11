@@ -286,6 +286,26 @@
     transition: opacity 0.6s var(--easing-soft);
 }
 
+/* Enlace discreto al modo 2D bajo el botón Entrar (escotilla si la
+   detección táctil no salta, y acceso alternativo en escritorio). */
+.door-2d {
+    display: block;
+    margin-top: 1.3rem;
+    color: rgba(207, 220, 236, 0.5);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.door-2d:hover,
+.door-2d:focus-visible {
+    color: var(--color-tech-soft);
+    text-decoration: underline;
+    outline: none;
+}
+
 .enter-btn {
     position: relative;
     background: transparent;

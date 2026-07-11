@@ -2,7 +2,7 @@ import { createScene } from "./scene.js?v=2";
 
 // Marca de build: sirve para comprobar en la consola del navegador que se está
 // cargando la versión NUEVA del visor y no una cacheada. Súbela al desplegar.
-console.log("[gallery] visor build v5");
+console.log("[gallery] visor build v6");
 
 const canvas = document.getElementById("renderCanvas");
 const doorLayer = document.getElementById("door-layer");
@@ -30,12 +30,17 @@ function leerDatos() {
 const datos = leerDatos();
 const soloEscritorio = document.getElementById("solo-escritorio");
 
-// El recorrido 3D usa teclado + ratón (pointer lock). En dispositivos sin
-// puntero fino (móviles/tablets táctiles) no se puede recorrer, así que
-// avisamos de que se ve mejor en un ordenador y no cargamos la escena.
+// El recorrido 3D usa teclado + ratón (pointer lock). Detectamos móvil/tablet
+// por el puntero PRINCIPAL (pointer: coarse = táctil): muchos Android declaran
+// además un puntero fino (S-Pen, ratón Bluetooth emparejado) y con
+// any-pointer:fine se colaban al 3D. Un portátil táctil no entra aquí porque
+// su puntero principal sigue siendo el ratón (fine).
 function esSoloTactil() {
     try {
-        return !window.matchMedia("(any-pointer: fine)").matches;
+        return (
+            window.matchMedia("(pointer: coarse)").matches ||
+            !window.matchMedia("(any-pointer: fine)").matches
+        );
     } catch (e) {
         return false;
     }
