@@ -15,13 +15,7 @@
 <main class="portal">
     <header class="portal-hero">
         <span class="portal-emblem" aria-hidden="true">
-            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-                <rect x="20" y="20" width="24" height="24" rx="3"/>
-                <rect x="27" y="27" width="10" height="10" rx="1.5"/>
-                <path d="M26 20v-9M38 20v-9M26 44v9M38 44v9M20 26h-9M20 38h-9M44 26h9M44 38h9"/>
-                <circle cx="32" cy="32" r="1.6" fill="currentColor" stroke="none"/>
-            </svg>
+            <img src="{{ url_for('static', filename='img/logoF-256.png') }}" alt="">
         </span>
         <p class="portal-eyebrow">Galería Virtual</p>
         <h1 class="portal-title">Exposiciones abiertas</h1>
@@ -45,11 +39,7 @@
                     <img class="gcard-cover-logo" src="{{ g.portada }}" alt="{{ g.organizador }}" loading="lazy">
                     {% elif not foto %}
                     <span class="gcard-cover-emblem" aria-hidden="true">
-                        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="20" y="20" width="24" height="24" rx="3"/>
-                            <rect x="27" y="27" width="10" height="10" rx="1.5"/>
-                        </svg>
+                        <img src="{{ url_for('static', filename='img/logoF-256.png') }}" alt="" loading="lazy">
                     </span>
                     {% endif %}
                     {% if g.apertura == 'abierta' %}

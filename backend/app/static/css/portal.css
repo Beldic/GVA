@@ -54,7 +54,12 @@
     margin-bottom: 1.25rem;
 }
 
-.portal-emblem svg { width: 34px; height: 34px; }
+.portal-emblem img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.35));
+}
 
 .portal-eyebrow {
     margin: 0 0 0.5rem;
@@ -143,7 +148,12 @@
 }
 
 .gcard-cover-emblem { color: rgba(125, 211, 252, 0.55); }
-.gcard-cover-emblem svg { width: 46px; height: 46px; }
+.gcard-cover-emblem img {
+    width: 58px;
+    height: auto;
+    opacity: 0.85;
+    filter: drop-shadow(0 4px 14px rgba(2, 12, 27, 0.5));
+}
 
 /* Logo del organizador como placeholder de portada (sin obra elegida) */
 .gcard-cover-logo {
