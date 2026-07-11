@@ -1,5 +1,5 @@
 import { buildRoom, slotPlacement } from "./room.js?v=2";
-import { buildPainting } from "./painting.js?v=2";
+import { buildPainting } from "./painting.js?v=3";
 import { createFirstPersonCamera } from "./camera.js?v=2";
 
 export function createScene(engine, canvas, datos, options = {}) {
@@ -100,6 +100,39 @@ export function createScene(engine, canvas, datos, options = {}) {
 
     // ---- Cámara primera persona (con salida por la puerta) ----
     createFirstPersonCamera(scene, canvas, planta, options.onExit);
+
+    // ---- Interés por obra: contemplación ----
+    // Si el visitante mantiene un cuadro en el centro de la vista, a menos de
+    // GAZE.distancia metros, durante GAZE.requerido ms seguidos, se notifica
+    // una única vez por obra (options.onObraVista decide si procede enviarla).
+    if (options.onObraVista) {
+        const GAZE = { intervalo: 250, distancia: 5, requerido: 2000 };
+        const contadas = new Set();
+        let miradaObra = null;
+        let miradaMs = 0;
+        window.setInterval(() => {
+            if (document.hidden) return;
+            const cam = scene.activeCamera;
+            if (!cam) return;
+            const ray = cam.getForwardRay(GAZE.distancia);
+            const hit = scene.pickWithRay(
+                ray, (m) => !!(m.metadata && m.metadata.obraId != null)
+            );
+            const id = hit && hit.pickedMesh ? hit.pickedMesh.metadata.obraId : null;
+            if (id != null && id === miradaObra) {
+                miradaMs += GAZE.intervalo;
+                if (miradaMs >= GAZE.requerido && !contadas.has(id)) {
+                    // El callback devuelve false si aún no toca contar (p. ej.
+                    // en la puerta o las instrucciones): se reintenta luego.
+                    if (options.onObraVista(id)) contadas.add(id);
+                    else miradaMs = 0;
+                }
+            } else {
+                miradaObra = id;
+                miradaMs = 0;
+            }
+        }, GAZE.intervalo);
+    }
 
     return scene;
 }

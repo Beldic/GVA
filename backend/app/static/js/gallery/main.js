@@ -1,8 +1,8 @@
-import { createScene } from "./scene.js?v=2";
+import { createScene } from "./scene.js?v=3";
 
 // Marca de build: sirve para comprobar en la consola del navegador que se está
 // cargando la versión NUEVA del visor y no una cacheada. Súbela al desplegar.
-console.log("[gallery] visor build v6");
+console.log("[gallery] visor build v7");
 
 const canvas = document.getElementById("renderCanvas");
 const doorLayer = document.getElementById("door-layer");
@@ -94,7 +94,22 @@ if (esSoloTactil()) {
         }, 1900);
     };
 
-    const scene = createScene(engine, canvas, datos, { onExit: salirPorLaPuerta });
+    // Interés por obra (contemplación): beacon anónimo, solo con la visita ya
+    // empezada (la puerta y las instrucciones no cuentan como contemplar).
+    const notificarObraVista = (obraId) => {
+        if (!entrado || saliendo) return false;
+        const url = `/g/${datos.exposicion.slug}/obra-vista`;
+        const cuerpo = JSON.stringify({ obra_id: obraId, modo: "3d" });
+        try {
+            navigator.sendBeacon(url, new Blob([cuerpo], { type: "application/json" }));
+        } catch (e) { /* sin beacon, la visita sigue igual */ }
+        return true;
+    };
+
+    const scene = createScene(engine, canvas, datos, {
+        onExit: salirPorLaPuerta,
+        onObraVista: notificarObraVista,
+    });
     engine.runRenderLoop(() => scene.render());
     window.addEventListener("resize", () => engine.resize());
 

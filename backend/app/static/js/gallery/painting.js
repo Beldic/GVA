@@ -50,6 +50,7 @@ export function buildPainting(scene, obra, placement) {
     );
     frame.material = frameMat;
     frame.parent = parent;
+    frame.metadata = { obraId: obra.id };
 
     // ---- Lienzo (textura de la obra desde Cloudinary o placeholder) ----
     const canvasTexture = new BABYLON.Texture(
@@ -86,6 +87,8 @@ export function buildPainting(scene, obra, placement) {
     );
     canvasPlane.material = canvasMat;
     canvasPlane.parent = parent;
+    // Para la detección de contemplación (scene.js): mirar lienzo o marco cuenta.
+    canvasPlane.metadata = { obraId: obra.id };
 
     // ---- Placa con título / autor·año / descripción ----
     const plaqueMat = new BABYLON.StandardMaterial(`plaqueMat-${id}`, scene);

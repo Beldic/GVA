@@ -47,6 +47,11 @@ class Obra(db.Model):
 
     autor = db.relationship("Autor", back_populates="obras")
     zona = db.relationship("Zona", back_populates="obras")
+    vistas = db.relationship(
+        "VistaObra",
+        back_populates="obra",
+        cascade="all, delete-orphan",
+    )
 
     def __repr__(self) -> str:
         return f"<Obra {self.titulo}>"

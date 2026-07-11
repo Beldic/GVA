@@ -11,8 +11,8 @@ from flask_login import current_user
 
 import re
 
-from backend.app.extensions import db
-from backend.app.models import Exposicion, Visita
+from backend.app.extensions import csrf, db
+from backend.app.models import Exposicion, Obra, Sala, Visita, VistaObra, Zona
 from backend.app.models.exposicion import ESTADO_PUBLICADA, VISIBILIDAD_ENLACE
 from backend.app.models.visita import (
     DISPOSITIVO_ESCRITORIO,
@@ -20,6 +20,7 @@ from backend.app.models.visita import (
     MODO_2D,
     MODO_3D,
 )
+from backend.app.models.vista_obra import VISTA_2D, VISTA_3D
 from backend.app.services.gallery import resumen_exposicion, serializar_sala
 
 bp = Blueprint("main", __name__)
@@ -106,6 +107,53 @@ def gallery(slug):
     if request.args.get("modo") == "2d":
         return render_template("gallery_2d.html", datos=datos)
     return render_template("gallery.html", datos=datos)
+
+
+@bp.post("/g/<slug>/obra-vista")
+@csrf.exempt  # beacon anónimo del visor; sin sesión de formulario que proteger
+def obra_vista(slug):
+    """Registra interés anónimo por una obra: contemplación en el 3D o
+    apertura de su ficha en el 2D. Mismas puertas que el visor; una fila por
+    obra y sesión de navegador; los gestores no cuentan."""
+    expo = Exposicion.query.filter_by(
+        slug=slug, estado=ESTADO_PUBLICADA
+    ).first_or_404()
+    if _puede_gestionar(expo):
+        return "", 204  # previsualización del dueño/superadmin: no sesga
+    if not expo.abierta:
+        return "", 403
+    if expo.requiere_codigo and not _visitante_autorizado(expo):
+        return "", 403
+
+    data = request.get_json(silent=True) or {}
+    modo = data.get("modo")
+    if modo not in (VISTA_3D, VISTA_2D):
+        return "", 400
+    try:
+        obra_id = int(data.get("obra_id"))
+    except (TypeError, ValueError):
+        return "", 400
+
+    vistas = session.get("obras_vistas", [])
+    if obra_id in vistas:
+        return "", 204
+
+    # La obra debe colgar en ESTA exposición (nada de inflar ajenas).
+    pertenece = (
+        db.session.query(Obra.id)
+        .join(Zona, Obra.zona_id == Zona.id)
+        .join(Sala, Zona.sala_id == Sala.id)
+        .filter(Obra.id == obra_id, Sala.exposicion_id == expo.id)
+        .first()
+    )
+    if pertenece is None:
+        return "", 404
+
+    db.session.add(VistaObra(obra_id=obra_id, modo=modo))
+    db.session.commit()
+    # Dedupe por sesión, con tope para no engordar la cookie sin límite.
+    session["obras_vistas"] = (vistas + [obra_id])[-300:]
+    return "", 204
 
 
 @bp.post("/g/<slug>/codigo")

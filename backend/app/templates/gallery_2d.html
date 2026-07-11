@@ -94,6 +94,18 @@
     const img = document.getElementById("ficha-img");
     let actual = 0;
 
+    // Interés por obra: una señal anónima por obra y visita al abrir su ficha.
+    const notificadas = new Set();
+    function notificarInteres(obra) {
+        if (obra.id == null || notificadas.has(obra.id)) return;
+        notificadas.add(obra.id);
+        const url = `/g/${datos.exposicion.slug}/obra-vista`;
+        const cuerpo = JSON.stringify({ obra_id: obra.id, modo: "2d" });
+        try {
+            navigator.sendBeacon(url, new Blob([cuerpo], { type: "application/json" }));
+        } catch (e) { /* sin beacon no pasa nada: la ficha sigue funcionando */ }
+    }
+
     function medidas(o) {
         const partes = [];
         if (o.tecnica) partes.push(o.tecnica);
@@ -103,6 +115,7 @@
 
     function pintarFicha() {
         const o = obras[actual];
+        notificarInteres(o);
         img.src = o.imagen_url;
         img.alt = o.titulo;
         document.getElementById("ficha-titulo").textContent = o.titulo;

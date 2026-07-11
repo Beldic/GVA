@@ -428,7 +428,10 @@ def sala_detail(sala_id):
     sala = db.get_or_404(Sala, sala_id)
     exigir_acceso_exposicion(sala.exposicion)
     return render_template(
-        "admin/sala_detail.html", sala=sala, nombre_plantilla=nombre_plantilla
+        "admin/sala_detail.html",
+        sala=sala,
+        nombre_plantilla=nombre_plantilla,
+        interes=stats.interes_por_obra_de_sala(sala.id),
     )
 
 

@@ -22,6 +22,7 @@ def _imagen_url(obra) -> str:
 
 def _serializar_obra(obra) -> dict:
     return {
+        "id": obra.id,
         "orden": obra.orden,
         "titulo": obra.titulo,
         "autor": obra.autor.nombre,

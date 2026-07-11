@@ -106,6 +106,33 @@ empiece a entrar, aquí verás cuándo y cómo lo hace.</p>
     </div>
 </div>
 
+{% if stats.top_obras %}
+<div class="stat-panel">
+    <h3 class="stat-titulo">Obras con más interés</h3>
+    <p class="admin-muted stat-nota">Contemplaciones: visitantes que se detuvieron
+    a mirar la obra en el 3D. Fichas: aperturas de su ficha en el modo 2D.</p>
+    <table class="admin-table">
+        <thead>
+            <tr><th></th><th>Obra</th><th>Contemplaciones 3D</th><th>Fichas 2D</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+            {% for fila in stats.top_obras %}
+            <tr>
+                <td><img class="admin-thumb" src="{{ miniatura(fila.obra) }}" alt=""></td>
+                <td>
+                    {{ fila.obra.titulo }}
+                    <br><small class="admin-muted">{{ fila.obra.autor.nombre }} · {{ fila.obra.zona.sala.exposicion.titulo }}</small>
+                </td>
+                <td>{{ fila.n3d }}</td>
+                <td>{{ fila.n2d }}</td>
+                <td><strong>{{ fila.total }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
 {% if stats.expos %}
 <div class="stat-panel">
     <h3 class="stat-titulo">Por exposición</h3>

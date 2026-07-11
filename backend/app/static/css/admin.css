@@ -503,6 +503,8 @@ td.admin-actions > *:not(:last-child) {
     color: var(--gva-azul);
 }
 
+.stat-nota { margin: -0.5rem 0 0.9rem; }
+
 /* ---- Badges de estado ---- */
 .admin-badge {
     display: inline-block;

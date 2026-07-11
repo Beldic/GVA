@@ -10,9 +10,10 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import func
 
 from backend.app.extensions import db
-from backend.app.models import Exposicion, Usuario, Visita
+from backend.app.models import Exposicion, Obra, Sala, Usuario, Visita, VistaObra, Zona
 from backend.app.models.exposicion import ESTADO_PUBLICADA
 from backend.app.models.usuario import ROL_ORGANIZADOR
+from backend.app.models.vista_obra import VISTA_2D, VISTA_3D
 
 try:
     from zoneinfo import ZoneInfo
@@ -84,6 +85,58 @@ def _hora_local(dt: datetime) -> datetime:
     return dt.astimezone(TZ_LOCAL)
 
 
+def top_obras(usuario_id: int, limite: int = 10) -> list:
+    """Obras del organizador con más interés registrado (contemplaciones 3D +
+    fichas 2D), de mayor a menor, con el desglose por modo."""
+    filas = (
+        db.session.query(
+            VistaObra.obra_id, VistaObra.modo, func.count(VistaObra.id)
+        )
+        .join(Obra, VistaObra.obra_id == Obra.id)
+        .join(Zona, Obra.zona_id == Zona.id)
+        .join(Sala, Zona.sala_id == Sala.id)
+        .join(Exposicion, Sala.exposicion_id == Exposicion.id)
+        .filter(Exposicion.usuario_id == usuario_id)
+        .group_by(VistaObra.obra_id, VistaObra.modo)
+        .all()
+    )
+    conteos = {}
+    for obra_id, modo, n in filas:
+        c = conteos.setdefault(obra_id, {VISTA_3D: 0, VISTA_2D: 0})
+        c[modo] = n
+    mejores = sorted(
+        conteos.items(), key=lambda kv: kv[1][VISTA_3D] + kv[1][VISTA_2D],
+        reverse=True,
+    )[:limite]
+    obras = {
+        o.id: o
+        for o in Obra.query.filter(Obra.id.in_([oid for oid, _ in mejores])).all()
+    }
+    return [
+        {
+            "obra": obras[oid],
+            "n3d": c[VISTA_3D],
+            "n2d": c[VISTA_2D],
+            "total": c[VISTA_3D] + c[VISTA_2D],
+        }
+        for oid, c in mejores
+        if oid in obras
+    ]
+
+
+def interes_por_obra_de_sala(sala_id: int) -> dict:
+    """{obra_id: nº de señales de interés} de las obras de una sala."""
+    filas = (
+        db.session.query(VistaObra.obra_id, func.count(VistaObra.id))
+        .join(Obra, VistaObra.obra_id == Obra.id)
+        .join(Zona, Obra.zona_id == Zona.id)
+        .filter(Zona.sala_id == sala_id)
+        .group_by(VistaObra.obra_id)
+        .all()
+    )
+    return dict(filas)
+
+
 def panel_organizador(usuario_id: int) -> dict:
     """Todos los datos del dashboard del organizador en una pasada: KPIs,
     serie diaria (30 días), frecuencia por día de semana y franja horaria,
@@ -134,6 +187,7 @@ def panel_organizador(usuario_id: int) -> dict:
         for d in (hace_30 + timedelta(days=i) for i in range(30))
     ]
     return {
+        "top_obras": top_obras(usuario_id),
         "kpis": {
             "visitas_total": len(visitas),
             "visitas_7d": total_7d,

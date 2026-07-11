@@ -37,7 +37,7 @@
     {% if z.obras %}
     <table class="admin-table">
         <thead>
-            <tr><th></th><th>Pos.</th><th>Obra</th><th>Autor</th><th>Medidas</th><th></th></tr>
+            <tr><th></th><th>Pos.</th><th>Obra</th><th>Autor</th><th>Medidas</th><th title="Contemplaciones en 3D + fichas abiertas en 2D">Interés</th><th></th></tr>
         </thead>
         <tbody>
             {% for o in z.obras %}
@@ -54,6 +54,7 @@
                 <td class="admin-muted">
                     {%- if o.ancho_cm and o.alto_cm %}{{ o.ancho_cm }}×{{ o.alto_cm }} cm{% else %}—{% endif -%}
                 </td>
+                <td class="admin-muted">{{ interes.get(o.id, 0) }}</td>
                 <td class="admin-actions">
                     <a href="{{ url_for('admin.obra_editar', obra_id=o.id) }}">Editar</a>
                     <form method="post" action="{{ url_for('admin.obra_portada', obra_id=o.id) }}">
