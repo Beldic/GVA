@@ -3,10 +3,12 @@
         radial-gradient(ellipse at 50% 38%, #12325c 0%, #0a1f3d 52%, #04101f 100%);
     min-height: 100dvh;
     display: flex;
-    align-items: center;
-    justify-content: center;
     perspective: 1800px;
-    overflow: hidden;
+    /* Antes overflow:hidden + centrado: en ventanas bajas recortaba el
+       contenido por arriba y por abajo sin remedio. El margen auto de
+       .door-stage centra cuando sobra sitio y permite scroll cuando no. */
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Rejilla técnica de fondo */
@@ -27,8 +29,9 @@
 .door-stage {
     position: relative;
     width: min(720px, 92vw);
+    margin: auto; /* centrado que degrada a scroll si el alto no da */
     text-align: center;
-    padding: clamp(1.5rem, 4vh, 3rem) 1rem;
+    padding: clamp(1rem, 3vh, 3rem) 1rem;
     transform-style: preserve-3d;
     z-index: 1;
 }
@@ -99,7 +102,10 @@
 .door-frame {
     position: relative;
     z-index: 1;
-    width: min(420px, 78vw);
+    /* El tercer término hace la puerta consciente del ALTO de la ventana
+       (proporción 3:5 → altura ≈ 53dvh), con un suelo de 180px para que
+       nunca quede ridícula; si aun así no cabe, .door-page hace scroll. */
+    width: min(420px, 78vw, max(32dvh, 180px));
     aspect-ratio: 3 / 5;
     margin: 0 auto;
     perspective: 1400px;
@@ -463,4 +469,28 @@
     .door-page.is-entering::after {
         animation-duration: 0.001s;
     }
+}
+
+/* ---- Pantallas bajas (portátiles pequeños, móvil apaisado): compactar ---- */
+@media (max-height: 700px) {
+    .door-emblem {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 0.5rem;
+    }
+    .brand-eyebrow { font-size: 0.68rem; margin-bottom: 0.45rem; }
+    .brand-title { font-size: clamp(1.4rem, 4.5vw, 2.1rem); }
+    .brand-subtitle { margin-top: 0.45rem; font-size: 0.8rem; }
+    .door-header { margin-bottom: 1rem; }
+    .door-actions { margin-top: 1rem; }
+    .enter-btn {
+        font-size: 0.85rem;
+        padding: 0.65rem 2rem 0.65rem 2.4rem;
+    }
+    .door-2d { margin-top: 0.85rem; }
+}
+
+@media (max-height: 460px) {
+    .door-emblem { display: none; }
+    .brand-subtitle { display: none; }
 }
