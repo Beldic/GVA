@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}{{ (datos.exposicion.titulo ~ ' — ' ~ datos.sala.nombre ~ ' · 2D') if datos else 'Plataforma de Exposiciones Virtuales' }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/gallery2d.css') }}">
+{% endblock %}
+
+{% block body_class %}g2d-page{% endblock %}
+
+{% block content %}
+{% if datos %}
+<header class="g2d-hero">
+    <a class="g2d-volver" href="{{ url_for('main.index') }}">‹ Portal</a>
+    {% if datos.exposicion.organizador %}
+    <p class="g2d-eyebrow">{{ datos.exposicion.organizador }}</p>
+    {% endif %}
+    <h1 class="g2d-titulo">{{ datos.exposicion.titulo }}</h1>
+    <p class="g2d-sala">{{ datos.sala.nombre }}</p>
+</header>
+
+<main class="g2d-cuerpo">
+    {% set ns = namespace(idx=0) %}
+    {% for zona in datos.sala.zonas if zona.obras %}
+    <section class="g2d-zona">
+        <h2 class="g2d-zona-titulo">{{ zona.nombre }}</h2>
+        <div class="g2d-grid">
+            {% for o in zona.obras %}
+            <figure class="g2d-obra">
+                <button type="button" class="g2d-obra-btn" data-idx="{{ ns.idx }}"
+                        aria-label="Ver ficha de «{{ o.titulo }}»">
+                    <img src="{{ o.imagen_movil }}" alt="{{ o.titulo }}" loading="lazy">
+                </button>
+                <figcaption class="g2d-pie">
+                    <span class="g2d-obra-titulo">{{ o.titulo }}</span>
+                    <span class="g2d-obra-autor">{{ o.autor }}{% if o.anio %} · {{ o.anio }}{% endif %}</span>
+                </figcaption>
+            </figure>
+            {% set ns.idx = ns.idx + 1 %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+
+    <footer class="g2d-footer">
+        <a href="{{ url_for('main.index') }}">‹ Volver al portal</a>
+        <span class="g2d-footer-nota">Recorrido 3D completo disponible en ordenador</span>
+    </footer>
+</main>
+
+{# Ficha de obra: imagen grande + metadatos, con navegación anterior/siguiente #}
+<dialog id="g2d-ficha" class="g2d-ficha" aria-label="Ficha de la obra">
+    <button type="button" id="ficha-cerrar" class="g2d-ficha-cerrar" aria-label="Cerrar">✕</button>
+    <img id="ficha-img" class="g2d-ficha-img" src="" alt="">
+    <div class="g2d-ficha-datos">
+        <h3 id="ficha-titulo" class="g2d-ficha-titulo"></h3>
+        <p id="ficha-autor" class="g2d-ficha-autor"></p>
+        <p id="ficha-detalle" class="g2d-ficha-detalle"></p>
+        <p id="ficha-descripcion" class="g2d-ficha-descripcion"></p>
+    </div>
+    <div class="g2d-ficha-nav">
+        <button type="button" id="ficha-prev" class="g2d-ficha-flecha" aria-label="Obra anterior">‹</button>
+        <span id="ficha-pos" class="g2d-ficha-pos"></span>
+        <button type="button" id="ficha-next" class="g2d-ficha-flecha" aria-label="Obra siguiente">›</button>
+    </div>
+</dialog>
+
+{% if datos.exposicion.musica_url %}
+<audio id="hilo-musical" src="{{ datos.exposicion.musica_url }}" loop preload="none"></audio>
+<button id="musica-btn" type="button" class="g2d-musica" title="Activar la música"
+        aria-label="Activar la música">♪</button>
+{% endif %}
+{% else %}
+<div class="g2d-vacia">
+    <p class="g2d-eyebrow">Plataforma de Exposiciones Virtuales</p>
+    <h1 class="g2d-titulo">Sala en preparación</h1>
+    <p>Esta exposición todavía no tiene obras que mostrar.</p>
+    <a href="{{ url_for('main.index') }}">‹ Volver al portal</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if datos %}
+<script id="gallery-data" type="application/json">{{ datos|tojson }}</script>
+<script>
+(function () {
+    const datos = JSON.parse(document.getElementById("gallery-data").textContent);
+    // Obras en orden de recorrido (aplanadas), como las recorre el 3D.
+    const obras = datos.sala.zonas.flatMap((z) => z.obras);
+
+    // ---- Ficha (lightbox) ----
+    const ficha = document.getElementById("g2d-ficha");
+    const img = document.getElementById("ficha-img");
+    let actual = 0;
+
+    function medidas(o) {
+        const partes = [];
+        if (o.tecnica) partes.push(o.tecnica);
+        if (o.ancho_cm && o.alto_cm) partes.push(`${o.ancho_cm} × ${o.alto_cm} cm`);
+        return partes.join(" · ");
+    }
+
+    function pintarFicha() {
+        const o = obras[actual];
+        img.src = o.imagen_url;
+        img.alt = o.titulo;
+        document.getElementById("ficha-titulo").textContent = o.titulo;
+        document.getElementById("ficha-autor").textContent =
+            o.autor + (o.anio ? ` · ${o.anio}` : "");
+        document.getElementById("ficha-detalle").textContent = medidas(o);
+        document.getElementById("ficha-descripcion").textContent = o.descripcion || "";
+        document.getElementById("ficha-pos").textContent = `${actual + 1} / ${obras.length}`;
+    }
+
+    document.querySelectorAll(".g2d-obra-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            actual = Number(btn.dataset.idx) || 0;
+            pintarFicha();
+            ficha.showModal();
+        });
+    });
+
+    document.getElementById("ficha-cerrar").addEventListener("click", () => ficha.close());
+    document.getElementById("ficha-prev").addEventListener("click", () => {
+        actual = (actual - 1 + obras.length) % obras.length;
+        pintarFicha();
+    });
+    document.getElementById("ficha-next").addEventListener("click", () => {
+        actual = (actual + 1) % obras.length;
+        pintarFicha();
+    });
+    // Tocar el fondo (fuera de la imagen y la ficha) cierra el diálogo.
+    ficha.addEventListener("click", (ev) => {
+        if (ev.target === ficha) ficha.close();
+    });
+
+    // ---- Hilo musical: arranca al tocar ♪ (gesto que exige el navegador) ----
+    const audio = document.getElementById("hilo-musical");
+    const musicaBtn = document.getElementById("musica-btn");
+    if (audio && musicaBtn) {
+        audio.volume = 0.35;
+        function pintarMusica() {
+            const sonando = !audio.paused;
+            musicaBtn.classList.toggle("g2d-musica--on", sonando);
+            const titulo = sonando ? "Silenciar la música" : "Activar la música";
+            musicaBtn.title = titulo;
+            musicaBtn.setAttribute("aria-label", titulo);
+        }
+        musicaBtn.addEventListener("click", () => {
+            if (audio.paused) audio.play().catch(() => {});
+            else audio.pause();
+            pintarMusica();
+        });
+        audio.addEventListener("play", pintarMusica);
+        audio.addEventListener("pause", pintarMusica);
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}

@@ -31,6 +31,12 @@ def _serializar_obra(obra) -> dict:
         "alto_cm": obra.alto_cm,
         "descripcion": obra.descripcion,
         "imagen_url": _imagen_url(obra),
+        # Variante ligera para la rejilla del modo 2D en móvil.
+        "imagen_movil": (
+            cloudinary_service.url_obra(obra.cloudinary_public_id, ancho=600)
+            if obra.cloudinary_public_id
+            else obra.cloudinary_url
+        ),
     }
 
 

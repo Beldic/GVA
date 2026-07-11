@@ -81,6 +81,10 @@ def gallery(slug):
             return render_template("gallery_codigo.html", expo=expo)
         _registrar_visita(expo)
     datos = serializar_sala(expo.salas[0]) if expo.salas else None
+    # Modo 2D (?modo=2d): la misma sala como galería vertical, pensada para
+    # móvil. Pasa por las mismas puertas de acceso que el 3D.
+    if request.args.get("modo") == "2d":
+        return render_template("gallery_2d.html", datos=datos)
     return render_template("gallery.html", datos=datos)
 
 

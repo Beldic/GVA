@@ -42,19 +42,10 @@ function esSoloTactil() {
 }
 
 if (esSoloTactil()) {
+    // El aviso ofrece el enlace real al modo 2D (?modo=2d).
     if (doorLayer) doorLayer.classList.add("is-gone");
     if (resume) resume.classList.add("is-hidden");
     if (soloEscritorio) soloEscritorio.classList.remove("is-hidden");
-    // "Ver en 2D" → de momento, aviso de "próximamente".
-    const ver2d = document.getElementById("ver-2d");
-    if (ver2d) {
-        ver2d.addEventListener("click", () => {
-            const inicial = document.getElementById("aviso-2d");
-            const proximo = document.getElementById("aviso-proximamente");
-            if (inicial) inicial.hidden = true;
-            if (proximo) proximo.hidden = false;
-        });
-    }
 } else if (typeof BABYLON === "undefined") {
     console.error("Babylon.js no se ha cargado.");
 } else if (!datos || !datos.sala) {

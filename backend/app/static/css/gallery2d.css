@@ -1,0 +1,283 @@
+/* Modo 2D del visor: la sala como galería vertical, pensada para móvil.
+   Hereda la paleta y tipografías de main.css (:root). */
+
+.g2d-page {
+    background:
+        radial-gradient(120% 60% at 50% 0, rgba(30, 77, 140, 0.35), transparent 70%),
+        var(--color-deep);
+    color: var(--color-pale);
+    min-height: 100dvh;
+    height: auto;
+}
+
+/* ---- Cabecera ---- */
+.g2d-hero {
+    text-align: center;
+    padding: clamp(2rem, 6vw, 3.5rem) 1.2rem 1.6rem;
+    border-bottom: 1px solid rgba(125, 211, 252, 0.14);
+}
+
+.g2d-volver {
+    display: inline-block;
+    margin-bottom: 1.4rem;
+    color: var(--color-mist);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.g2d-eyebrow {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--color-tech-soft);
+}
+
+.g2d-titulo {
+    margin: 0;
+    font-size: clamp(1.7rem, 6vw, 2.6rem);
+    font-weight: 600;
+    color: var(--color-white);
+}
+
+.g2d-sala {
+    margin: 0.4rem 0 0;
+    color: rgba(207, 220, 236, 0.65);
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+/* ---- Cuerpo: secciones por zona ---- */
+.g2d-cuerpo {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 1rem 3rem;
+}
+
+.g2d-zona { margin-top: 2.2rem; }
+
+.g2d-zona-titulo {
+    margin: 0 0 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(186, 214, 240, 0.6);
+    border-left: 2px solid rgba(56, 189, 248, 0.45);
+    padding-left: 0.7rem;
+}
+
+.g2d-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+@media (min-width: 700px) {
+    .g2d-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.3rem; }
+}
+
+.g2d-obra { margin: 0; }
+
+.g2d-obra-btn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 1px solid rgba(125, 211, 252, 0.16);
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(10, 31, 61, 0.5);
+    cursor: pointer;
+}
+
+.g2d-obra-btn img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    transition: transform 0.3s var(--easing-soft);
+}
+
+.g2d-obra-btn:active img,
+.g2d-obra-btn:hover img { transform: scale(1.04); }
+
+.g2d-pie {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.5rem 0.15rem 0;
+}
+
+.g2d-obra-titulo {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-pale);
+}
+
+.g2d-obra-autor {
+    font-size: 0.76rem;
+    color: rgba(207, 220, 236, 0.6);
+}
+
+/* ---- Ficha (dialog) ---- */
+.g2d-ficha {
+    border: none;
+    padding: 0;
+    width: min(94vw, 640px);
+    max-height: 92dvh;
+    background: rgba(10, 20, 36, 0.97);
+    color: var(--color-pale);
+    border: 1px solid rgba(207, 220, 236, 0.18);
+    border-radius: 14px;
+    overflow: auto;
+}
+
+.g2d-ficha::backdrop {
+    background: rgba(2, 8, 18, 0.8);
+    backdrop-filter: blur(4px);
+}
+
+.g2d-ficha-img {
+    display: block;
+    width: 100%;
+    max-height: 62dvh;
+    object-fit: contain;
+    background: #06101f;
+}
+
+.g2d-ficha-datos { padding: 1rem 1.2rem 0.4rem; }
+
+.g2d-ficha-titulo { margin: 0; font-size: 1.25rem; color: var(--color-white); }
+
+.g2d-ficha-autor {
+    margin: 0.25rem 0 0;
+    color: var(--color-tech-soft);
+    font-size: 0.9rem;
+}
+
+.g2d-ficha-detalle {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: rgba(207, 220, 236, 0.6);
+}
+
+.g2d-ficha-descripcion {
+    margin: 0.7rem 0 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--color-mist);
+}
+
+.g2d-ficha-cerrar {
+    position: sticky;
+    top: 0.6rem;
+    margin-left: calc(100% - 3rem);
+    z-index: 1;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    border: 1px solid rgba(207, 220, 236, 0.3);
+    background: rgba(10, 20, 36, 0.75);
+    color: var(--color-pale);
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.g2d-ficha-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem 1rem;
+}
+
+.g2d-ficha-flecha {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    border: 1px solid rgba(125, 211, 252, 0.35);
+    background: transparent;
+    color: var(--color-pale);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.g2d-ficha-flecha:active { background: rgba(91, 141, 201, 0.25); }
+
+.g2d-ficha-pos {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: rgba(207, 220, 236, 0.55);
+}
+
+/* ---- Botón flotante de música ---- */
+.g2d-musica {
+    position: fixed;
+    right: 1rem;
+    bottom: 1.1rem;
+    z-index: 15;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    border: 1px solid rgba(125, 211, 252, 0.4);
+    background: rgba(7, 20, 38, 0.8);
+    color: rgba(207, 220, 236, 0.55);
+    font-size: 1.25rem;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    text-decoration: line-through;
+}
+
+.g2d-musica--on {
+    color: var(--color-tech-soft);
+    text-decoration: none;
+    border-color: rgba(56, 189, 248, 0.7);
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
+}
+
+/* ---- Pie y estado vacío ---- */
+.g2d-footer {
+    margin-top: 3rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid rgba(125, 211, 252, 0.14);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: center;
+    text-align: center;
+}
+
+.g2d-footer a {
+    color: var(--color-mist);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.g2d-footer-nota {
+    font-size: 0.72rem;
+    color: rgba(186, 214, 240, 0.45);
+}
+
+.g2d-vacia {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.g2d-vacia a { color: var(--color-tech-soft); }

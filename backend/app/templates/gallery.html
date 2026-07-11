@@ -116,32 +116,16 @@
 {# Aviso en dispositivos táctiles: el recorrido 3D necesita teclado y ratón #}
 <div id="solo-escritorio" class="overlay is-hidden solo-escritorio">
     <div class="overlay-card">
-        {# Estado inicial: banner de modo 2D #}
-        <div id="aviso-2d">
-            <span class="badge-2d" aria-hidden="true">2D</span>
-            <p class="overlay-eyebrow">{{ datos.exposicion.titulo }}</p>
-            <h2 class="overlay-title">Estás en un móvil</h2>
-            <p class="overlay-text">
-                En el móvil, esta exposición se mostrará en <strong>modo 2D</strong>.
-                Para el recorrido completo en 3D (moverte con
-                <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> y mirar con el
-                ratón), ábrela desde un ordenador.
-            </p>
-            <button id="ver-2d" type="button" class="overlay-btn">Ver en 2D</button>
-            <a href="{{ url_for('main.index') }}" class="overlay-exit">Volver al portal</a>
-        </div>
-
-        {# Estado tras pulsar "Ver en 2D": próximamente #}
-        <div id="aviso-proximamente" hidden>
-            <span class="badge-2d badge-soon" aria-hidden="true">🚧</span>
-            <h2 class="overlay-title">Modo 2D — próximamente</h2>
-            <p class="overlay-text">
-                Estamos preparando la visualización en 2D para el móvil.
-                ¡Estará disponible muy pronto! Mientras tanto, puedes disfrutar el
-                recorrido en 3D completo desde un ordenador.
-            </p>
-            <a href="{{ url_for('main.index') }}" class="overlay-btn">Volver al portal</a>
-        </div>
+        <span class="badge-2d" aria-hidden="true">2D</span>
+        <p class="overlay-eyebrow">{{ datos.exposicion.titulo }}</p>
+        <h2 class="overlay-title">Estás en un móvil</h2>
+        <p class="overlay-text">
+            En el móvil esta exposición se ve en <strong>modo 2D</strong>:
+            las obras de la sala en su orden de recorrido, con ficha de cada
+            una. Para el recorrido 3D completo, ábrela desde un ordenador.
+        </p>
+        <a href="{{ url_for('main.gallery', slug=datos.exposicion.slug, modo='2d') }}" class="overlay-btn">Ver en 2D</a>
+        <a href="{{ url_for('main.index') }}" class="overlay-exit">Volver al portal</a>
     </div>
 </div>
 {% else %}
