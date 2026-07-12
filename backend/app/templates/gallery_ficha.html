@@ -118,6 +118,18 @@
 {% block scripts %}
 <script>
 (function () {
+    // Vídeo mp4 directo: sin oEmbed que consultar, la orientación la dicta el
+    // propio archivo — el navegador la conoce al cargar los metadatos.
+    const cont = document.querySelector(".ficha-video");
+    const vid = cont && cont.querySelector("video");
+    if (vid) {
+        vid.addEventListener("loadedmetadata", () => {
+            cont.classList.toggle(
+                "ficha-video--vertical", vid.videoHeight > vid.videoWidth
+            );
+        });
+    }
+
     const copiar = document.getElementById("ficha-copiar");
     if (!copiar) return;
     copiar.addEventListener("click", async () => {

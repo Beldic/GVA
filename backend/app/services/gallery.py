@@ -67,7 +67,7 @@ def video_embed(url):
             "tipo": "iframe",
             "src": f"https://player.vimeo.com/video/{m.group(1)}?dnt=1",
         }
-    if url.lower().split("?")[0].endswith((".mp4", ".webm")):
+    if url.lower().split("?")[0].endswith((".mp4", ".webm", ".mov", ".m4v")):
         return {"tipo": "mp4", "src": url}
     return None
 
