@@ -147,7 +147,51 @@
     white-space: pre-line; /* respeta los párrafos que escriba el organizador */
 }
 
-/* ---- Vídeo de presentación (compacto, no invade) ---- */
+/* ---- Vídeo de presentación (desplegable: opcional, no rompe el flujo) ---- */
+.ficha-video-details summary::-webkit-details-marker { display: none; }
+
+.ficha-video-summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.6rem;
+    border: 1px solid rgba(125, 211, 252, 0.3);
+    border-radius: 999px;
+    width: fit-content;
+    margin: 0 auto;
+    color: var(--color-mist);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.25s var(--easing-soft), color 0.25s var(--easing-soft);
+}
+
+.ficha-video-summary:hover,
+.ficha-video-details[open] .ficha-video-summary {
+    border-color: rgba(56, 189, 248, 0.6);
+    color: var(--color-white);
+}
+
+.ficha-video-summary-icono {
+    font-size: 0.6rem;
+    color: var(--color-tech-soft);
+    transition: transform 0.25s var(--easing-soft);
+}
+
+.ficha-video-details[open] .ficha-video-summary-icono { transform: rotate(90deg); }
+
+.ficha-video-summary-nota {
+    color: rgba(186, 214, 240, 0.5);
+    letter-spacing: 0.1em;
+    text-transform: none;
+}
+
+.ficha-video-details[open] .ficha-video { margin-top: 1.2rem; }
+
 .ficha-video {
     max-width: 560px;
     margin: 0 auto;

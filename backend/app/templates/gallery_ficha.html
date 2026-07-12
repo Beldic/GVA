@@ -60,17 +60,25 @@
 
     {% if video %}
     <section class="ficha-seccion">
-        <h2 class="ficha-seccion-titulo">El autor presenta la exposición</h2>
-        <div class="ficha-video{% if expo.video_vertical %} ficha-video--vertical{% endif %}">
-            {% if video.tipo == 'iframe' %}
-            <iframe src="{{ video.src }}" loading="lazy" allowfullscreen
-                    allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    title="Vídeo de presentación de la exposición"></iframe>
-            {% else %}
-            <video src="{{ video.src }}" controls preload="metadata"></video>
-            {% endif %}
-        </div>
+        {# Desplegable: el vídeo es opcional y no interrumpe el camino a las
+           salas. No se carga NADA del reproductor hasta que se abre. #}
+        <details id="ficha-video-details" class="ficha-video-details">
+            <summary class="ficha-video-summary">
+                <span class="ficha-video-summary-icono" aria-hidden="true">▶</span>
+                El autor presenta la exposición
+                <span class="ficha-video-summary-nota">(vídeo)</span>
+            </summary>
+            <div class="ficha-video{% if expo.video_vertical %} ficha-video--vertical{% endif %}">
+                {% if video.tipo == 'iframe' %}
+                <iframe data-src="{{ video.src }}" allowfullscreen
+                        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        title="Vídeo de presentación de la exposición"></iframe>
+                {% else %}
+                <video data-src="{{ video.src }}" controls preload="metadata"></video>
+                {% endif %}
+            </div>
+        </details>
     </section>
     {% endif %}
 
@@ -118,6 +126,20 @@
 {% block scripts %}
 <script>
 (function () {
+    // El reproductor se carga SOLO al abrir el desplegable (data-src -> src):
+    // cero peticiones a YouTube/Vimeo hasta que el visitante lo pide.
+    const detalles = document.getElementById("ficha-video-details");
+    if (detalles) {
+        detalles.addEventListener("toggle", () => {
+            if (!detalles.open) return;
+            const medio = detalles.querySelector("[data-src]");
+            if (medio) {
+                medio.src = medio.dataset.src;
+                medio.removeAttribute("data-src");
+            }
+        });
+    }
+
     // Vídeo mp4 directo: sin oEmbed que consultar, la orientación la dicta el
     // propio archivo — el navegador la conoce al cargar los metadatos.
     const cont = document.querySelector(".ficha-video");
