@@ -19,7 +19,7 @@
         <span aria-hidden="true">‹</span> Salir
     </a>
     {% if datos %}
-    <span class="hud-title">{{ datos.sala.nombre }} · {{ datos.exposicion.titulo }}</span>
+    <span class="hud-title">{{ datos.sala.nombre }} · {{ datos.exposicion.titulo }}{% if es_preview %} <span class="hud-preview">Borrador · previsualización</span>{% endif %}</span>
     {% endif %}
     <span class="hud-acciones">
         {% if datos %}

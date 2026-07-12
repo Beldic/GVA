@@ -16,7 +16,11 @@
             <span class="admin-badge">Borrador</span>
         {% endif %}
     </div>
-    <a class="admin-btn-sm" href="{{ url_for('admin.exposicion_editar', exposicion_id=expo.id) }}">Editar datos</a>
+    <div class="admin-actions">
+        <a class="admin-btn-sm" href="{{ url_for('main.gallery', slug=expo.slug) }}" target="_blank" rel="noopener">▶ Visualizar en 3D</a>
+        <a class="admin-btn-sm" href="{{ url_for('main.gallery_ficha', slug=expo.slug) }}" target="_blank" rel="noopener">Ver ficha</a>
+        <a class="admin-btn-sm" href="{{ url_for('admin.exposicion_editar', exposicion_id=expo.id) }}">Editar datos</a>
+    </div>
 </div>
 
 {% if expo.descripcion %}<p class="admin-lead">{{ expo.descripcion }}</p>{% endif %}

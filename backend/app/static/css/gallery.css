@@ -61,6 +61,17 @@ html, body {
     color: rgba(207, 220, 236, 0.7);
 }
 
+.hud-preview {
+    margin-left: 0.6rem;
+    padding: 0.15rem 0.55rem;
+    border: 1px solid rgba(251, 191, 36, 0.5);
+    border-radius: 999px;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: #fbbf24;
+    white-space: nowrap;
+}
+
 .hud-acciones {
     display: flex;
     align-items: center;

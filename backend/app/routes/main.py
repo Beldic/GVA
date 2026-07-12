@@ -1,5 +1,6 @@
 from flask import (
     Blueprint,
+    abort,
     flash,
     redirect,
     render_template,
@@ -68,6 +69,16 @@ def _puede_gestionar(expo) -> bool:
     )
 
 
+def _expo_visible(slug):
+    """La exposición que puede verse en esta petición: publicada para todo el
+    mundo; en cualquier estado (borrador incluido) para su dueño o el
+    superadmin — la previsualización desde el panel."""
+    expo = Exposicion.query.filter_by(slug=slug).first_or_404()
+    if expo.estado != ESTADO_PUBLICADA and not _puede_gestionar(expo):
+        abort(404)
+    return expo
+
+
 def _visitante_autorizado(expo) -> bool:
     """El visitante ya introdujo el código correcto en esta sesión de navegador."""
     return expo.id in session.get("expos_autorizadas", [])
@@ -103,9 +114,7 @@ def gallery(slug):
     debe estar abierta (fechas/cierre manual) y, si pide código, haberlo
     introducido. El dueño y el superadmin entran siempre. Si no tiene salas,
     `datos` es None y la plantilla avisa."""
-    expo = Exposicion.query.filter_by(
-        slug=slug, estado=ESTADO_PUBLICADA
-    ).first_or_404()
+    expo = _expo_visible(slug)
     og = og_de_expo(expo)
     if not _puede_gestionar(expo):
         if not expo.abierta:
@@ -114,11 +123,16 @@ def gallery(slug):
             return render_template("gallery_codigo.html", expo=expo, og=og)
         _registrar_visita(expo)
     datos = serializar_sala(expo.salas[0]) if expo.salas else None
+    es_preview = expo.estado != ESTADO_PUBLICADA
     # Modo 2D (?modo=2d): la misma sala como galería vertical, pensada para
     # móvil. Pasa por las mismas puertas de acceso que el 3D.
     if request.args.get("modo") == "2d":
-        return render_template("gallery_2d.html", datos=datos, og=og, expo=expo)
-    return render_template("gallery.html", datos=datos, og=og, expo=expo)
+        return render_template(
+            "gallery_2d.html", datos=datos, og=og, expo=expo, es_preview=es_preview
+        )
+    return render_template(
+        "gallery.html", datos=datos, og=og, expo=expo, es_preview=es_preview
+    )
 
 
 @bp.get("/g/<slug>/ficha")
@@ -126,9 +140,7 @@ def gallery_ficha(slug):
     """Ficha de la exposición: el catálogo previo a la puerta — leitmotiv
     íntegro, organizador (logo + web) y autores con retrato y bio. Mismas
     puertas de acceso que el visor; no cuenta visita (eso lo hace entrar)."""
-    expo = Exposicion.query.filter_by(
-        slug=slug, estado=ESTADO_PUBLICADA
-    ).first_or_404()
+    expo = _expo_visible(slug)
     og = og_de_expo(expo)
     if not _puede_gestionar(expo):
         if not expo.abierta:
@@ -186,9 +198,7 @@ def obra_vista(slug):
     """Registra interés anónimo por una obra: contemplación en el 3D o
     apertura de su ficha en el 2D. Mismas puertas que el visor; una fila por
     obra y sesión de navegador; los gestores no cuentan."""
-    expo = Exposicion.query.filter_by(
-        slug=slug, estado=ESTADO_PUBLICADA
-    ).first_or_404()
+    expo = _expo_visible(slug)
     if _puede_gestionar(expo):
         return "", 204  # previsualización del dueño/superadmin: no sesga
     if not expo.abierta:

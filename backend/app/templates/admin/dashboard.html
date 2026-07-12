@@ -138,7 +138,7 @@ empiece a entrar, aquí verás cuándo y cómo lo hace.</p>
     <h3 class="stat-titulo">Por exposición</h3>
     <table class="admin-table">
         <thead>
-            <tr><th>Exposición</th><th>Visitas</th><th>Últimos 7 días</th></tr>
+            <tr><th>Exposición</th><th>Visitas</th><th>Últimos 7 días</th><th></th></tr>
         </thead>
         <tbody>
             {% for fila in stats.expos %}
@@ -148,6 +148,10 @@ empiece a entrar, aquí verás cuándo y cómo lo hace.</p>
                 </td>
                 <td>{{ fila.total }}</td>
                 <td>{{ fila.recientes }}</td>
+                <td class="admin-actions">
+                    <a href="{{ url_for('main.gallery', slug=fila.exposicion.slug) }}" target="_blank" rel="noopener"
+                       title="Visualizar en 3D (también en borrador)">▶ Ver</a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

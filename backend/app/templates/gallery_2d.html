@@ -14,6 +14,7 @@
 {% if datos %}
 <header class="g2d-hero">
     <a class="g2d-volver" href="{{ url_for('main.index') }}">‹ Portal</a>
+    {% if es_preview %}<p class="g2d-preview">Borrador · previsualización</p>{% endif %}
     {% if datos.exposicion.organizador %}
     <p class="g2d-eyebrow">{{ datos.exposicion.organizador }}</p>
     {% endif %}

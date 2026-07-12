@@ -42,6 +42,8 @@
                 {%- if e.fecha_fin %} – {{ e.fecha_fin.strftime('%d/%m/%Y') }}{% endif %}
             </td>
             <td class="admin-actions">
+                <a href="{{ url_for('main.gallery', slug=e.slug) }}" target="_blank" rel="noopener"
+                   title="Visualizar en 3D (también en borrador: solo la ves tú)">▶ Ver</a>
                 <a href="{{ url_for('admin.exposicion_editar', exposicion_id=e.id) }}">Editar</a>
                 {% if e.estado == ESTADO_PUBLICADA %}
                 <form method="post" action="{{ url_for('admin.exposicion_despublicar', exposicion_id=e.id) }}">
