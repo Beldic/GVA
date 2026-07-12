@@ -12,6 +12,7 @@ ruta lo muestre con un flash; el borrado es best-effort y solo registra el error
 import time
 
 import cloudinary
+import cloudinary.api
 import cloudinary.uploader
 import cloudinary.utils
 from flask import current_app
@@ -40,7 +41,8 @@ def esta_configurado() -> bool:
 
 def subir_imagen(archivo):
     """Sube un archivo (file-like / FileStorage) a Cloudinary.
-    Devuelve (public_id, secure_url). Lanza CloudinaryError si falla."""
+    Devuelve (public_id, secure_url, ancho_px, alto_px).
+    Lanza CloudinaryError si falla."""
     try:
         resultado = cloudinary.uploader.upload(
             archivo, folder=CARPETA, resource_type="image"
@@ -48,7 +50,29 @@ def subir_imagen(archivo):
     except Exception as exc:  # la API de Cloudinary lanza varios tipos
         current_app.logger.exception("Fallo al subir imagen a Cloudinary")
         raise CloudinaryError(str(exc)) from exc
-    return resultado["public_id"], resultado["secure_url"]
+    return (
+        resultado["public_id"],
+        resultado["secure_url"],
+        resultado.get("width"),
+        resultado.get("height"),
+    )
+
+
+def dimensiones_imagen(public_id):
+    """(ancho_px, alto_px) de una imagen ya subida, o None si no se puede
+    consultar. Best-effort: se usa para ajustar proporciones, nunca debe
+    tumbar la operación."""
+    if not public_id:
+        return None
+    try:
+        info = cloudinary.api.resource(public_id)
+        if info.get("width") and info.get("height"):
+            return info["width"], info["height"]
+    except Exception:
+        current_app.logger.exception(
+            "No se pudieron consultar las dimensiones de %s", public_id
+        )
+    return None
 
 
 def eliminar_imagen(public_id) -> None:

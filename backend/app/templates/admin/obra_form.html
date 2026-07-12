@@ -4,7 +4,7 @@
 {% block admin_title %}{{ titulo }}{% endblock %}
 
 {% block admin_content %}
-{% set TIPOS = {'dibujo': 'Dibujos', 'cuadro': 'Cuadros', 'mixto': 'Mixto'} %}
+{% set TIPOS = {'dibujo': 'Dibujos', 'cuadro': 'Cuadros', 'fotografia': 'Fotografías', 'infografia': 'Infografías', 'mixto': 'Mixto'} %}
 
 <p class="admin-breadcrumb">
     <a href="{{ url_for('admin.sala_detail', sala_id=zona.sala_id) }}">‹ {{ zona.sala.nombre }}</a>
@@ -56,4 +56,12 @@
         <a href="{{ url_for('admin.sala_detail', sala_id=zona.sala_id) }}" class="admin-cancel">Cancelar</a>
     </div>
 </form>
+
+{% if not es_nueva and obra and imagen_actual %}
+<form method="post" action="{{ url_for('admin.obra_ajustar_medidas', obra_id=obra.id) }}" class="admin-ajustar">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="admin-link">📐 Ajustar medidas a la proporción de la imagen</button>
+    <small class="admin-muted">Recalcula ancho × alto según la imagen real (arregla obras deformadas).</small>
+</form>
+{% endif %}
 {% endblock %}

@@ -505,6 +505,14 @@ td.admin-actions > *:not(:last-child) {
 
 .stat-nota { margin: -0.5rem 0 0.9rem; }
 
+.admin-ajustar {
+    margin-top: 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+}
+
 /* ---- Asistente de nueva exposición ---- */
 .wiz-seccion {
     margin: 2rem 0 0.6rem;

@@ -543,6 +543,20 @@ def sala_borrar(sala_id):
 # --------------------------------------------------------------------------
 # Obras (colgadas en una zona)
 # --------------------------------------------------------------------------
+def _medidas_proporcionales(tipo, ancho_px, alto_px):
+    """Medidas en cm que respetan la proporción real de la imagen: el lado
+    mayor de la obra es el lado mayor por defecto de su tipo. Sin píxeles,
+    devuelve las medidas por defecto del tipo (puede salir apaisada o
+    vertical según venga la imagen, que es justo lo que se busca)."""
+    base = TIPOS_OBRA.get(tipo, TIPOS_OBRA[TIPO_CUADRO])
+    if not ancho_px or not alto_px:
+        return base["ancho_cm"], base["alto_cm"]
+    mayor = max(base["ancho_cm"], base["alto_cm"])
+    if ancho_px >= alto_px:
+        return mayor, round(mayor * alto_px / ancho_px, 1)
+    return round(mayor * ancho_px / alto_px, 1), mayor
+
+
 def _siguiente_hueco(zona) -> int:
     """Primer orden libre en la zona dentro de su capacidad."""
     ocupados = {o.orden for o in zona.obras}
@@ -592,9 +606,14 @@ def obra_nueva(zona_id):
         if archivo:
             if cloudinary_service.esta_configurado():
                 try:
-                    public_id, url = cloudinary_service.subir_imagen(archivo)
+                    public_id, url, px_w, px_h = cloudinary_service.subir_imagen(archivo)
                     obra.cloudinary_public_id = public_id
                     obra.cloudinary_url = url
+                    # Sin medidas indicadas: proporción real de la imagen.
+                    if not form.ancho_cm.data and not form.alto_cm.data:
+                        obra.ancho_cm, obra.alto_cm = _medidas_proporcionales(
+                            obra.tipo, px_w, px_h
+                        )
                 except cloudinary_service.CloudinaryError:
                     flash("No se pudo subir la imagen: se mantiene el placeholder.", "error")
             else:
@@ -646,7 +665,7 @@ def obra_editar(obra_id):
             if cloudinary_service.esta_configurado():
                 anterior = obra.cloudinary_public_id
                 try:
-                    public_id, url = cloudinary_service.subir_imagen(archivo)
+                    public_id, url, _, _ = cloudinary_service.subir_imagen(archivo)
                     obra.cloudinary_public_id = public_id
                     obra.cloudinary_url = url
                     cloudinary_service.eliminar_imagen(anterior)  # limpia la antigua
@@ -667,7 +686,32 @@ def obra_editar(obra_id):
         titulo=f"Editar: {obra.titulo}",
         es_nueva=False,
         imagen_actual=obra.cloudinary_url,
+        obra=obra,
     )
+
+
+@bp.post("/obras/<int:obra_id>/ajustar-medidas")
+@login_required
+def obra_ajustar_medidas(obra_id):
+    """Recalcula las medidas de la obra según la proporción real de su imagen
+    en Cloudinary (arregla obras subidas con las medidas por defecto de otro
+    formato: p. ej. un cómic apaisado registrado como infografía vertical)."""
+    obra = db.get_or_404(Obra, obra_id)
+    exigir_acceso_exposicion(obra.zona.sala.exposicion)
+    if not obra.cloudinary_public_id:
+        flash("La obra no tiene imagen propia: no hay proporción que ajustar.", "error")
+        return redirect(url_for("admin.obra_editar", obra_id=obra.id))
+    dims = cloudinary_service.dimensiones_imagen(obra.cloudinary_public_id)
+    if not dims:
+        flash("No se pudieron consultar las dimensiones de la imagen.", "error")
+        return redirect(url_for("admin.obra_editar", obra_id=obra.id))
+    obra.ancho_cm, obra.alto_cm = _medidas_proporcionales(obra.tipo, *dims)
+    db.session.commit()
+    flash(
+        f"Medidas ajustadas a la imagen: {obra.ancho_cm:g} × {obra.alto_cm:g} cm.",
+        "info",
+    )
+    return redirect(url_for("admin.obra_editar", obra_id=obra.id))
 
 
 @bp.post("/obras/<int:obra_id>/portada")
@@ -784,8 +828,6 @@ def obras_subir(sala_id):
             return {"error": "Elige un autor válido o crea uno nuevo."}, 400
 
     huecos = _huecos_libres(sala, tipo)
-    ancho = TIPOS_OBRA[tipo]["ancho_cm"]
-    alto = TIPOS_OBRA[tipo]["alto_cm"]
     creadas = 0
     sin_hueco = []
     for img in imagenes:
@@ -797,6 +839,11 @@ def obras_subir(sala_id):
         if creadas >= len(huecos):
             sin_hueco.append(nombre)
             continue
+        # Medidas con la proporción real de cada imagen (Cloudinary devuelve
+        # sus píxeles al subir); sin datos, las del tipo por defecto.
+        ancho, alto = _medidas_proporcionales(
+            tipo, img.get("width"), img.get("height")
+        )
         zona, orden = huecos[creadas]
         db.session.add(
             Obra(
