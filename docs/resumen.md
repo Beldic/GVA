@@ -1,3 +1,9 @@
+ > **Nota (jul-2026):** este es el documento fundacional del proyecto y se
+> conserva como histórico. La visión evolucionó a plataforma multi-organizador
+> y la v1.0 está en producción en galeriavirtual.org — el estado actual está en
+> [funcionalidades.md](funcionalidades.md) y
+> [estrategia_desarrollo.md](estrategia_desarrollo.md).
+
 El proyecto GVA (Galería Virtual de Arte) o VAG (Virtual Art Gallery), consiste en el diseño y desarrollo de una Galería Web en 3D, con un backend con soporte de base de datos, un dashboard de administración, con un CRUD para subir imágenes con varias resoluciones y texto relacionado con cada imagen, englobado todo en un objeto exposición. La base de datos se llamaría Exposiciones. Y cada exposición tendrá la posibilidad de vincular cada imagen a un espacio en la simulación 3D de la Galería.
 Esta simulación 3D será posible visitarla desde la web, mediante un navegador web, con una cuenta de usuario o bien libremente. El frontend estará desarrollado en HTML5, CSS3 vanilla y bootstrap. Y JS vanilla junto con una librería especializada en 3D como Babylonjs.
 La idea es que los usuarios entren vía web en una simulación de unas instancias en 3D que representan la Galería Virtual, con su iluminación, su espacio y acústica determinados.

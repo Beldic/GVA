@@ -4,28 +4,29 @@
 > programada** (corte de sesión, cambio de equipo, pausa larga). Resume qué se
 > está construyendo, cómo, en qué punto estamos y cómo continuar.
 >
-> Última actualización: 2026-07-08 — **Cambio de rumbo: plataforma
-> multi-organizador**. Fases A–C + portal público + rebranding completados.
+> Última actualización: 2026-07-12 — **v1.0 en producción**
+> (galeriavirtual.org). Catálogo completo de funcionalidades y su técnica en
+> [funcionalidades.md](funcionalidades.md).
 
 ---
 
 ## 1. Visión del proyecto
 
-**Plataforma de Exposiciones Virtuales**: galería Web en **3D** multi-organizador.
-
-> ⚠️ **Cambio de rumbo (jul-2026):** de piloto single-tenant de AFESOL (admin
-> único, una exposición publicada) a **plataforma con varios organizadores**,
-> cada uno dueño de sus propias exposiciones, autores y obras.
+**Plataforma de Exposiciones Virtuales**: galería Web en **3D** multi-organizador,
+en producción en **galeriavirtual.org** con AFESOL como organizador piloto.
 
 Tres tipos de sesión:
-- **Visitante** (anónimo): portal `/` con *cards* de las galerías publicadas →
-  `/g/<slug>` recorre en primera persona la sala en 3D (Babylon.js).
-- **Organizador** (`/admin`): gestiona SOLO sus exposiciones/salas/obras/autores.
-  Alta **solo por invitación** (los crea el superadmin).
-- **Superadmin** (`/plataforma`): CRUD de organizadores + estadísticas de visitas.
+- **Visitante** (anónimo, sin rastreo): portal `/` con *cards* → ficha de la
+  exposición (`/g/<slug>/ficha`) → puerta → sala 3D en primera persona
+  (Babylon.js), o **modo 2D** en móvil (`?modo=2d`). Exposiciones públicas,
+  de enlace secreto o privadas con código; hilo musical; compartir en RRSS.
+- **Organizador** (`/admin`): gestiona SOLO sus exposiciones/salas/obras/autores
+  + su perfil público + dashboard de estadísticas. Alta solo por invitación.
+- **Superadmin** (`/plataforma`): CRUD de organizadores, reasignación de
+  exposiciones y estadísticas globales.
 
 Estética: azul/blanco. Portal navy + acento cian; panel admin claro. Marca
-**"Plataforma de Exposiciones Virtuales"** (ya no "SIT").
+**"Galería Virtual"** con logo hexagonal y favicon GV.
 
 ---
 
@@ -33,15 +34,16 @@ Estética: azul/blanco. Portal navy + acento cian; panel admin claro. Marca
 
 | Capa | Tecnología |
 |---|---|
-| Backend | Python + **Flask** |
+| Backend | Python + **Flask** (app factory + blueprints) |
 | ORM / migraciones | Flask-SQLAlchemy + Flask-Migrate (Alembic) |
+| Autenticación | Flask-Login + CSRF global (Flask-WTF) |
 | BD (local) | **SQLite** (`galeria_dev.db`) |
 | BD (producción) | **PostgreSQL** en Railway |
-| Imágenes | **Cloudinary** (CDN; guardamos `public_id` + `secure_url`) |
+| Imágenes y audio | **Cloudinary** (CDN; guardamos `public_id` + `secure_url`) |
 | Frontend | HTML5, CSS3 vanilla + Bootstrap, JS vanilla |
-| 3D | **Babylon.js** (CDN) |
-| Servidor prod | gunicorn |
-| Hosting | **Railway** (deploy desde GitHub) |
+| 3D | **Babylon.js** (CDN) — motor de plantas propio data-driven |
+| Servidor prod | gunicorn (+ ProxyFix para https tras el proxy) |
+| Hosting | **Railway** (deploy automático desde GitHub) |
 | Repo | github.com:Beldic/GVA.git |
 
 ---
@@ -50,74 +52,85 @@ Estética: azul/blanco. Portal navy + acento cian; panel admin claro. Marca
 
 ```
 Galeria/
-├─ app.py                     # entrypoint: app = create_app()
-├─ requirements.txt
-├─ Procfile                   # web: gunicorn app:app --bind 0.0.0.0:$PORT
-├─ .env.example               # plantilla (copiar a .env en local)
+├─ app.py                     # entrypoint; en Postgres aplica migraciones al arrancar
+├─ requirements.txt / Procfile / .env.example
 ├─ galeria_dev.db             # SQLite local (gitignored)
+├─ docs/                      # este documento + funcionalidades.md + resumen.md
 ├─ backend/
 │  ├─ app/
-│  │  ├─ __init__.py          # create_app(): init extensiones + blueprints
-│  │  ├─ config.py            # config por entorno (SQLite/Postgres)
-│  │  ├─ extensions.py        # db, migrate
-│  │  ├─ models/              # un archivo por entidad
-│  │  │  ├─ usuario.py  autor.py  exposicion.py
-│  │  │  └─ sala.py  zona.py  obra.py
-│  │  ├─ routes/              # blueprints (main.py = público)
-│  │  ├─ services/            # lógica (Cloudinary, etc.) — pendiente
-│  │  ├─ static/              # css/ y js/gallery (Babylon)
-│  │  └─ templates/           # base.html, index.html, gallery.html
-│  └─ migrations/             # Alembic
-└─ frontend/assets/           # imágenes/modelos servidos vía /frontend-assets
+│  │  ├─ __init__.py          # create_app(): extensiones, ProxyFix, blueprints
+│  │  ├─ config.py  extensions.py  authz.py  bootstrap.py  cli.py  utils.py
+│  │  ├─ plantillas.py        # plantillas de sala + PLANTAS ELÁSTICAS (ajustar_planta)
+│  │  ├─ models/              # usuario, autor, exposicion, sala, zona, obra,
+│  │  │                       # visita, vista_obra
+│  │  ├─ routes/              # main (público), admin (organizador), plataforma
+│  │  ├─ services/            # gallery (serialización/OG), stats, cloudinary_service
+│  │  ├─ static/
+│  │  │  ├─ css/              # main, portal, gallery, gallery2d, ficha, door, admin…
+│  │  │  ├─ js/gallery/       # main, room, painting, camera, scene (visor 3D)
+│  │  │  ├─ img/              # logo + logos de organizadores (convención)
+│  │  │  └─ favicons/
+│  │  └─ templates/           # portal, ficha, visor, 2D, admin/, plataforma/,
+│  │                          # parciales (_og_expo, _iconos_rrss)
+│  └─ migrations/             # Alembic (11 revisiones, todas aditivas)
+└─ frontend/assets/           # legado, servido vía /frontend-assets
 ```
 
 ---
 
 ## 4. Modelo de datos (confirmado)
 
-Jerarquía: `usuario 1─<N exposicion 1─<N sala 1─<N zona 1─<N obra >─N─1 autor`. Más `visita`.
+Jerarquía: `usuario 1─<N exposicion 1─<N sala 1─<N zona 1─<N obra >─N─1 autor`.
+Más `visita` y `vista_obra` (métricas anónimas).
 
-| Tabla | Campos clave | Relaciones |
+| Tabla | Campos clave | Notas |
 |---|---|---|
-| **usuario** | email, password_hash, **nombre**, **rol** (`superadmin`/`organizador`), **activo** | dueño de exposiciones y autores |
-| **autor** | **usuario_id (dueño)**, nombre, bio, foto_url, contacto | 1 ─< N obra |
-| **exposicion** | **usuario_id (dueño)**, titulo, slug (único global), descripcion, fechas, **estado** (borrador/publicada) | 1 ─< N sala |
-| **sala** | nombre, plantilla_3d, orden | 1 ─< N zona |
-| **zona** | nombre, codigo, capacidad, tipo_admitido | 1 ─< N obra |
-| **obra** | titulo, anio, tecnica, **ancho_cm/alto_cm**, tipo, descripcion, `cloudinary_public_id`, `cloudinary_url`, **orden** | → autor, → zona |
-| **visita** | exposicion_id, created_at | estadísticas (1 por expo y sesión) |
+| **usuario** | email, password_hash, nombre, **web, logo_public_id/url**, rol (`superadmin`/`organizador`), activo | perfil público del organizador |
+| **autor** | usuario_id (dueño), nombre, bio, **foto_public_id**/foto_url, contacto | privado por organizador |
+| **exposicion** | usuario_id, titulo, slug único, descripcion (leitmotiv), fechas, estado, **visibilidad** (publica/enlace/codigo) + codigo_acceso_hash, **cerrada_manual** (→ propiedad `apertura`), **portada_obra_id**, **musica_public_id/url** | cascada a salas y visitas |
+| **sala** | nombre, plantilla_3d, **parametros** (JSON: dimensiones elásticas; NULL = medidas por defecto), orden | |
+| **zona** | codigo (= pared 3D), nombre, capacidad, tipo_admitido | las siembra la plantilla (estática o elástica) |
+| **obra** | titulo, **tipo** (cuadro/fotografia/infografia/dibujo), anio, tecnica, ancho_cm/alto_cm (proporción real de la imagen), descripcion, cloudinary_*, orden | UNIQUE(zona_id, orden) |
+| **visita** | exposicion_id, **dispositivo, modo**, created_at | 1 por expo y sesión; anónima |
+| **vista_obra** | obra_id, **modo** (3d=contemplación / 2d=ficha), created_at | interés por obra; anónima |
 
-**Decisiones de diseño:**
-- **Propiedad:** exposiciones y autores tienen `usuario_id`. Los organizadores solo ven/tocan lo suyo; el superadmin es transversal. La propiedad de sala/zona/obra se hereda por la cadena hasta `exposicion.usuario_id` (`authz.exigir_acceso_exposicion`).
-- **Autores privados** por organizador; la obra llega a su exposición por la cadena `obra→zona→sala→exposicion` (sin duplicar `exposicion_id`).
-- **Posición = `zona_id` + `orden`**, con `UNIQUE(zona_id, orden)`. El 3D reparte y dimensiona según `ancho_cm/alto_cm`. **No hay coordenadas en BD.**
-- Las **zonas las predefine la plantilla de sala**; el organizador solo asigna obras.
-- La **geometría 3D** vive en el **frontend**, no en BD.
-- **Cada organizador publica de forma independiente** (varias exposiciones publicadas a la vez; el portal `/g/<slug>` sirve cada una por su slug). Ya NO hay "una sola publicada global".
-
-**Aparcado para fases posteriores:** conexiones/puertas entre salas en BD y
-estadísticas de **clicks por obra** (engagement; las visitas por exposición ya están).
+**Decisiones de diseño vigentes:**
+- Propiedad y aislamiento por `usuario_id`, heredada por la cadena
+  obra→zona→sala→exposición (`authz.exigir_acceso_exposicion`).
+- Posición = `zona_id` + `orden`; sin coordenadas en BD. La **geometría 3D vive
+  en el frontend** (`room.js`), parametrizada por `sala.parametros`.
+- Visitante **anónimo siempre**: métricas con dimensiones agregadas, sin
+  identificadores de persona (decisión RGPD deliberada).
+- `portada_obra_id` es entero SIN FK (evita ciclo exposicion↔obra); se valida
+  en lectura.
 
 ---
 
 ## 5. Hoja de ruta por fases
 
-**Base single-tenant (1–6):** andamiaje ORM, autenticación, dashboard CRUD
-(autores/exposiciones/salas/obras), Cloudinary, 3D dinámico y despliegue en
-Railway — todo ✅ hecho antes del cambio de rumbo.
+**Base single-tenant (1–6)** ✅ y **pivote multi-organizador (A–C + portal)** ✅
+— ver historial de este documento.
 
-**Cambio de rumbo → plataforma multi-organizador:**
+**Sprint v1.0 (9–12 jul-2026), todo ✅ desplegado en producción:**
 
-| Fase | Contenido | Estado |
-|---|---|---|
-| **A** | Modelo multi-organizador: roles `superadmin`/`organizador`, `usuario_id` en exposicion/autor, migración con backfill (organizador legado) | ✅ Hecho |
-| **B** | Autorización y aislamiento: `authz.py`, scoping de `/admin` por dueño, publicación independiente, login de cuentas activas | ✅ Hecho |
-| **C** | Panel de plataforma `/plataforma` (superadmin): CRUD de organizadores + **estadísticas de visitas** (tabla `visita`); login enruta por rol | ✅ Hecho |
-| **Portal** | Portada pública con *cards* de galerías abiertas + `/g/<slug>`; rebranding SIT → Plataforma; puerta como transición de entrada/salida | ✅ Hecho |
-| **E** | Pulido: seeds con dueño, docs y memoria al día | ✅ Hecho |
-| — | **Pendiente:** desplegar el pivote en Railway (aplicar migraciones `a1b2c3d4e5f6` y `b2c3d4e5f6a7`); autoservicio de imágenes; clicks por obra | ⬜ |
+| Bloque | Contenido |
+|---|---|
+| Acceso | Visibilidad pública/enlace/código · apertura por fechas + cierre manual |
+| Portal | Badges de estado, candado, portada elegible, logo de organizador, footer, favicon, logo de marca |
+| Plataforma | Sección Exposiciones + reasignación de dueño (autores incluidos) |
+| Visor | Hilo musical (♪/M), ventana de instrucciones, HUD accesible, puerta responsive, compartir |
+| Móvil | **Modo 2D** completo + detección táctil robusta + escotilla en la puerta |
+| Estadísticas | Dashboard del organizador (KPIs, series, frecuencias, desgloses) + **interés por obra** (contemplación 3D / ficha 2D) |
+| Salas | **Plantas elásticas** (4 formas, algoritmo de ajuste) + 4 tipos de obra + asistente de nueva exposición + proporciones reales de imagen |
+| Catálogo | **Ficha de exposición** + Mi perfil (web/logo) + retratos de autor |
+| SEO | OG/Twitter cards, JSON-LD, sitemap, robots, iconos oficiales de RRSS |
 
-> Cada fase se diseña/consensúa antes de implementar y se cierra con un commit.
+**Pendiente / aparcado:** ver la sección final de
+[funcionalidades.md](funcionalidades.md) (formas complejas multi-sala,
+girar imágenes, placeholders opcionales, perfiles sociales…).
+
+> Cada fase se diseña/consensúa antes de implementar y se cierra con un commit
+> (coautoría J.C. Sobrepere + Claude).
 
 ---
 
@@ -125,7 +138,8 @@ Railway — todo ✅ hecho antes del cambio de rumbo.
 
 - **Local:** si `DATABASE_URL` está vacía → SQLite (`galeria_dev.db`). Cero instalación.
 - **Producción (Railway):** Railway inyecta `DATABASE_URL` (Postgres). `config.py`
-  la detecta y normaliza `postgres://` → `postgresql://`.
+  la detecta y normaliza `postgres://` → `postgresql://`. Al arrancar, `app.py`
+  aplica migraciones y asegura el superadmin (`bootstrap.py`).
 - Variables en `.env` (local) / panel de Railway (prod). Plantilla en `.env.example`.
 
 ---
@@ -146,18 +160,19 @@ $env:FLASK_SKIP_DOTENV = "1"   # ver gotcha en sección 8
 & ".\venv\Scripts\python.exe" -m flask db migrate -m "mensaje"
 & ".\venv\Scripts\python.exe" -m flask db upgrade
 
-# Crear/actualizar el administrador del panel
+# Crear/actualizar el superadmin del panel
 & ".\venv\Scripts\python.exe" -m flask crear-admin --email "tu@email" --password "tu-pass"
 
-# Crear datos de ejemplo: exposición 'afesol_cero' (40 dibujos + 15 cuadros, placeholders)
+# Datos de ejemplo (placeholders)
 & ".\venv\Scripts\python.exe" -m flask seed-afesol-cero --reset
+& ".\venv\Scripts\python.exe" -m flask seed-rectangular --reset --publicar
 
-# Arrancar en local
-& ".\venv\Scripts\python.exe" app.py     # http://127.0.0.1:5000
+# Arrancar en local (accesible desde el móvil en la misma red con --host)
+& ".\venv\Scripts\python.exe" -m flask run --host=0.0.0.0   # http://127.0.0.1:5000
 ```
 
-**Panel de administración:** `/admin/login` (login) → `/admin/` (dashboard).
-Todo lo que cuelgue de `/admin` requiere sesión.
+**Paneles:** `/admin/login` → organizador · `/plataforma` → superadmin (el
+login enruta por rol).
 
 ---
 
@@ -166,31 +181,41 @@ Todo lo que cuelgue de `/admin` requiere sesión.
 - **`.env` del Escritorio:** existe `C:\Users\jordi\Desktop\.env` con una
   `DATABASE_URL` de **Render**. El CLI de `flask` auto-carga `.env` rastreando
   hacia carpetas superiores, así que **sin `FLASK_SKIP_DOTENV=1` los comandos
-  `flask` se conectan a Render en vez de a SQLite local**. El `config.py` de la
-  app ya carga solo el `.env` del proyecto, pero el CLI no.
-  → *Solución definitiva pendiente: mover/borrar ese `.env` del Escritorio.*
-- **psycopg2-binary:** usar `==2.9.10` (la 2.9.9 no tiene wheel para Python
-  3.13 e intenta compilar). En local no se usa (SQLite); solo en Railway.
+  `flask` se conectan a Render en vez de a SQLite local**.
+- **psycopg2-binary:** usar `==2.9.10` (la 2.9.9 no tiene wheel para Python 3.13).
+- **Caché del visor:** los módulos JS del 3D llevan versión en el import
+  (`room.js?v=N`) y una marca de build en consola (`[gallery] visor build vN`).
+  Al tocar el visor, **subir ambos** o el navegador servirá JS viejo.
+- **GPU Apple/Metal (Mac M1):** el visor se prueba también en Mac; los bugs
+  de Z-fighting/backface ya corregidos están documentados en los comentarios
+  de `room.js`/`painting.js` — no reintroducir `preserveDrawingBuffer` ni
+  `backFaceCulling=false`.
+- **Plantillas y zonas:** cada `codigo` de zona en `plantillas.py` debe tener
+  su tramo de pared homónimo en `room.js` (hay comprobación en los smoke
+  tests del scratchpad).
 
 ---
 
 ## 9. Despliegue en Railway
 
-- El repo está conectado; Railway hace build con Nixpacks (detecta Python por
-  `requirements.txt`) y arranca con el `Procfile`.
-- Generar dominio público: **Settings → Networking → Generate Domain**.
-- Postgres (Fase 6): **New → Database → PostgreSQL**; Railway inyecta
-  `DATABASE_URL`. Hay que ejecutar `flask db upgrade` contra la BD de prod.
+- **En producción**: dominio propio **galeriavirtual.org**; deploy automático
+  con cada push a `main` (build Nixpacks + `Procfile` con gunicorn).
+- Las **migraciones se aplican solas** al arrancar el proceso web (solo en
+  Postgres); el superadmin se asegura con `ADMIN_EMAIL`/`ADMIN_PASSWORD`.
+- Variables en el panel de Railway: `DATABASE_URL` (inyectada), Cloudinary
+  (`CLOUDINARY_*`), `SECRET_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`.
+- SEO: sitemap enviado a Google Search Console (`/sitemap.xml`).
 
 ---
 
 ## 10. Cómo retomar tras una interrupción
 
-1. Lee este documento y la sección **5 (hoja de ruta)** para ubicar la fase actual.
+1. Lee este documento y [funcionalidades.md](funcionalidades.md) para ubicarte.
 2. Verifica el entorno: `git status`, venv activo, `galeria_dev.db` presente.
 3. Si faltan tablas: `flask db upgrade` (con las variables de la sección 7).
 4. Revisa los commits recientes (`git log --oneline`) para ver hasta dónde se llegó.
-5. Continúa por la **siguiente fase no marcada** en la hoja de ruta.
+5. Continúa por lo **pendiente/aparcado** de funcionalidades.md o lo que pida
+   el momento.
 
 > Notas de diseño y decisiones también guardadas en la memoria del asistente
-> (`db-data-model`, `flujo-migraciones-dev`, `project-gva`).
+> (`db-data-model`, `flujo-migraciones-dev`, `project-gva`, `commits-coautoria-duo`).
