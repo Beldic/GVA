@@ -33,6 +33,7 @@ from backend.app.services.gallery import (
     og_de_expo,
     resumen_exposicion,
     serializar_sala,
+    video_embed,
 )
 
 bp = Blueprint("main", __name__)
@@ -160,6 +161,7 @@ def gallery_ficha(slug):
         og=og,
         autores=autores,
         logo=logo_organizador(expo.propietario),
+        video=video_embed(expo.video_url),
     )
 
 

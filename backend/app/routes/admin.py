@@ -53,6 +53,7 @@ from backend.app.plantillas import (
     ELASTICAS,
 )
 from backend.app.services import cloudinary_service, stats
+from backend.app.services.gallery import video_es_vertical
 from backend.app.utils import slugify
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -358,8 +359,10 @@ def exposicion_nueva():
             descripcion=form.descripcion.data or None,
             fecha_inicio=form.fecha_inicio.data,
             fecha_fin=form.fecha_fin.data,
+            video_url=(form.video_url.data or "").strip() or None,
             estado=ESTADO_BORRADOR,
         )
+        expo.video_vertical = video_es_vertical(expo.video_url)
         if _aplicar_visibilidad(expo, form):
             _aplicar_musica(expo, form)
             sala = Sala(
@@ -453,6 +456,10 @@ def exposicion_editar(exposicion_id):
         expo.descripcion = form.descripcion.data or None
         expo.fecha_inicio = form.fecha_inicio.data
         expo.fecha_fin = form.fecha_fin.data
+        video_nuevo = (form.video_url.data or "").strip() or None
+        if video_nuevo != expo.video_url:
+            expo.video_url = video_nuevo
+            expo.video_vertical = video_es_vertical(video_nuevo)
         _aplicar_musica(expo, form)
         db.session.commit()
         flash("Exposición actualizada.", "info")

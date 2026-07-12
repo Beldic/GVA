@@ -23,6 +23,8 @@ colección traes y elige la planta que mejor le siente.</p>
         {{ field(form.codigo_acceso, placeholder="El código que compartirás con los visitantes", autocomplete="off") }}
         <small class="admin-muted">{{ form.codigo_acceso.description }}</small>
     </div>
+    {{ field(form.video_url, placeholder="https://youtu.be/…") }}
+    <small class="admin-muted">{{ form.video_url.description }}</small>
     {{ field(form.musica) }}
     <small class="admin-muted">{{ form.musica.description }}</small>
     <p class="admin-muted wiz-organizador">Organiza: <strong>{{ current_user.nombre or current_user.email }}</strong></p>

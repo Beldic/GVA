@@ -90,6 +90,11 @@ class ExposicionForm(FlaskForm):
         validators=[Optional(), Length(min=4, max=64)],
         description="Mínimo 4 caracteres. Al editar, déjalo vacío para conservar el actual.",
     )
+    video_url = StringField(
+        "Vídeo de presentación",
+        validators=[Optional(), URL(), Length(max=500)],
+        description="Enlace de YouTube o Vimeo (o un mp4). Aparece en la ficha de la exposición.",
+    )
     musica = FileField(
         "Hilo musical",
         validators=[

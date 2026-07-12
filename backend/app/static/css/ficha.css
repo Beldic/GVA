@@ -147,6 +147,32 @@
     white-space: pre-line; /* respeta los párrafos que escriba el organizador */
 }
 
+/* ---- Vídeo de presentación (compacto, no invade) ---- */
+.ficha-video {
+    max-width: 560px;
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(125, 211, 252, 0.2);
+    background: #06101f;
+    box-shadow: 0 16px 44px rgba(2, 12, 27, 0.5);
+}
+
+.ficha-video iframe,
+.ficha-video video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Vídeo grabado con móvil (9:16): marco vertical compacto, como un teléfono */
+.ficha-video--vertical {
+    max-width: 300px;
+    aspect-ratio: 9 / 16;
+}
+
 /* ---- Autores ---- */
 .ficha-autores {
     display: flex;

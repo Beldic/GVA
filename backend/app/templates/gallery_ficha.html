@@ -58,6 +58,22 @@
     </section>
     {% endif %}
 
+    {% if video %}
+    <section class="ficha-seccion">
+        <h2 class="ficha-seccion-titulo">El autor presenta la exposición</h2>
+        <div class="ficha-video{% if expo.video_vertical %} ficha-video--vertical{% endif %}">
+            {% if video.tipo == 'iframe' %}
+            <iframe src="{{ video.src }}" loading="lazy" allowfullscreen
+                    allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    title="Vídeo de presentación de la exposición"></iframe>
+            {% else %}
+            <video src="{{ video.src }}" controls preload="metadata"></video>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+
     {% if autores %}
     <section class="ficha-seccion">
         <h2 class="ficha-seccion-titulo">{{ 'El autor' if autores|length == 1 else 'Los autores' }}</h2>

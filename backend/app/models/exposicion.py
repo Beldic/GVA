@@ -50,6 +50,10 @@ class Exposicion(db.Model):
     # Hilo musical de la exposición (audio en Cloudinary, opcional).
     musica_public_id = db.Column(db.String(255))
     musica_url = db.Column(db.String(500))
+    # Vídeo de presentación (enlace YouTube/Vimeo/mp4; se embebe en la ficha).
+    # video_vertical: True si es 9:16 (móvil); se detecta al guardar (oEmbed).
+    video_url = db.Column(db.String(500))
+    video_vertical = db.Column(db.Boolean)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

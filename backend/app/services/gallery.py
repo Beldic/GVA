@@ -4,12 +4,72 @@ El render de Babylon.js (static/js/gallery) consume esta estructura: la página
 la incrusta como JSON y los módulos la leen para construir la escena. El `codigo`
 de cada zona (far/near/left/right) mapea directamente a las paredes de room.js.
 """
+import json
 import os
+import re
+import urllib.parse
+import urllib.request
 
 from flask import current_app, url_for
 
 from backend.app.services import cloudinary_service
 from backend.app.utils import slugify
+
+_RE_YOUTUBE = re.compile(
+    r"(?:youtube\.com/(?:watch\?.*v=|shorts/|embed/)|youtu\.be/)([\w-]{6,20})"
+)
+_RE_VIMEO = re.compile(r"vimeo\.com/(?:video/)?(\d+)")
+
+
+def video_es_vertical(url):
+    """True si el vídeo es vertical (9:16, grabado con móvil), False si es
+    apaisado, None si no se pudo saber. Los Shorts de YouTube son verticales
+    por definición; para el resto se consulta el oEmbed público de
+    YouTube/Vimeo (best-effort, con timeout: un fallo no bloquea el guardado)."""
+    if not url:
+        return None
+    if "youtube.com/shorts/" in url:
+        return True
+    cuoted = urllib.parse.quote(url, safe="")
+    if _RE_YOUTUBE.search(url):
+        oembed = f"https://www.youtube.com/oembed?url={cuoted}&format=json"
+    elif _RE_VIMEO.search(url):
+        oembed = f"https://vimeo.com/api/oembed.json?url={cuoted}"
+    else:
+        return None
+    try:
+        with urllib.request.urlopen(oembed, timeout=4) as resp:
+            data = json.load(resp)
+        ancho, alto = data.get("width"), data.get("height")
+        if ancho and alto:
+            return alto > ancho
+    except Exception:
+        current_app.logger.warning("oEmbed no disponible para %s", url)
+    return None
+
+
+def video_embed(url):
+    """Interpreta el enlace de vídeo de una exposición y devuelve cómo
+    embeberlo: {"tipo": "iframe"|"mp4", "src": ...} o None si no se
+    reconoce. YouTube va por youtube-nocookie y Vimeo con dnt=1 (modo
+    privacidad: sin cookies de terceros hasta que el visitante da al play)."""
+    if not url:
+        return None
+    m = _RE_YOUTUBE.search(url)
+    if m:
+        return {
+            "tipo": "iframe",
+            "src": f"https://www.youtube-nocookie.com/embed/{m.group(1)}?rel=0",
+        }
+    m = _RE_VIMEO.search(url)
+    if m:
+        return {
+            "tipo": "iframe",
+            "src": f"https://player.vimeo.com/video/{m.group(1)}?dnt=1",
+        }
+    if url.lower().split("?")[0].endswith((".mp4", ".webm")):
+        return {"tipo": "mp4", "src": url}
+    return None
 
 
 def _imagen_url(obra) -> str:
