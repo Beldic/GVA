@@ -41,21 +41,41 @@
 }
 
 .ficha-organizador {
-    margin: 0 0 0.4rem;
+    margin: 0 0 0.7rem;
     font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.35em;
+    font-size: 0.68rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(186, 214, 240, 0.55);
+}
+
+.ficha-logo-enlace {
+    display: inline-block;
+    transition: transform 0.25s var(--easing-soft);
+}
+
+.ficha-logo-enlace:hover,
+.ficha-logo-enlace:focus-visible {
+    transform: translateY(-2px);
+    outline: none;
+}
+
+.ficha-organizador-nombre {
+    margin: 0 0 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
     color: var(--color-tech-soft);
 }
 
-.ficha-organizador a {
+.ficha-organizador-nombre a {
     color: inherit;
     text-decoration: none;
     border-bottom: 1px solid rgba(125, 211, 252, 0.35);
 }
 
-.ficha-organizador a:hover { color: var(--color-white); }
+.ficha-organizador-nombre a:hover { color: var(--color-white); }
 
 .ficha-titulo {
     margin: 0;

@@ -16,11 +16,21 @@
     <p class="ficha-volver"><a href="{{ url_for('main.index') }}">‹ Portal</a></p>
 
     <header class="ficha-cabecera">
+        {% if logo or (expo.propietario and expo.propietario.nombre) %}
+        <p class="ficha-organizador">Organiza</p>
+        {% endif %}
         {% if logo %}
+        {# El logo ya lleva la identidad: nada de repetir el nombre debajo. #}
+        {% if expo.propietario and expo.propietario.web %}
+        <a class="ficha-logo-enlace" href="{{ expo.propietario.web }}" target="_blank" rel="noopener"
+           title="{{ expo.propietario.nombre or 'Web del organizador' }}">
+            <img class="ficha-logo" src="{{ logo }}" alt="{{ expo.propietario.nombre or '' }}">
+        </a>
+        {% else %}
         <img class="ficha-logo" src="{{ logo }}" alt="{{ expo.propietario.nombre or '' }}">
         {% endif %}
-        {% if expo.propietario and expo.propietario.nombre %}
-        <p class="ficha-organizador">
+        {% elif expo.propietario and expo.propietario.nombre %}
+        <p class="ficha-organizador-nombre">
             {% if expo.propietario.web %}
             <a href="{{ expo.propietario.web }}" target="_blank" rel="noopener">{{ expo.propietario.nombre }}</a>
             {% else %}
