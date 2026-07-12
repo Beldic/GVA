@@ -7,6 +7,7 @@ from wtforms import (
     FloatField,
     IntegerField,
     PasswordField,
+    RadioField,
     SelectField,
     StringField,
     SubmitField,
@@ -70,6 +71,26 @@ class ExposicionForm(FlaskForm):
     submit = SubmitField("Guardar")
 
 
+class ExposicionNuevaForm(ExposicionForm):
+    """Asistente de nueva exposición: además de los datos de la exposición,
+    pide la colección estimada (para recomendar planta) y la planta de la
+    sala inicial, que se crea junto a la exposición."""
+
+    n_cuadros = IntegerField(
+        "Cuadros", validators=[Optional(), NumberRange(min=0)]
+    )
+    n_fotografias = IntegerField(
+        "Fotografías", validators=[Optional(), NumberRange(min=0)]
+    )
+    n_infografias = IntegerField(
+        "Infografías", validators=[Optional(), NumberRange(min=0)]
+    )
+    n_dibujos = IntegerField(
+        "Dibujos", validators=[Optional(), NumberRange(min=0)]
+    )
+    plantilla = RadioField("Planta de la sala", validators=[DataRequired()])
+
+
 class SalaForm(FlaskForm):
     nombre = StringField("Nombre de la sala", validators=[DataRequired(), Length(max=120)])
     plantilla_3d = SelectField("Plantilla", validators=[Optional()])
@@ -81,7 +102,13 @@ class ObraForm(FlaskForm):
     titulo = StringField("Título", validators=[DataRequired(), Length(max=200)])
     autor_id = SelectField("Autor", coerce=int, validators=[DataRequired()])
     tipo = SelectField(
-        "Tipo", choices=[("dibujo", "Dibujo"), ("cuadro", "Cuadro")],
+        "Tipo",
+        choices=[
+            ("cuadro", "Cuadro"),
+            ("fotografia", "Fotografía"),
+            ("infografia", "Infografía"),
+            ("dibujo", "Dibujo"),
+        ],
         validators=[Optional()],
     )
     anio = IntegerField("Año", validators=[Optional()])

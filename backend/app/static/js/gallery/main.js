@@ -1,8 +1,8 @@
-import { createScene } from "./scene.js?v=3";
+import { createScene } from "./scene.js?v=4";
 
 // Marca de build: sirve para comprobar en la consola del navegador que se está
 // cargando la versión NUEVA del visor y no una cacheada. Súbela al desplegar.
-console.log("[gallery] visor build v7");
+console.log("[gallery] visor build v8");
 
 const canvas = document.getElementById("renderCanvas");
 const doorLayer = document.getElementById("door-layer");

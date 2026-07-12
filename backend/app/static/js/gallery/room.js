@@ -40,45 +40,95 @@ function rectPlanta(width, depth, height, door = null) {
 // Entras por el fondo del pasillo (dibujos a los lados), avanzas y desemboca
 // por un arco en una estancia ancha con cuadros bien espaciados. La pared del
 // tabique de la puerta queda limpia (sin obra), solo con su arco de acceso.
-function plantaT() {
+// Elástica: `pasillo` = largo del pasillo, `estancia` = ancho de la estancia.
+function plantaT(pasillo = 12, estancia = 20) {
     const height = 4.2;
-    // Pasillo: x∈[-2.5,2.5], z∈[-15,-3]. Estancia: x∈[-10,10], z∈[-3,5].
+    const hE = estancia / 2;
+    const z0 = -3 - pasillo; // testero de entrada
     return {
         height,
         cells: [
-            { x: 0, z: -9, w: 5, d: 12 }, // pasillo
-            { x: 0, z: 1, w: 20, d: 8 }, // estancia
+            { x: 0, z: -3 - pasillo / 2, w: 5, d: pasillo }, // pasillo
+            { x: 0, z: 1, w: estancia, d: 8 }, // estancia
         ],
         walls: [
             // Pasillo — el tabique de la entrada es estructural (sin codigo → sin obra)
-            { x1: -2.5, z1: -15, x2: 2.5, z2: -15, nx: 0, nz: 1, door: { width: 1.4, height: 2.6 } },
-            { codigo: "pasillo_izq", x1: -2.5, z1: -15, x2: -2.5, z2: -3, nx: 1, nz: 0 },
-            { codigo: "pasillo_der", x1: 2.5, z1: -15, x2: 2.5, z2: -3, nx: -1, nz: 0 },
+            { x1: -2.5, z1: z0, x2: 2.5, z2: z0, nx: 0, nz: 1, door: { width: 1.4, height: 2.6 } },
+            { codigo: "pasillo_izq", x1: -2.5, z1: z0, x2: -2.5, z2: -3, nx: 1, nz: 0 },
+            { codigo: "pasillo_der", x1: 2.5, z1: z0, x2: 2.5, z2: -3, nx: -1, nz: 0 },
             // Estancia
-            { codigo: "fondo", x1: -10, z1: 5, x2: 10, z2: 5, nx: 0, nz: -1 },
-            { codigo: "hall_izq", x1: -10, z1: -3, x2: -10, z2: 5, nx: 1, nz: 0 },
-            { codigo: "hall_der", x1: 10, z1: -3, x2: 10, z2: 5, nx: -1, nz: 0 },
+            { codigo: "fondo", x1: -hE, z1: 5, x2: hE, z2: 5, nx: 0, nz: -1 },
+            { codigo: "hall_izq", x1: -hE, z1: -3, x2: -hE, z2: 5, nx: 1, nz: 0 },
+            { codigo: "hall_der", x1: hE, z1: -3, x2: hE, z2: 5, nx: -1, nz: 0 },
             // Pared de unión estancia↔pasillo, con arco central (ancho del pasillo)
             {
-                codigo: "hall_frente", x1: -10, z1: -3, x2: 10, z2: -3, nx: 0, nz: 1,
+                codigo: "hall_frente", x1: -hE, z1: -3, x2: hE, z2: -3, nx: 0, nz: 1,
                 door: { width: 5, height: 3.0 },
             },
         ],
-        door: { x: 0, z: -15, width: 1.4, height: 2.6, out: { x: 0, z: -1 } },
-        start: { x: 0, z: -13.8, lookAt: { x: 0, z: 0 } },
+        door: { x: 0, z: z0, width: 1.4, height: 2.6, out: { x: 0, z: -1 } },
+        start: { x: 0, z: z0 + 1.2, lookAt: { x: 0, z: 0 } },
     };
 }
 
+// ---- Planta en cruz (+): vestíbulo central con cuatro alas ----
+// Entras por el ala sur; cuadros en los fondos de las otras tres alas y
+// dibujos en los ocho costados. Alas de 5 m de ancho y `ala` m de fondo sobre
+// un vestíbulo de 5×5: el perímetro son 12 tramos alineados a ejes.
+function plantaCruz(ala = 6) {
+    const height = 3.6;
+    const a = 2.5; // medio ancho de ala
+    const b = a + ala; // extremo de cada ala
+    return {
+        height,
+        cells: [
+            { x: 0, z: 0, w: 5, d: 5 },                        // vestíbulo central
+            { x: 0, z: -(a + ala / 2), w: 5, d: ala },         // ala sur (entrada)
+            { x: 0, z: a + ala / 2, w: 5, d: ala },            // ala norte
+            { x: -(a + ala / 2), z: 0, w: ala, d: 5 },         // ala oeste
+            { x: a + ala / 2, z: 0, w: ala, d: 5 },            // ala este
+        ],
+        walls: [
+            // Ala sur — el testero de entrada es estructural (sin codigo)
+            { x1: -a, z1: -b, x2: a, z2: -b, nx: 0, nz: 1, door: { width: 1.4, height: 2.6 } },
+            { codigo: "entrada_izq", x1: -a, z1: -b, x2: -a, z2: -a, nx: 1, nz: 0 },
+            { codigo: "entrada_der", x1: a, z1: -b, x2: a, z2: -a, nx: -1, nz: 0 },
+            // Ala oeste
+            { codigo: "oeste_sur", x1: -b, z1: -a, x2: -a, z2: -a, nx: 0, nz: 1 },
+            { codigo: "oeste_fondo", x1: -b, z1: -a, x2: -b, z2: a, nx: 1, nz: 0 },
+            { codigo: "oeste_norte", x1: -b, z1: a, x2: -a, z2: a, nx: 0, nz: -1 },
+            // Ala este
+            { codigo: "este_sur", x1: a, z1: -a, x2: b, z2: -a, nx: 0, nz: 1 },
+            { codigo: "este_fondo", x1: b, z1: -a, x2: b, z2: a, nx: -1, nz: 0 },
+            { codigo: "este_norte", x1: a, z1: a, x2: b, z2: a, nx: 0, nz: -1 },
+            // Ala norte
+            { codigo: "norte_izq", x1: -a, z1: a, x2: -a, z2: b, nx: 1, nz: 0 },
+            { codigo: "fondo", x1: -a, z1: b, x2: a, z2: b, nx: 0, nz: -1 },
+            { codigo: "norte_der", x1: a, z1: a, x2: a, z2: b, nx: -1, nz: 0 },
+        ],
+        door: { x: 0, z: -b, width: 1.4, height: 2.6, out: { x: 0, z: -1 } },
+        start: { x: 0, z: -b + 1.2, lookAt: { x: 0, z: 0 } },
+    };
+}
+
+// Cada forma es una función de sus parámetros elásticos (sala.parametros,
+// calculados por el backend al crear la sala). Sin parámetros -> medidas por
+// defecto, que son las de las salas creadas antes de las plantas elásticas.
+const PUERTA = { wall: "near", width: 1.4, height: 2.3 };
+
 export const PLANTAS_GEO = {
-    "sala-clasica": rectPlanta(8, 6, 3.2),
-    "sala-rectangular": rectPlanta(11, 16, 3.4, { wall: "near", width: 1.4, height: 2.3 }),
-    "planta-t": plantaT(),
+    // La clásica también con su puerta: todas las plantas tienen entrada.
+    "sala-clasica": (p) => rectPlanta(p.ancho || 8, p.fondo || 6, 3.2, PUERTA),
+    "sala-rectangular": (p) => rectPlanta(p.ancho || 11, p.fondo || 16, 3.4, PUERTA),
+    "planta-cruz": (p) => plantaCruz(p.ala || 6),
+    "planta-t": (p) => plantaT(p.pasillo || 12, p.estancia || 20),
 };
 
 export const DEFAULT_PLANTA = "sala-clasica";
 
-export function plantaDe(plantilla) {
-    return PLANTAS_GEO[plantilla] || PLANTAS_GEO[DEFAULT_PLANTA];
+export function plantaDe(plantilla, params) {
+    const builder = PLANTAS_GEO[plantilla] || PLANTAS_GEO[DEFAULT_PLANTA];
+    return builder(params || {});
 }
 
 // Compatibilidad: la cámara importa ROOM como planta por defecto.
@@ -92,8 +142,8 @@ const wallFacingY = (nx, nz) => Math.atan2(-nx, nz);
 // Un cuadro (frente -Z local, ver painting.js) mira hacia (nx,nz) con esta.
 const paintingFacingY = (nx, nz) => Math.atan2(-nx, -nz);
 
-export function buildRoom(scene, plantilla) {
-    const planta = plantaDe(plantilla);
+export function buildRoom(scene, plantilla, params) {
+    const planta = plantaDe(plantilla, params);
     const { height } = planta;
 
     // ---- Materiales ----

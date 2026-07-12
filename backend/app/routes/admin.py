@@ -16,7 +16,13 @@ from flask_login import current_user, login_required, login_user, logout_user
 
 from backend.app.authz import exigir_acceso_exposicion, exigir_propietario
 from backend.app.extensions import db
-from backend.app.forms import AutorForm, ExposicionForm, ObraForm, SalaForm
+from backend.app.forms import (
+    AutorForm,
+    ExposicionForm,
+    ExposicionNuevaForm,
+    ObraForm,
+    SalaForm,
+)
 from backend.app.models import Autor, Exposicion, Obra, Sala, Usuario, Zona
 from backend.app.models.exposicion import (
     APERTURA_CERRADA,
@@ -24,12 +30,25 @@ from backend.app.models.exposicion import (
     ESTADO_PUBLICADA,
     VISIBILIDAD_CODIGO,
 )
-from backend.app.models.obra import PLACEHOLDER_IMAGEN, TIPO_CUADRO, TIPO_DIBUJO
+import json
+
+from backend.app.models.obra import (
+    PLACEHOLDER_IMAGEN,
+    TIPO_CUADRO,
+    TIPO_DIBUJO,
+    TIPOS_OBRA,
+)
 from backend.app.models.zona import TIPO_MIXTO
 from backend.app.plantillas import (
+    ajustar_planta,
+    capacidades,
+    catalogo_plantillas,
     nombre_plantilla,
     opciones_plantilla,
     sembrar_zonas,
+    sembrar_zonas_elasticas,
+    texto_deficit,
+    ELASTICAS,
 )
 from backend.app.services import cloudinary_service, stats
 from backend.app.utils import slugify
@@ -243,7 +262,12 @@ def exposiciones_list():
 @bp.route("/exposiciones/nueva", methods=["GET", "POST"])
 @login_required
 def exposicion_nueva():
-    form = ExposicionForm()
+    """Asistente: la exposición nace con su sala inicial ya montada. La
+    colección estimada (nº de cuadros/dibujos) solo guía la elección de
+    planta; no se persiste."""
+    form = ExposicionNuevaForm()
+    form.plantilla.choices = opciones_plantilla()
+    plantillas = catalogo_plantillas()
     if form.validate_on_submit():
         base = slugify(form.slug.data or form.titulo.data)
         expo = Exposicion(
@@ -257,13 +281,82 @@ def exposicion_nueva():
         )
         if _aplicar_visibilidad(expo, form):
             _aplicar_musica(expo, form)
-            db.session.add(expo)
+            sala = Sala(
+                exposicion=expo,
+                nombre="Sala principal",
+                plantilla_3d=form.plantilla.data,
+                orden=0,
+            )
+            coleccion = {
+                "cuadro": form.n_cuadros.data or 0,
+                "fotografia": form.n_fotografias.data or 0,
+                "infografia": form.n_infografias.data or 0,
+                "dibujo": form.n_dibujos.data or 0,
+            }
+            if any(coleccion.values()):
+                # Planta elástica: dimensiones y reparto según la colección.
+                ajuste = ajustar_planta(form.plantilla.data, coleccion)
+                sala.parametros = json.dumps(ajuste["params"])
+                sembrar_zonas_elasticas(sala, ajuste["zonas"])
+                resumen = " · ".join(
+                    f"{n} {TIPOS_OBRA[t]['nombre'].lower()}s"
+                    for t, n in ajuste["capacidad_por_tipo"].items()
+                )
+                flash(
+                    f"Exposición creada con su sala a medida "
+                    f"({nombre_plantilla(form.plantilla.data)}, {ajuste['dims_texto']}; "
+                    f"huecos: {resumen}).",
+                    "info",
+                )
+                if ajuste["deficit"]:
+                    flash(
+                        "Ni estirada al máximo cabe todo: quedan fuera "
+                        f"{texto_deficit(ajuste['deficit'])}. Puedes añadir otra "
+                        "sala desde la ficha de la exposición.",
+                        "error",
+                    )
+            else:
+                # Sin colección declarada: medidas y zonas por defecto.
+                sembrar_zonas(sala)
+                caps = capacidades(form.plantilla.data)
+                flash(
+                    f"Exposición creada con su sala ({nombre_plantilla(form.plantilla.data)}: "
+                    f"{caps['cuadros']} cuadros + {caps['dibujos']} dibujos).",
+                    "info",
+                )
+            db.session.add_all([expo, sala])
             db.session.commit()
-            flash("Exposición creada.", "info")
-            return redirect(url_for("admin.exposiciones_list"))
+            return redirect(url_for("admin.exposicion_detail", exposicion_id=expo.id))
     return render_template(
-        "admin/exposicion_form.html", form=form, titulo="Nueva exposición"
+        "admin/exposicion_nueva.html",
+        form=form,
+        plantillas=plantillas,
+        titulo="Nueva exposición",
     )
+
+
+@bp.post("/plantas/ajustar")
+@login_required
+def plantas_ajustar():
+    """Recomendación en vivo del asistente: para la colección recibida, cómo
+    se estira cada planta y si la acoge entera (misma fuente de verdad que la
+    creación)."""
+    data = request.get_json(silent=True) or {}
+    coleccion = {
+        t: max(int(data.get(f"n_{t}") or 0), 0)
+        for t in ("cuadro", "fotografia", "infografia", "dibujo")
+    }
+    if not any(coleccion.values()):
+        return {"con_datos": False, "plantas": {}}
+    plantas = {}
+    for codigo in ELASTICAS:
+        ajuste = ajustar_planta(codigo, coleccion)
+        plantas[codigo] = {
+            "cabe": not ajuste["deficit"],
+            "dims": ajuste["dims_texto"],
+            "deficit": texto_deficit(ajuste["deficit"]) if ajuste["deficit"] else "",
+        }
+    return {"con_datos": True, "plantas": plantas}
 
 
 @bp.route("/exposiciones/<int:exposicion_id>/editar", methods=["GET", "POST"])
@@ -643,8 +736,10 @@ def obras_subir_form(sala_id):
         "admin/obras_bulk.html",
         sala=sala,
         autores=autores,
-        libres_dibujo=len(_huecos_libres(sala, TIPO_DIBUJO)),
-        libres_cuadro=len(_huecos_libres(sala, TIPO_CUADRO)),
+        tipos=[
+            {"codigo": t, "nombre": info["nombre"], "libres": len(_huecos_libres(sala, t))}
+            for t, info in TIPOS_OBRA.items()
+        ],
         cloudinary_ok=cloudinary_service.esta_configurado(),
     )
 
@@ -668,7 +763,7 @@ def obras_subir(sala_id):
 
     data = request.get_json(silent=True) or {}
     tipo = data.get("tipo")
-    if tipo not in (TIPO_DIBUJO, TIPO_CUADRO):
+    if tipo not in TIPOS_OBRA:
         return {"error": "Tipo inválido."}, 400
     imagenes = data.get("imagenes") or []
     if not imagenes:
@@ -689,7 +784,8 @@ def obras_subir(sala_id):
             return {"error": "Elige un autor válido o crea uno nuevo."}, 400
 
     huecos = _huecos_libres(sala, tipo)
-    ancho, alto = (29.7, 42.0) if tipo == TIPO_DIBUJO else (100.0, 80.0)
+    ancho = TIPOS_OBRA[tipo]["ancho_cm"]
+    alto = TIPOS_OBRA[tipo]["alto_cm"]
     creadas = 0
     sin_hueco = []
     for img in imagenes:

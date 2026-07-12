@@ -23,8 +23,9 @@
     <label class="admin-field">
         <span>Tipo de obra</span>
         <select id="bulk-tipo" class="admin-input">
-            <option value="dibujo">Dibujos — {{ libres_dibujo }} huecos libres</option>
-            <option value="cuadro">Cuadros — {{ libres_cuadro }} huecos libres</option>
+            {% for t in tipos %}
+            <option value="{{ t.codigo }}">{{ t.nombre }}s — {{ t.libres }} huecos libres</option>
+            {% endfor %}
         </select>
     </label>
 

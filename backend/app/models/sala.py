@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timezone
 
 from backend.app.extensions import db
@@ -5,7 +6,9 @@ from backend.app.extensions import db
 
 class Sala(db.Model):
     """Un espacio 3D dentro de una exposición. `plantilla_3d` identifica la
-    geometría que usa el frontend; `orden` define el recorrido entre salas."""
+    forma de la planta; `parametros` (JSON) guarda sus dimensiones elásticas
+    calculadas al crearla — NULL en salas antiguas, que usan las medidas por
+    defecto de la forma. `orden` define el recorrido entre salas."""
 
     __tablename__ = "sala"
 
@@ -15,6 +18,7 @@ class Sala(db.Model):
     )
     nombre = db.Column(db.String(120), nullable=False)
     plantilla_3d = db.Column(db.String(80), nullable=False)
+    parametros = db.Column(db.Text)
     orden = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
@@ -27,6 +31,16 @@ class Sala(db.Model):
         cascade="all, delete-orphan",
         order_by="Zona.orden",
     )
+
+    @property
+    def dimensiones(self):
+        """Parámetros de la planta como dict, o None (medidas por defecto)."""
+        if not self.parametros:
+            return None
+        try:
+            return json.loads(self.parametros)
+        except ValueError:
+            return None
 
     def __repr__(self) -> str:
         return f"<Sala {self.nombre}>"

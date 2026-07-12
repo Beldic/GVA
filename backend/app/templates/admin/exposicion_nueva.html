@@ -1,0 +1,129 @@
+{% extends "admin/_layout.html" %}
+{% from "admin/_macros.html" import field %}
+
+{% block admin_title %}{{ titulo }}{% endblock %}
+
+{% block admin_content %}
+<h1 class="admin-h1">{{ titulo }}</h1>
+<p class="admin-lead">Tu exposición nace con su sala montada: cuéntanos qué
+colección traes y elige la planta que mejor le siente.</p>
+
+<form method="post" enctype="multipart/form-data" class="admin-form admin-form-wide">
+    {{ form.hidden_tag() }}
+
+    <h2 class="admin-h2 wiz-seccion">1 · La exposición</h2>
+    {{ field(form.titulo) }}
+    {{ field(form.descripcion, rows=3, placeholder="El leitmotiv: de qué va la muestra, en dos o tres frases") }}
+    <div class="admin-form-row">
+        {{ field(form.fecha_inicio) }}
+        {{ field(form.fecha_fin) }}
+    </div>
+    {{ field(form.visibilidad) }}
+    <div id="campo-codigo" {% if form.visibilidad.data != 'codigo' %}hidden{% endif %}>
+        {{ field(form.codigo_acceso, placeholder="El código que compartirás con los visitantes", autocomplete="off") }}
+        <small class="admin-muted">{{ form.codigo_acceso.description }}</small>
+    </div>
+    {{ field(form.musica) }}
+    <small class="admin-muted">{{ form.musica.description }}</small>
+    <p class="admin-muted wiz-organizador">Organiza: <strong>{{ current_user.nombre or current_user.email }}</strong></p>
+
+    <h2 class="admin-h2 wiz-seccion">2 · Tu colección</h2>
+    <p class="admin-muted">Número y tipo de obras. La planta que elijas se
+    <strong>estirará a medida</strong> para acogerlas (dentro de unos límites
+    generosos), dedicando cada pared a un tipo.</p>
+    <div class="admin-form-row">
+        {{ field(form.n_cuadros, min=0, placeholder="0") }}
+        {{ field(form.n_fotografias, min=0, placeholder="0") }}
+        {{ field(form.n_infografias, min=0, placeholder="0") }}
+        {{ field(form.n_dibujos, min=0, placeholder="0") }}
+    </div>
+
+    <h2 class="admin-h2 wiz-seccion">3 · La planta de la sala</h2>
+    {% for e in form.plantilla.errors %}<small class="admin-error">{{ e }}</small>{% endfor %}
+    <div class="plan-cards">
+        {% for p in plantillas %}
+        <label class="plan-card" data-plantilla="{{ p.codigo }}">
+            <input type="radio" name="plantilla" value="{{ p.codigo }}"
+                   {% if form.plantilla.data == p.codigo %}checked{% endif %} required>
+            <span class="plan-card-cuerpo">
+                <span class="plan-card-nombre">{{ p.nombre }}</span>
+                <span class="plan-card-desc">{{ p.descripcion }}</span>
+                <span class="plan-card-caps">
+                    <span class="plan-card-fit" hidden></span>
+                </span>
+            </span>
+        </label>
+        {% endfor %}
+    </div>
+    <p class="admin-muted wiz-nota">Si tu colección desborda incluso la planta
+    estirada al máximo, la exposición se crea igualmente y te avisamos del
+    excedente: podrás añadir otra sala desde su ficha.</p>
+
+    <div class="admin-form-actions">
+        <button type="submit" class="admin-btn">Crear exposición y sala</button>
+        <a href="{{ url_for('admin.exposiciones_list') }}" class="admin-cancel">Cancelar</a>
+    </div>
+</form>
+
+<script>
+(function () {
+    // Muestra/oculta el código según la visibilidad (como en el form de edición).
+    const select = document.getElementById("visibilidad");
+    const campo = document.getElementById("campo-codigo");
+    if (select && campo) {
+        const actualizar = () => { campo.hidden = select.value !== "codigo"; };
+        select.addEventListener("change", actualizar);
+        actualizar();
+    }
+
+    // Recomendación en vivo: consulta al algoritmo real de ajuste (servidor)
+    // cómo se estira cada planta para la colección tecleada.
+    const campos = ["n_cuadros", "n_fotografias", "n_infografias", "n_dibujos"]
+        .map((id) => document.getElementById(id))
+        .filter(Boolean);
+    const cards = document.querySelectorAll(".plan-card");
+    const csrf = document.querySelector('input[name="csrf_token"]');
+    let temporizador = null;
+
+    function pintar(datos) {
+        cards.forEach((card) => {
+            const fit = card.querySelector(".plan-card-fit");
+            card.classList.remove("plan-card--ok", "plan-card--corta");
+            if (!datos.con_datos) { fit.hidden = true; return; }
+            const r = datos.plantas[card.dataset.plantilla];
+            if (!r) { fit.hidden = true; return; }
+            fit.hidden = false;
+            if (r.cabe) {
+                card.classList.add("plan-card--ok");
+                fit.textContent = `✓ Cabe estirándose a ${r.dims}`;
+            } else {
+                card.classList.add("plan-card--corta");
+                fit.textContent = `✗ Ni al máximo (${r.dims}): quedan fuera ${r.deficit}`;
+            }
+        });
+    }
+
+    async function evaluar() {
+        const cuerpo = {};
+        campos.forEach((c) => { cuerpo[c.id] = parseInt(c.value, 10) || 0; });
+        try {
+            const resp = await fetch("{{ url_for('admin.plantas_ajustar') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrf ? csrf.value : "",
+                },
+                body: JSON.stringify(cuerpo),
+            });
+            if (resp.ok) pintar(await resp.json());
+        } catch (e) { /* sin recomendación en vivo; el envío sigue funcionando */ }
+    }
+
+    campos.forEach((c) => c.addEventListener("input", () => {
+        window.clearTimeout(temporizador);
+        temporizador = window.setTimeout(evaluar, 350);
+    }));
+    evaluar();
+})();
+</script>
+{% endblock %}

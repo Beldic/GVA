@@ -1,6 +1,6 @@
-import { buildRoom, slotPlacement } from "./room.js?v=2";
+import { buildRoom, slotPlacement } from "./room.js?v=3";
 import { buildPainting } from "./painting.js?v=3";
-import { createFirstPersonCamera } from "./camera.js?v=2";
+import { createFirstPersonCamera } from "./camera.js?v=3";
 
 export function createScene(engine, canvas, datos, options = {}) {
     const scene = new BABYLON.Scene(engine);
@@ -13,8 +13,8 @@ export function createScene(engine, canvas, datos, options = {}) {
 
     const salaData = datos.sala;
 
-    // ---- Geometría (según la plantilla de la sala) ----
-    const planta = buildRoom(scene, salaData.plantilla_3d);
+    // ---- Geometría (forma de la plantilla + dimensiones elásticas) ----
+    const planta = buildRoom(scene, salaData.plantilla_3d, salaData.parametros);
 
     // ---- Iluminación: base ambiental + fila de focos cálidos en el techo ----
     const hemi = new BABYLON.HemisphericLight(

@@ -3,7 +3,7 @@
 {% block admin_title %}{{ sala.nombre }}{% endblock %}
 
 {% block admin_content %}
-{% set TIPOS = {'dibujo': 'Dibujos', 'cuadro': 'Cuadros', 'mixto': 'Mixto'} %}
+{% set TIPOS = {'dibujo': 'Dibujos', 'cuadro': 'Cuadros', 'fotografia': 'Fotografías', 'infografia': 'Infografías', 'mixto': 'Mixto'} %}
 
 <p class="admin-breadcrumb">
     <a href="{{ url_for('admin.exposicion_detail', exposicion_id=sala.exposicion_id) }}">‹ {{ sala.exposicion.titulo }}</a>

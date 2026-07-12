@@ -505,6 +505,67 @@ td.admin-actions > *:not(:last-child) {
 
 .stat-nota { margin: -0.5rem 0 0.9rem; }
 
+/* ---- Asistente de nueva exposición ---- */
+.wiz-seccion {
+    margin: 2rem 0 0.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--gva-borde);
+    color: var(--gva-azul-claro);
+    font-size: 1.05rem;
+}
+
+.wiz-organizador { margin: 0.6rem 0 0; }
+.wiz-nota { margin: 0.7rem 0 0; }
+
+.plan-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.plan-card {
+    display: flex;
+    gap: 0.7rem;
+    padding: 1rem 1.1rem;
+    border: 2px solid var(--gva-borde);
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.plan-card:hover { border-color: var(--gva-azul-claro); }
+
+.plan-card:has(input:checked) {
+    border-color: var(--gva-azul);
+    box-shadow: 0 0 0 3px rgba(47, 90, 147, 0.15);
+}
+
+.plan-card input { margin-top: 0.25rem; }
+
+.plan-card-cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.plan-card-nombre { font-weight: 600; color: var(--gva-azul); }
+
+.plan-card-desc { font-size: 0.82rem; color: #5a6b82; line-height: 1.4; }
+
+.plan-card-caps {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+}
+
+.plan-card-fit { font-size: 0.78rem; font-weight: 600; }
+.plan-card--ok .plan-card-fit { color: #1b7a4b; }
+.plan-card--corta .plan-card-fit { color: #b3541e; }
+.plan-card--ok { border-color: #4da47e; }
+
 /* ---- Badges de estado ---- */
 .admin-badge {
     display: inline-block;

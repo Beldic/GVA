@@ -24,6 +24,7 @@ def _serializar_obra(obra) -> dict:
     return {
         "id": obra.id,
         "orden": obra.orden,
+        "tipo": obra.tipo,
         "titulo": obra.titulo,
         "autor": obra.autor.nombre,
         "anio": obra.anio,
@@ -126,6 +127,7 @@ def serializar_sala(sala) -> dict:
         "sala": {
             "nombre": sala.nombre,
             "plantilla_3d": sala.plantilla_3d,
+            "parametros": sala.dimensiones,
             "zonas": [
                 {
                     "codigo": zona.codigo,

@@ -4,6 +4,17 @@ from backend.app.extensions import db
 
 TIPO_DIBUJO = "dibujo"
 TIPO_CUADRO = "cuadro"
+TIPO_FOTOGRAFIA = "fotografia"
+TIPO_INFOGRAFIA = "infografia"
+
+# Catálogo de tipos: etiqueta visible y medidas por defecto (cm) cuando la
+# obra no trae las suyas (carga múltiple, placeholder del 3D).
+TIPOS_OBRA = {
+    TIPO_CUADRO: {"nombre": "Cuadro", "ancho_cm": 100.0, "alto_cm": 80.0},
+    TIPO_FOTOGRAFIA: {"nombre": "Fotografía", "ancho_cm": 60.0, "alto_cm": 40.0},
+    TIPO_INFOGRAFIA: {"nombre": "Infografía", "ancho_cm": 70.0, "alto_cm": 100.0},
+    TIPO_DIBUJO: {"nombre": "Dibujo", "ancho_cm": 29.7, "alto_cm": 42.0},
+}
 
 # Imagen por defecto mientras no se sube la definitiva a Cloudinary (Fase 4).
 PLACEHOLDER_IMAGEN = "/frontend-assets/images/afesol4.png"

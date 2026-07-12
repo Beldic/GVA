@@ -1,13 +1,22 @@
 // Construye un cuadro (marco + lienzo + placa) a partir de los datos de una obra
 // y lo coloca contra una pared usando el `placement` calculado por slotPlacement.
 const PAINTING = {
-    defaultSize: 1.0, // m, fallback cuando la obra no trae medidas
+    defaultSize: 1.0, // m, fallback cuando la obra no trae medidas ni tipo
     maxSize: 2.4, // m, tope de seguridad por dimensión
     frameThickness: 0.08,
     frameDepth: 0.06,
     centerY: 1.75,
     wallOffset: 0.02, // separación de la pared para evitar z-fighting
     slotMargin: 0.3, // m, aire mínimo entre cuadros contiguos del mismo hueco
+};
+
+// Medidas por defecto (m) según el tipo de obra, cuando no trae las suyas.
+// Espejo de TIPOS_OBRA en el backend (obra.py).
+const SIZE_BY_TIPO = {
+    cuadro: { w: 1.0, h: 0.8 },
+    fotografia: { w: 0.6, h: 0.4 },
+    infografia: { w: 0.7, h: 1.0 },
+    dibujo: { w: 0.297, h: 0.42 },
 };
 
 const PLAQUE = {
@@ -115,8 +124,9 @@ export function buildPainting(scene, obra, placement) {
 // Tamaño del lienzo en metros: medidas reales (cm→m) con topes y recorte al
 // ancho de hueco disponible, manteniendo la proporción.
 function canvasSize(obra, slotWidth) {
-    let w = obra.ancho_cm ? obra.ancho_cm / 100 : PAINTING.defaultSize;
-    let h = obra.alto_cm ? obra.alto_cm / 100 : PAINTING.defaultSize;
+    const porTipo = SIZE_BY_TIPO[obra.tipo] || { w: PAINTING.defaultSize, h: PAINTING.defaultSize };
+    let w = obra.ancho_cm ? obra.ancho_cm / 100 : porTipo.w;
+    let h = obra.alto_cm ? obra.alto_cm / 100 : porTipo.h;
 
     const limitW = Math.min(
         PAINTING.maxSize,
