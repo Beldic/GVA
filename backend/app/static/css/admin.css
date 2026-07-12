@@ -505,6 +505,50 @@ td.admin-actions > *:not(:last-child) {
 
 .stat-nota { margin: -0.5rem 0 0.9rem; }
 
+/* ---- Zona de peligro ---- */
+.admin-danger {
+    margin-top: 3rem;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid #e3b1b1;
+    border-radius: 12px;
+    background: #fdf6f6;
+}
+
+.admin-danger-titulo {
+    margin: 0 0 0.9rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #a33a3a;
+}
+
+.admin-danger-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+}
+
+.admin-danger-fila p { margin: 0.3rem 0 0; }
+
+.admin-btn-danger {
+    padding: 0.6rem 1.3rem;
+    border: 1px solid #c0392b;
+    border-radius: 8px;
+    background: transparent;
+    color: #c0392b;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+}
+
+.admin-btn-danger:hover {
+    background: #c0392b;
+    color: #fff;
+}
+
 .admin-preview--retrato {
     width: 96px;
     height: 96px;

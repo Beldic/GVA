@@ -15,9 +15,17 @@
 <canvas id="renderCanvas" touch-action="none"></canvas>
 
 <div id="hud-top" class="hud hud-top">
+    {# El gestor sale de vuelta a su panel; el visitante, al portal. La
+       animación de salida (main.js) navega al href de este enlace. #}
+    {% if es_gestor and expo %}
+    <a href="{{ url_for('admin.exposicion_detail', exposicion_id=expo.id) }}" id="salir-link" class="hud-link" title="Volver al panel">
+        <span aria-hidden="true">‹</span> Panel
+    </a>
+    {% else %}
     <a href="{{ url_for('main.index') }}" id="salir-link" class="hud-link" title="Salir al portal">
         <span aria-hidden="true">‹</span> Salir
     </a>
+    {% endif %}
     {% if datos %}
     <span class="hud-title">{{ datos.sala.nombre }} · {{ datos.exposicion.titulo }}{% if es_preview %} <span class="hud-preview">Borrador · previsualización</span>{% endif %}</span>
     {% endif %}
@@ -137,7 +145,7 @@
         <h2 class="overlay-title">{{ datos.sala.nombre }}</h2>
         <p class="overlay-text">Haz clic para continuar la visita.</p>
         <button id="resume-btn" type="button" class="overlay-btn">Continuar</button>
-        <button id="resume-salir" type="button" class="overlay-exit">Salir al portal</button>
+        <button id="resume-salir" type="button" class="overlay-exit">{{ 'Volver al panel' if es_gestor else 'Salir al portal' }}</button>
     </div>
 </div>
 

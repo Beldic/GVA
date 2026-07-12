@@ -124,14 +124,18 @@ def gallery(slug):
         _registrar_visita(expo)
     datos = serializar_sala(expo.salas[0]) if expo.salas else None
     es_preview = expo.estado != ESTADO_PUBLICADA
+    # Para el gestor, la salida del visor vuelve a su panel, no al portal.
+    es_gestor = _puede_gestionar(expo)
     # Modo 2D (?modo=2d): la misma sala como galería vertical, pensada para
     # móvil. Pasa por las mismas puertas de acceso que el 3D.
     if request.args.get("modo") == "2d":
         return render_template(
-            "gallery_2d.html", datos=datos, og=og, expo=expo, es_preview=es_preview
+            "gallery_2d.html", datos=datos, og=og, expo=expo,
+            es_preview=es_preview, es_gestor=es_gestor,
         )
     return render_template(
-        "gallery.html", datos=datos, og=og, expo=expo, es_preview=es_preview
+        "gallery.html", datos=datos, og=og, expo=expo,
+        es_preview=es_preview, es_gestor=es_gestor,
     )
 
 

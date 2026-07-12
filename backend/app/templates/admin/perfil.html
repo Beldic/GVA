@@ -28,4 +28,18 @@ portal y en la ficha de cada una de tus exposiciones.</p>
         <a href="{{ url_for('admin.dashboard') }}" class="admin-cancel">Cancelar</a>
     </div>
 </form>
+
+<h2 class="admin-h2 wiz-seccion">Cambiar contraseña</h2>
+<form method="post" action="{{ url_for('admin.perfil_password') }}" class="admin-form admin-form-wide">
+    {{ form_password.hidden_tag() }}
+    {{ field(form_password.actual, autocomplete="current-password") }}
+    <div class="admin-form-row">
+        {{ field(form_password.nueva, autocomplete="new-password") }}
+        {{ field(form_password.confirmar, autocomplete="new-password") }}
+    </div>
+    <small class="admin-muted">Mínimo 8 caracteres.</small>
+    <div class="admin-form-actions">
+        <button type="submit" class="admin-btn">Cambiar contraseña</button>
+    </div>
+</form>
 {% endblock %}

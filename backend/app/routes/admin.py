@@ -18,6 +18,7 @@ from backend.app.authz import exigir_acceso_exposicion, exigir_propietario
 from backend.app.extensions import db
 from backend.app.forms import (
     AutorForm,
+    CambioPasswordForm,
     ExposicionForm,
     ExposicionNuevaForm,
     ObraForm,
@@ -145,8 +146,30 @@ def perfil():
         flash("Perfil guardado.", "info")
         return redirect(url_for("admin.perfil"))
     return render_template(
-        "admin/perfil.html", form=form, logo_actual=current_user.logo_url
+        "admin/perfil.html",
+        form=form,
+        form_password=CambioPasswordForm(),
+        logo_actual=current_user.logo_url,
     )
+
+
+@bp.post("/perfil/password")
+@login_required
+def perfil_password():
+    """Cambio de contraseña de la propia cuenta: exige la actual."""
+    form = CambioPasswordForm()
+    if form.validate_on_submit():
+        if not current_user.check_password(form.actual.data):
+            flash("La contraseña actual no es correcta.", "error")
+        else:
+            current_user.set_password(form.nueva.data)
+            db.session.commit()
+            flash("Contraseña cambiada.", "info")
+    else:
+        for errores in form.errors.values():
+            for e in errores:
+                flash(e, "error")
+    return redirect(url_for("admin.perfil"))
 
 
 # --------------------------------------------------------------------------
@@ -500,9 +523,18 @@ def exposicion_borrar(exposicion_id):
     expo = db.get_or_404(Exposicion, exposicion_id)
     exigir_acceso_exposicion(expo)
     musica_public_id = expo.musica_public_id
+    # Imágenes de las obras: se recogen antes del borrado y se limpian de
+    # Cloudinary después (best-effort), para no dejar huérfanas.
+    imagenes = [
+        o.cloudinary_public_id
+        for sala in expo.salas for zona in sala.zonas for o in zona.obras
+        if o.cloudinary_public_id
+    ]
     db.session.delete(expo)
     db.session.commit()
-    cloudinary_service.eliminar_audio(musica_public_id)  # pista huérfana
+    for public_id in imagenes:
+        cloudinary_service.eliminar_imagen(public_id)
+    cloudinary_service.eliminar_audio(musica_public_id)
     flash("Exposición borrada.", "info")
     return redirect(url_for("admin.exposiciones_list"))
 

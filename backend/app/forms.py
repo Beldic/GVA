@@ -16,6 +16,7 @@ from wtforms import (
 from wtforms.validators import (
     URL,
     DataRequired,
+    EqualTo,
     Length,
     NumberRange,
     Optional,
@@ -155,6 +156,20 @@ class ObraForm(FlaskForm):
         ],
     )
     submit = SubmitField("Guardar")
+
+
+class CambioPasswordForm(FlaskForm):
+    """Cambio de contraseña de la propia cuenta (Mi perfil)."""
+
+    actual = PasswordField("Contraseña actual", validators=[DataRequired()])
+    nueva = PasswordField(
+        "Nueva contraseña", validators=[DataRequired(), Length(min=8, max=128)]
+    )
+    confirmar = PasswordField(
+        "Repite la nueva contraseña",
+        validators=[DataRequired(), EqualTo("nueva", message="Las contraseñas no coinciden.")],
+    )
+    submit_password = SubmitField("Cambiar contraseña")
 
 
 class OrganizadorForm(FlaskForm):

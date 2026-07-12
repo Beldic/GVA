@@ -13,7 +13,11 @@
 {% block content %}
 {% if datos %}
 <header class="g2d-hero">
+    {% if es_gestor and expo %}
+    <a class="g2d-volver" href="{{ url_for('admin.exposicion_detail', exposicion_id=expo.id) }}">‹ Volver al panel</a>
+    {% else %}
     <a class="g2d-volver" href="{{ url_for('main.index') }}">‹ Portal</a>
+    {% endif %}
     {% if es_preview %}<p class="g2d-preview">Borrador · previsualización</p>{% endif %}
     {% if datos.exposicion.organizador %}
     <p class="g2d-eyebrow">{{ datos.exposicion.organizador }}</p>

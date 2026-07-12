@@ -58,4 +58,21 @@
 {% else %}
 <p class="admin-empty">Esta exposición aún no tiene salas. Añade la primera.</p>
 {% endif %}
+
+<section class="admin-danger">
+    <h2 class="admin-danger-titulo">Zona de peligro</h2>
+    <div class="admin-danger-fila">
+        <div>
+            <strong>Borrar esta exposición</strong>
+            <p class="admin-muted">Elimina la exposición con sus salas, zonas, obras,
+            estadísticas y sus imágenes de Cloudinary.
+            <strong>No se puede deshacer.</strong></p>
+        </div>
+        <form method="post" action="{{ url_for('admin.exposicion_borrar', exposicion_id=expo.id) }}"
+              onsubmit="return confirm('¿Borrar «{{ expo.titulo }}» y TODO su contenido? Esta acción no se puede deshacer.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="admin-btn-danger">Borrar exposición</button>
+        </form>
+    </div>
+</section>
 {% endblock %}
