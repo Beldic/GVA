@@ -45,40 +45,20 @@
     {% endfor %}
 
     {% if og %}
+    {% from "_iconos_rrss.html" import icono_rrss, url_compartir %}
     {% set texto_compartir = 'Visita «' ~ datos.exposicion.titulo ~ '» en la Galería Virtual' %}
     <div class="g2d-compartir" aria-label="Compartir esta exposición">
         <span class="g2d-compartir-titulo">Comparte la exposición</span>
         <div class="g2d-compartir-fila">
+            {% for red, etiqueta in [('whatsapp', 'WhatsApp'), ('x', 'X'), ('facebook', 'Facebook'), ('telegram', 'Telegram'), ('linkedin', 'LinkedIn')] %}
             <a class="g2d-share" target="_blank" rel="noopener"
-               href="https://wa.me/?text={{ (texto_compartir ~ ' ' ~ og.url)|urlencode }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3.5a8.5 8.5 0 0 0-7.4 12.7L3.4 20.6l4.5-1.2A8.5 8.5 0 1 0 12 3.5z"/>
-                    <path d="M9 9.3c.4 2.7 3 5.3 5.7 5.7l1-1.6-2-1-.9.7c-.8-.5-1.4-1.1-1.9-1.9l.7-.9-1-2z"/>
-                </svg>
-                <span>WhatsApp</span>
+               href="{{ url_compartir(red, og.url, texto_compartir) }}"
+               aria-label="Compartir en {{ etiqueta }}">
+                {{ icono_rrss(red) }}<span>{{ etiqueta }}</span>
             </a>
-            <a class="g2d-share" target="_blank" rel="noopener"
-               href="https://twitter.com/intent/tweet?text={{ texto_compartir|urlencode }}&url={{ og.url|urlencode }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" aria-hidden="true">
-                    <path d="M5 4l14 16M19 4L5 20"/>
-                </svg>
-                <span>X</span>
-            </a>
-            <a class="g2d-share" target="_blank" rel="noopener"
-               href="https://www.facebook.com/sharer/sharer.php?u={{ og.url|urlencode }}">
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M14.5 8.5H17V5.2h-2.5c-2.4 0-4 1.7-4 4.1v2H8.3v3.1h2.2v6.4h3.3v-6.4h2.4l.5-3.1h-2.9V9.6c0-.7.3-1.1.7-1.1z"/>
-                </svg>
-                <span>Facebook</span>
-            </a>
+            {% endfor %}
             <button id="g2d-copiar" type="button" class="g2d-share" data-url="{{ og.url }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M10 14l4-4M8.5 11.5l-2.2 2.2a3.2 3.2 0 0 0 4.5 4.5l2.2-2.2M15.5 12.5l2.2-2.2a3.2 3.2 0 0 0-4.5-4.5l-2.2 2.2"/>
-                </svg>
-                <span>Copiar enlace</span>
+                {{ icono_rrss('enlace') }}<span>Copiar enlace</span>
             </button>
         </div>
     </div>

@@ -76,6 +76,50 @@ html, body {
 
 .hud-compartir svg { width: 16px; height: 16px; display: block; }
 
+/* Menú de compartir (escritorio): panel discreto bajo el HUD */
+.hud-share-menu {
+    position: fixed;
+    top: 3.6rem;
+    right: 1.2rem;
+    z-index: 26; /* justo sobre el HUD (25) */
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+    padding: 0.45rem;
+    border: 1px solid rgba(125, 211, 252, 0.25);
+    border-radius: 12px;
+    background: rgba(7, 18, 34, 0.92);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+}
+
+.hud-share-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--color-mist);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.hud-share-item:hover,
+.hud-share-item:focus-visible {
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--color-white);
+    outline: none;
+}
+
+.hud-share-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+
 /* Botón del hilo musical (♪): tachado y atenuado cuando está en silencio */
 .hud-musica {
     background: none;

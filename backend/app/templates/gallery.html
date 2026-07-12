@@ -39,6 +39,24 @@
     </span>
 </div>
 
+{% if datos and og %}
+{% from "_iconos_rrss.html" import icono_rrss, url_compartir %}
+{% set texto_compartir = 'Visita «' ~ datos.exposicion.titulo ~ '» en la Galería Virtual' %}
+{# Menú de compartir (escritorio): iconos oficiales, endpoints intent, sin SDKs #}
+<div id="compartir-menu" class="hud-share-menu" hidden>
+    {% for red, etiqueta in [('whatsapp', 'WhatsApp'), ('x', 'X'), ('facebook', 'Facebook'), ('telegram', 'Telegram'), ('linkedin', 'LinkedIn')] %}
+    <a class="hud-share-item" target="_blank" rel="noopener"
+       href="{{ url_compartir(red, og.url, texto_compartir) }}"
+       aria-label="Compartir en {{ etiqueta }}">
+        {{ icono_rrss(red) }}<span>{{ etiqueta }}</span>
+    </a>
+    {% endfor %}
+    <button id="compartir-copiar" type="button" class="hud-share-item" data-url="{{ og.url }}">
+        {{ icono_rrss('enlace') }}<span>Copiar enlace</span>
+    </button>
+</div>
+{% endif %}
+
 {% if datos and datos.exposicion.musica_url %}
 <audio id="hilo-musical" src="{{ datos.exposicion.musica_url }}" loop preload="auto"></audio>
 {% endif %}
@@ -205,28 +223,48 @@
 })();
 
 (function () {
-    // Compartir: menú nativo si existe (móvil); si no, copia el enlace.
+    // Compartir: menú nativo del sistema si existe (móvil); en escritorio,
+    // menú discreto con los iconos oficiales (endpoints intent, sin SDKs).
     const btn = document.getElementById("compartir-btn");
     if (!btn) return;
+    const menu = document.getElementById("compartir-menu");
+    const copiar = document.getElementById("compartir-copiar");
     const datosCompartir = {
         title: {{ og.titulo|tojson }} + " — Galería Virtual",
         text: {{ og.descripcion|tojson }},
         url: {{ og.url|tojson }},
     };
-    const icono = btn.innerHTML;
+
     btn.addEventListener("click", async (ev) => {
         ev.stopPropagation();
         if (navigator.share) {
             try { await navigator.share(datosCompartir); } catch (e) { /* cancelado */ }
             return;
         }
-        try {
-            await navigator.clipboard.writeText(datosCompartir.url);
-            btn.textContent = "✓";
-            btn.title = "Enlace copiado";
-            window.setTimeout(() => { btn.innerHTML = icono; btn.title = "Compartir esta exposición"; }, 1600);
-        } catch (e) { window.prompt("Copia el enlace:", datosCompartir.url); }
+        if (menu) menu.hidden = !menu.hidden;
     });
+    // Clic fuera o Esc: se recoge el menú.
+    window.addEventListener("pointerdown", (ev) => {
+        if (menu && !menu.hidden && !menu.contains(ev.target) && ev.target !== btn) {
+            menu.hidden = true;
+        }
+    });
+    window.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape" && menu) menu.hidden = true;
+    });
+    if (copiar) {
+        const etiqueta = copiar.querySelector("span");
+        copiar.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(copiar.dataset.url);
+                etiqueta.textContent = "✓ Copiado";
+                window.setTimeout(() => {
+                    etiqueta.textContent = "Copiar enlace";
+                    if (menu) menu.hidden = true;
+                }, 1200);
+            } catch (e) { window.prompt("Copia el enlace:", copiar.dataset.url); }
+        });
+    }
 })();
 </script>
 {% endif %}
