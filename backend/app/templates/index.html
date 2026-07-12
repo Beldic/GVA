@@ -34,7 +34,7 @@
         {% set visitable = g.apertura == 'abierta' %}
         <article class="gcard{% if not visitable %} gcard--off{% endif %}">
             {% if visitable %}
-            <a class="gcard-link" href="{{ url_for('main.gallery', slug=g.slug) }}">
+            <a class="gcard-link" href="{{ url_for('main.gallery_ficha', slug=g.slug) }}">
             {% else %}
             <div class="gcard-link">
             {% endif %}

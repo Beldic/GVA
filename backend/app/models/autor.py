@@ -14,6 +14,7 @@ class Autor(db.Model):
     )
     nombre = db.Column(db.String(160), nullable=False, index=True)
     bio = db.Column(db.Text)
+    foto_public_id = db.Column(db.String(255))  # retrato subido a Cloudinary
     foto_url = db.Column(db.String(500))
     contacto = db.Column(db.String(255))
     created_at = db.Column(

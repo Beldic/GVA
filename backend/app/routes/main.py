@@ -26,6 +26,9 @@ from backend.app.models.visita import (
 )
 from backend.app.models.vista_obra import VISTA_2D, VISTA_3D
 from backend.app.services.gallery import (
+    autores_de_expo,
+    foto_autor,
+    logo_organizador,
     og_de_expo,
     resumen_exposicion,
     serializar_sala,
@@ -116,6 +119,32 @@ def gallery(slug):
     if request.args.get("modo") == "2d":
         return render_template("gallery_2d.html", datos=datos, og=og, expo=expo)
     return render_template("gallery.html", datos=datos, og=og, expo=expo)
+
+
+@bp.get("/g/<slug>/ficha")
+def gallery_ficha(slug):
+    """Ficha de la exposición: el catálogo previo a la puerta — leitmotiv
+    íntegro, organizador (logo + web) y autores con retrato y bio. Mismas
+    puertas de acceso que el visor; no cuenta visita (eso lo hace entrar)."""
+    expo = Exposicion.query.filter_by(
+        slug=slug, estado=ESTADO_PUBLICADA
+    ).first_or_404()
+    og = og_de_expo(expo)
+    if not _puede_gestionar(expo):
+        if not expo.abierta:
+            return render_template("gallery_cerrada.html", expo=expo, og=og)
+        if expo.requiere_codigo and not _visitante_autorizado(expo):
+            return render_template("gallery_codigo.html", expo=expo, og=og)
+    autores = [
+        {"autor": a, "foto": foto_autor(a)} for a in autores_de_expo(expo)
+    ]
+    return render_template(
+        "gallery_ficha.html",
+        expo=expo,
+        og=og,
+        autores=autores,
+        logo=logo_organizador(expo.propietario),
+    )
 
 
 @bp.get("/robots.txt")

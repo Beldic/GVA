@@ -1,0 +1,199 @@
+/* Ficha de exposición: el catálogo previo a la puerta. Hereda la paleta y
+   tipografías de main.css (:root). */
+
+.ficha-page {
+    background:
+        radial-gradient(120% 55% at 50% 0, rgba(30, 77, 140, 0.35), transparent 70%),
+        var(--color-deep);
+    color: var(--color-pale);
+    min-height: 100dvh;
+    height: auto;
+}
+
+.ficha {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 5vw, 3rem) 1.2rem 3.5rem;
+}
+
+.ficha-volver { margin: 0 0 1.8rem; }
+
+.ficha-volver a {
+    color: var(--color-mist);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+/* ---- Cabecera ---- */
+.ficha-cabecera { text-align: center; }
+
+.ficha-logo {
+    width: clamp(72px, 16vw, 104px);
+    height: auto;
+    border-radius: 16px;
+    background: #fff;
+    padding: 0.55rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 10px 34px rgba(2, 12, 27, 0.5);
+}
+
+.ficha-organizador {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--color-tech-soft);
+}
+
+.ficha-organizador a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(125, 211, 252, 0.35);
+}
+
+.ficha-organizador a:hover { color: var(--color-white); }
+
+.ficha-titulo {
+    margin: 0;
+    font-size: clamp(2rem, 6.5vw, 3rem);
+    font-weight: 600;
+    color: var(--color-white);
+}
+
+.ficha-fechas {
+    margin: 0.55rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    color: rgba(207, 220, 236, 0.6);
+}
+
+/* ---- Acciones ---- */
+.ficha-acciones {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin: 1.8rem 0 0;
+}
+
+.ficha-btn {
+    padding: 0.75rem 2rem;
+    border: 1px solid var(--color-tech);
+    color: var(--color-white);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.3s var(--easing-soft), box-shadow 0.3s var(--easing-soft);
+}
+
+.ficha-btn:hover,
+.ficha-btn:focus-visible {
+    background: rgba(56, 189, 248, 0.14);
+    box-shadow: 0 0 24px -6px rgba(56, 189, 248, 0.6);
+    outline: none;
+}
+
+.ficha-btn--suave {
+    border-color: rgba(125, 211, 252, 0.3);
+    color: var(--color-mist);
+}
+
+/* ---- Secciones ---- */
+.ficha-seccion { margin-top: 2.6rem; }
+
+.ficha-seccion-titulo {
+    margin: 0 0 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(186, 214, 240, 0.6);
+    border-left: 2px solid rgba(56, 189, 248, 0.45);
+    padding-left: 0.7rem;
+}
+
+.ficha-leitmotiv {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--color-mist);
+    white-space: pre-line; /* respeta los párrafos que escriba el organizador */
+}
+
+/* ---- Autores ---- */
+.ficha-autores {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.ficha-autor {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem 1.1rem;
+    border: 1px solid rgba(125, 211, 252, 0.16);
+    border-radius: 14px;
+    background: rgba(10, 31, 61, 0.45);
+}
+
+.ficha-autor-foto {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(125, 211, 252, 0.3);
+}
+
+.ficha-autor-foto--vacia {
+    display: grid;
+    place-items: center;
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--color-tech-soft);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.ficha-autor-nombre { margin: 0 0 0.3rem; font-size: 1.05rem; color: var(--color-white); }
+
+.ficha-autor-bio {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: rgba(207, 220, 236, 0.75);
+}
+
+/* ---- Compartir ---- */
+.ficha-compartir-fila { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+.ficha-share {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    border: 1px solid rgba(125, 211, 252, 0.25);
+    background: rgba(10, 31, 61, 0.5);
+    color: var(--color-mist);
+    cursor: pointer;
+    transition: border-color 0.2s var(--easing-soft), color 0.2s var(--easing-soft);
+}
+
+.ficha-share:hover,
+.ficha-share:focus-visible {
+    border-color: rgba(56, 189, 248, 0.6);
+    color: var(--color-white);
+    outline: none;
+}
+
+.ficha-share--ok { border-color: #4da47e; color: #7ce0ae; }
+
+.ficha-share svg { width: 16px; height: 16px; }

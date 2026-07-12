@@ -1,0 +1,31 @@
+{% extends "admin/_layout.html" %}
+{% from "admin/_macros.html" import field %}
+
+{% block admin_title %}Mi perfil{% endblock %}
+
+{% block admin_content %}
+<h1 class="admin-h1">Mi perfil</h1>
+<p class="admin-lead">Tu cara pública: estos datos aparecen en las cards del
+portal y en la ficha de cada una de tus exposiciones.</p>
+
+<form method="post" enctype="multipart/form-data" class="admin-form admin-form-wide">
+    {{ form.hidden_tag() }}
+    {{ field(form.nombre) }}
+    {{ field(form.web, placeholder="https://…") }}
+    <small class="admin-muted">{{ form.web.description }}</small>
+
+    {% if logo_actual %}
+    <div class="admin-field">
+        <span>Logo actual</span>
+        <img class="admin-preview" src="{{ logo_actual }}" alt="Logo actual">
+    </div>
+    {% endif %}
+    {{ field(form.logo) }}
+    <small class="admin-muted">{{ form.logo.description }}</small>
+
+    <div class="admin-form-actions">
+        <button type="submit" class="admin-btn">Guardar perfil</button>
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-cancel">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

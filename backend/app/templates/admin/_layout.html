@@ -28,7 +28,8 @@
            class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.exposicion') }}">Exposiciones</a>
         <a href="{{ url_for('admin.autores_list') }}"
            class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('admin.autor') }}">Autores</a>
-        <span class="admin-nav-soon">Obras</span>
+        <a href="{{ url_for('admin.perfil') }}"
+           class="{{ 'is-active' if request.endpoint == 'admin.perfil' }}">Mi perfil</a>
     </nav>
 
     <main class="admin-main">

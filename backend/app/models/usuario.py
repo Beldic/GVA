@@ -26,6 +26,10 @@ class Usuario(UserMixin, db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
     nombre = db.Column(db.String(160))  # nombre visible del organizador / entidad
+    # Perfil público del organizador (ficha de sus exposiciones).
+    web = db.Column(db.String(300))
+    logo_public_id = db.Column(db.String(255))
+    logo_url = db.Column(db.String(500))
     rol = db.Column(db.String(20), nullable=False, default=ROL_ORGANIZADOR)
     activo = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(

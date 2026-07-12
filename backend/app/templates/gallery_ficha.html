@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% from "_iconos_rrss.html" import icono_rrss, url_compartir %}
+
+{% block title %}{{ expo.titulo }} · Ficha de la exposición{% endblock %}
+
+{% block meta %}{% include "_og_expo.html" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ficha.css') }}">
+{% endblock %}
+
+{% block body_class %}ficha-page{% endblock %}
+
+{% block content %}
+<main class="ficha">
+    <p class="ficha-volver"><a href="{{ url_for('main.index') }}">‹ Portal</a></p>
+
+    <header class="ficha-cabecera">
+        {% if logo %}
+        <img class="ficha-logo" src="{{ logo }}" alt="{{ expo.propietario.nombre or '' }}">
+        {% endif %}
+        {% if expo.propietario and expo.propietario.nombre %}
+        <p class="ficha-organizador">
+            {% if expo.propietario.web %}
+            <a href="{{ expo.propietario.web }}" target="_blank" rel="noopener">{{ expo.propietario.nombre }}</a>
+            {% else %}
+            {{ expo.propietario.nombre }}
+            {% endif %}
+        </p>
+        {% endif %}
+        <h1 class="ficha-titulo">{{ expo.titulo }}</h1>
+        {% if expo.fecha_inicio or expo.fecha_fin %}
+        <p class="ficha-fechas">
+            {{ expo.fecha_inicio.strftime('%d/%m/%Y') if expo.fecha_inicio }}{% if expo.fecha_fin %} — {{ expo.fecha_fin.strftime('%d/%m/%Y') }}{% endif %}
+        </p>
+        {% endif %}
+    </header>
+
+    <div class="ficha-acciones">
+        <a class="ficha-btn" href="{{ url_for('main.gallery', slug=expo.slug) }}">Entrar en 3D</a>
+        <a class="ficha-btn ficha-btn--suave" href="{{ url_for('main.gallery', slug=expo.slug, modo='2d') }}">Ver en 2D</a>
+    </div>
+
+    {% if expo.descripcion %}
+    <section class="ficha-seccion">
+        <h2 class="ficha-seccion-titulo">La exposición</h2>
+        <p class="ficha-leitmotiv">{{ expo.descripcion }}</p>
+    </section>
+    {% endif %}
+
+    {% if autores %}
+    <section class="ficha-seccion">
+        <h2 class="ficha-seccion-titulo">{{ 'El autor' if autores|length == 1 else 'Los autores' }}</h2>
+        <div class="ficha-autores">
+            {% for a in autores %}
+            <article class="ficha-autor">
+                {% if a.foto %}
+                <img class="ficha-autor-foto" src="{{ a.foto }}" alt="{{ a.autor.nombre }}" loading="lazy">
+                {% else %}
+                <span class="ficha-autor-foto ficha-autor-foto--vacia" aria-hidden="true">{{ a.autor.nombre[:1] }}</span>
+                {% endif %}
+                <div class="ficha-autor-datos">
+                    <h3 class="ficha-autor-nombre">{{ a.autor.nombre }}</h3>
+                    {% if a.autor.bio %}<p class="ficha-autor-bio">{{ a.autor.bio }}</p>{% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% set texto_compartir = 'Visita «' ~ expo.titulo ~ '» en la Galería Virtual' %}
+    <section class="ficha-seccion ficha-compartir">
+        <h2 class="ficha-seccion-titulo">Compártela</h2>
+        <div class="ficha-compartir-fila">
+            {% for red, etiqueta in [('whatsapp', 'WhatsApp'), ('x', 'X'), ('facebook', 'Facebook'), ('telegram', 'Telegram'), ('linkedin', 'LinkedIn')] %}
+            <a class="ficha-share" target="_blank" rel="noopener"
+               href="{{ url_compartir(red, og.url, texto_compartir) }}"
+               aria-label="Compartir en {{ etiqueta }}" title="{{ etiqueta }}">
+                {{ icono_rrss(red) }}
+            </a>
+            {% endfor %}
+            <button id="ficha-copiar" type="button" class="ficha-share" data-url="{{ og.url }}"
+                    title="Copiar enlace" aria-label="Copiar enlace">
+                {{ icono_rrss('enlace') }}
+            </button>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const copiar = document.getElementById("ficha-copiar");
+    if (!copiar) return;
+    copiar.addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(copiar.dataset.url);
+            copiar.classList.add("ficha-share--ok");
+            window.setTimeout(() => copiar.classList.remove("ficha-share--ok"), 1400);
+        } catch (e) { window.prompt("Copia el enlace:", copiar.dataset.url); }
+    });
+})();
+</script>
+{% endblock %}

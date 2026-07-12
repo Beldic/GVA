@@ -1,4 +1,4 @@
-"""Serialización de una sala a un dict plano para el frontend 3D.
+﻿"""Serialización de una sala a un dict plano para el frontend 3D.
 
 El render de Babylon.js (static/js/gallery) consume esta estructura: la página
 la incrusta como JSON y los módulos la leen para construir la escena. El `codigo`
@@ -66,7 +66,7 @@ def _portada_card(expo, propietario):
     elegida = expo.portada_obra
     if elegida is not None and elegida.cloudinary_public_id:
         return _miniatura_card(elegida), False
-    logo = _logo_organizador(propietario)
+    logo = logo_organizador(propietario)
     if logo:
         return logo, True
     return _primera_obra_url(expo), False
@@ -76,16 +76,41 @@ def _contar_obras(expo) -> int:
     return sum(len(zona.obras) for sala in expo.salas for zona in sala.zonas)
 
 
-def _logo_organizador(propietario):
-    """Logo del organizador por convención: si existe
-    static/img/organizadores/<slug-del-nombre>.png, se muestra en sus cards.
-    Sin campo en BD: basta con dejar el archivo en esa carpeta."""
-    if propietario is None or not propietario.nombre:
+def logo_organizador(propietario):
+    """Logo del organizador: el subido a su perfil (Cloudinary) manda; si no
+    hay, la convención static/img/organizadores/<slug-del-nombre>.png."""
+    if propietario is None:
+        return None
+    if propietario.logo_url:
+        return propietario.logo_url
+    if not propietario.nombre:
         return None
     relativa = f"img/organizadores/{slugify(propietario.nombre)}.png"
     if os.path.exists(os.path.join(current_app.static_folder, *relativa.split("/"))):
         return url_for("static", filename=relativa)
     return None
+
+
+def autores_de_expo(expo) -> list:
+    """Autores con obra colgada en la exposición, en orden de aparición en el
+    recorrido y sin repetidos."""
+    vistos = set()
+    autores = []
+    for sala in expo.salas:
+        for zona in sala.zonas:
+            for obra in zona.obras:
+                if obra.autor_id not in vistos:
+                    vistos.add(obra.autor_id)
+                    autores.append(obra.autor)
+    return autores
+
+
+def foto_autor(autor):
+    """Retrato del autor: el subido a Cloudinary (recortado a cuadrado) o la
+    URL manual; None si no hay ninguno."""
+    if autor.foto_public_id:
+        return cloudinary_service.url_miniatura(autor.foto_public_id, 240, 240)
+    return autor.foto_url or None
 
 
 def resumen_exposicion(expo) -> dict:
@@ -98,7 +123,7 @@ def resumen_exposicion(expo) -> dict:
         "descripcion": expo.descripcion,
         # Solo el nombre visible; nunca el email en público.
         "organizador": propietario.nombre if propietario else None,
-        "organizador_logo": _logo_organizador(propietario),
+        "organizador_logo": logo_organizador(propietario),
         "fecha_inicio": expo.fecha_inicio,
         "fecha_fin": expo.fecha_fin,
         "n_salas": len(expo.salas),

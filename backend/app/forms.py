@@ -28,12 +28,43 @@ _EMAIL_RE = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
 class AutorForm(FlaskForm):
     nombre = StringField("Nombre", validators=[DataRequired(), Length(max=160)])
-    bio = TextAreaField("Biografía", validators=[Optional()])
+    bio = TextAreaField(
+        "Biografía",
+        validators=[Optional()],
+        description="Una breve bio: aparece en la ficha de las exposiciones donde cuelgue obra.",
+    )
+    foto = FileField(
+        "Retrato",
+        validators=[
+            Optional(),
+            FileAllowed(["jpg", "jpeg", "png", "webp"], "Solo imágenes (jpg, png, webp)."),
+        ],
+        description="Foto del autor para la ficha (se recorta en círculo).",
+    )
     foto_url = StringField(
-        "URL de foto", validators=[Optional(), URL(), Length(max=500)]
+        "URL de foto (alternativa)", validators=[Optional(), URL(), Length(max=500)]
     )
     contacto = StringField("Contacto", validators=[Optional(), Length(max=255)])
     submit = SubmitField("Guardar")
+
+
+class PerfilForm(FlaskForm):
+    """Perfil público del organizador (ficha de sus exposiciones)."""
+
+    nombre = StringField("Nombre visible", validators=[Optional(), Length(max=160)])
+    web = StringField(
+        "Web", validators=[Optional(), URL(), Length(max=300)],
+        description="Enlace a vuestra web o perfil (con https://).",
+    )
+    logo = FileField(
+        "Logo",
+        validators=[
+            Optional(),
+            FileAllowed(["jpg", "jpeg", "png", "webp"], "Solo imágenes (jpg, png, webp)."),
+        ],
+        description="Aparece en vuestras cards del portal y en la ficha de cada exposición.",
+    )
+    submit = SubmitField("Guardar perfil")
 
 
 class ExposicionForm(FlaskForm):

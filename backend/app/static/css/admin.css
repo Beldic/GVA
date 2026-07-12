@@ -505,6 +505,13 @@ td.admin-actions > *:not(:last-child) {
 
 .stat-nota { margin: -0.5rem 0 0.9rem; }
 
+.admin-preview--retrato {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .admin-ajustar {
     margin-top: 1rem;
     display: flex;

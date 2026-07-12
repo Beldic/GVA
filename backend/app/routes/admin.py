@@ -21,6 +21,7 @@ from backend.app.forms import (
     ExposicionForm,
     ExposicionNuevaForm,
     ObraForm,
+    PerfilForm,
     SalaForm,
 )
 from backend.app.models import Autor, Exposicion, Obra, Sala, Usuario, Zona
@@ -118,8 +119,56 @@ def dashboard():
 
 
 # --------------------------------------------------------------------------
+# Mi perfil (público: ficha de las exposiciones)
+# --------------------------------------------------------------------------
+@bp.route("/perfil", methods=["GET", "POST"])
+@login_required
+def perfil():
+    form = PerfilForm(obj=current_user)
+    if form.validate_on_submit():
+        current_user.nombre = (form.nombre.data or "").strip() or None
+        current_user.web = (form.web.data or "").strip() or None
+        archivo = form.logo.data
+        if archivo:
+            if cloudinary_service.esta_configurado():
+                anterior = current_user.logo_public_id
+                try:
+                    public_id, url, _, _ = cloudinary_service.subir_imagen(archivo)
+                    current_user.logo_public_id = public_id
+                    current_user.logo_url = url
+                    cloudinary_service.eliminar_imagen(anterior)
+                except cloudinary_service.CloudinaryError:
+                    flash("No se pudo subir el logo: se conserva el anterior.", "error")
+            else:
+                flash("Cloudinary no está configurado: el logo no se subió.", "error")
+        db.session.commit()
+        flash("Perfil guardado.", "info")
+        return redirect(url_for("admin.perfil"))
+    return render_template(
+        "admin/perfil.html", form=form, logo_actual=current_user.logo_url
+    )
+
+
+# --------------------------------------------------------------------------
 # Autores
 # --------------------------------------------------------------------------
+def _aplicar_foto_autor(autor, form) -> None:
+    """Sube el retrato del autor a Cloudinary (reemplazando el anterior)."""
+    archivo = form.foto.data
+    if not archivo:
+        return
+    if not cloudinary_service.esta_configurado():
+        flash("Cloudinary no está configurado: el retrato no se subió.", "error")
+        return
+    anterior = autor.foto_public_id
+    try:
+        public_id, url, _, _ = cloudinary_service.subir_imagen(archivo)
+    except cloudinary_service.CloudinaryError:
+        flash("No se pudo subir el retrato: se conserva el anterior.", "error")
+        return
+    autor.foto_public_id = public_id
+    autor.foto_url = url
+    cloudinary_service.eliminar_imagen(anterior)
 @bp.get("/autores")
 @login_required
 def autores_list():
@@ -143,6 +192,7 @@ def autor_nuevo():
             foto_url=form.foto_url.data or None,
             contacto=form.contacto.data or None,
         )
+        _aplicar_foto_autor(autor, form)
         db.session.add(autor)
         db.session.commit()
         flash("Autor creado.", "info")
@@ -159,13 +209,19 @@ def autor_editar(autor_id):
     if form.validate_on_submit():
         autor.nombre = form.nombre.data.strip()
         autor.bio = form.bio.data or None
-        autor.foto_url = form.foto_url.data or None
+        # La URL manual solo manda si no hay retrato subido a Cloudinary.
+        if not autor.foto_public_id:
+            autor.foto_url = form.foto_url.data or None
         autor.contacto = form.contacto.data or None
+        _aplicar_foto_autor(autor, form)
         db.session.commit()
         flash("Autor actualizado.", "info")
         return redirect(url_for("admin.autores_list"))
     return render_template(
-        "admin/autor_form.html", form=form, titulo=f"Editar: {autor.nombre}"
+        "admin/autor_form.html",
+        form=form,
+        titulo=f"Editar: {autor.nombre}",
+        foto_actual=autor.foto_public_id and autor.foto_url,
     )
 
 
@@ -177,8 +233,10 @@ def autor_borrar(autor_id):
     if autor.obras:
         flash("No se puede borrar: el autor tiene obras asignadas.", "error")
     else:
+        foto_public_id = autor.foto_public_id
         db.session.delete(autor)
         db.session.commit()
+        cloudinary_service.eliminar_imagen(foto_public_id)  # retrato huérfano
         flash("Autor borrado.", "info")
     return redirect(url_for("admin.autores_list"))
 

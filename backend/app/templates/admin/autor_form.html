@@ -6,10 +6,19 @@
 {% block admin_content %}
 <h1 class="admin-h1">{{ titulo }}</h1>
 
-<form method="post" class="admin-form admin-form-wide">
+<form method="post" enctype="multipart/form-data" class="admin-form admin-form-wide">
     {{ form.hidden_tag() }}
     {{ field(form.nombre) }}
     {{ field(form.bio, rows=4) }}
+    <small class="admin-muted">{{ form.bio.description }}</small>
+    {% if foto_actual %}
+    <div class="admin-field">
+        <span>Retrato actual</span>
+        <img class="admin-preview admin-preview--retrato" src="{{ foto_actual }}" alt="Retrato actual">
+    </div>
+    {% endif %}
+    {{ field(form.foto) }}
+    <small class="admin-muted">{{ form.foto.description }}</small>
     {{ field(form.foto_url) }}
     {{ field(form.contacto) }}
     <div class="admin-form-actions">
