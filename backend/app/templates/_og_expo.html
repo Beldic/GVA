@@ -1,0 +1,37 @@
+{# Metadatos para compartir/indexar una exposición. Requiere `og` (og_de_expo)
+   y opcionalmente `expo` para los datos estructurados. #}
+<meta name="description" content="{{ og.descripcion }}">
+<link rel="canonical" href="{{ og.url }}">
+<meta property="og:site_name" content="Galería Virtual">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ og.titulo }} — Galería Virtual">
+<meta property="og:description" content="{{ og.descripcion }}">
+<meta property="og:image" content="{{ og.imagen }}">
+<meta property="og:url" content="{{ og.url }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og.titulo }} — Galería Virtual">
+<meta name="twitter:description" content="{{ og.descripcion }}">
+<meta name="twitter:image" content="{{ og.imagen }}">
+{% if expo %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ExhibitionEvent",
+  "name": {{ expo.titulo|tojson }},
+  "description": {{ og.descripcion|tojson }},
+  "url": {{ og.url|tojson }},
+  "image": {{ og.imagen|tojson }},
+  "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+  "location": {"@type": "VirtualLocation", "url": {{ og.url|tojson }}}
+  {%- if expo.fecha_inicio %},
+  "startDate": "{{ expo.fecha_inicio.isoformat() }}"
+  {%- endif %}
+  {%- if expo.fecha_fin %},
+  "endDate": "{{ expo.fecha_fin.isoformat() }}"
+  {%- endif %}
+  {%- if expo.propietario and expo.propietario.nombre %},
+  "organizer": {"@type": "Organization", "name": {{ expo.propietario.nombre|tojson }}}
+  {%- endif %}
+}
+</script>
+{% endif %}

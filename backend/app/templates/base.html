@@ -4,7 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{% block title %}Plataforma de Exposiciones Virtuales{% endblock %}</title>
+    {% block meta %}
     <meta name="description" content="Plataforma de Exposiciones Virtuales: recorre en 3D exposiciones de arte publicadas por sus organizadores.">
+    <meta property="og:site_name" content="Galería Virtual">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Galería Virtual — Exposiciones en 3D">
+    <meta property="og:description" content="Recorre en 3D exposiciones de arte publicadas por sus organizadores.">
+    <meta property="og:image" content="{{ url_for('static', filename='favicons/web-app-manifest-512x512.png', _external=True) }}">
+    <meta name="twitter:card" content="summary">
+    {% endblock %}
 
     <link rel="icon" href="{{ url_for('static', filename='favicons/favicon.ico') }}" sizes="any">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicons/favicon.svg') }}">

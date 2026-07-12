@@ -243,6 +243,56 @@
     box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
 }
 
+/* ---- Compartir ---- */
+.g2d-compartir {
+    margin-top: 2.6rem;
+    text-align: center;
+}
+
+.g2d-compartir-titulo {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(186, 214, 240, 0.55);
+}
+
+.g2d-compartir-fila {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.g2d-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid rgba(125, 211, 252, 0.25);
+    border-radius: 999px;
+    background: rgba(10, 31, 61, 0.5);
+    color: var(--color-mist);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.2s var(--easing-soft), color 0.2s var(--easing-soft);
+}
+
+.g2d-share:hover,
+.g2d-share:focus-visible {
+    border-color: rgba(56, 189, 248, 0.6);
+    color: var(--color-white);
+    outline: none;
+}
+
+.g2d-share svg { width: 15px; height: 15px; }
+
 /* ---- Pie y estado vacío ---- */
 .g2d-footer {
     margin-top: 3rem;

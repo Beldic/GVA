@@ -2,6 +2,8 @@
 
 {% block title %}{{ expo.titulo }} · {{ 'Próximamente' if expo.apertura == 'proximamente' else 'Cerrada' }}{% endblock %}
 
+{% block meta %}{% if og %}{% include "_og_expo.html" %}{% endif %}{% endblock %}
+
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 {% endblock %}

@@ -2,6 +2,8 @@
 
 {% block title %}{{ (datos.exposicion.titulo ~ ' — ' ~ datos.sala.nombre) if datos else 'Plataforma de Exposiciones Virtuales' }}{% endblock %}
 
+{% block meta %}{% if og %}{% include "_og_expo.html" %}{% endif %}{% endblock %}
+
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/door.css') }}">
@@ -19,10 +21,22 @@
     {% if datos %}
     <span class="hud-title">{{ datos.sala.nombre }} · {{ datos.exposicion.titulo }}</span>
     {% endif %}
-    {% if datos and datos.exposicion.musica_url %}
-    <button id="musica-btn" type="button" class="hud-link hud-musica"
-            title="Silenciar la música" aria-label="Silenciar la música" hidden>♪</button>
-    {% endif %}
+    <span class="hud-acciones">
+        {% if datos %}
+        <button id="compartir-btn" type="button" class="hud-link hud-compartir"
+                title="Compartir esta exposición" aria-label="Compartir esta exposición">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" aria-hidden="true">
+                <circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/>
+                <path d="M8.2 10.9l7.6-3.8M8.2 13.1l7.6 3.8"/>
+            </svg>
+        </button>
+        {% endif %}
+        {% if datos and datos.exposicion.musica_url %}
+        <button id="musica-btn" type="button" class="hud-link hud-musica"
+                title="Silenciar la música" aria-label="Silenciar la música" hidden>♪</button>
+        {% endif %}
+    </span>
 </div>
 
 {% if datos and datos.exposicion.musica_url %}
@@ -188,6 +202,31 @@
     });
     audio.addEventListener("play", pintar);
     audio.addEventListener("pause", pintar);
+})();
+
+(function () {
+    // Compartir: menú nativo si existe (móvil); si no, copia el enlace.
+    const btn = document.getElementById("compartir-btn");
+    if (!btn) return;
+    const datosCompartir = {
+        title: {{ og.titulo|tojson }} + " — Galería Virtual",
+        text: {{ og.descripcion|tojson }},
+        url: {{ og.url|tojson }},
+    };
+    const icono = btn.innerHTML;
+    btn.addEventListener("click", async (ev) => {
+        ev.stopPropagation();
+        if (navigator.share) {
+            try { await navigator.share(datosCompartir); } catch (e) { /* cancelado */ }
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(datosCompartir.url);
+            btn.textContent = "✓";
+            btn.title = "Enlace copiado";
+            window.setTimeout(() => { btn.innerHTML = icono; btn.title = "Compartir esta exposición"; }, 1600);
+        } catch (e) { window.prompt("Copia el enlace:", datosCompartir.url); }
+    });
 })();
 </script>
 {% endif %}

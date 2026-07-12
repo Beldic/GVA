@@ -111,6 +111,42 @@ def resumen_exposicion(expo) -> dict:
     }
 
 
+def og_de_expo(expo) -> dict:
+    """Metadatos Open Graph para compartir una exposición: título, resumen
+    recortado, imagen de portada ABSOLUTA y URL canónica. Sutileza de
+    privacidad: las expos con código no exponen su portada en la
+    previsualización (se usa la imagen genérica de la plataforma)."""
+    from backend.app.models.exposicion import VISIBILIDAD_CODIGO
+
+    descripcion = (expo.descripcion or "").strip()
+    if len(descripcion) > 160:
+        descripcion = descripcion[:157].rstrip() + "…"
+    if not descripcion:
+        descripcion = "Recorre esta exposición en 3D en la Galería Virtual."
+
+    imagen = None
+    if expo.visibilidad != VISIBILIDAD_CODIGO:
+        imagen, _ = _portada_card(expo, expo.propietario)
+        if imagen and imagen.startswith("/"):
+            imagen = url_for(
+                "static",
+                filename=imagen.split("/static/", 1)[-1],
+                _external=True,
+            )
+    if not imagen:
+        imagen = url_for(
+            "static",
+            filename="favicons/web-app-manifest-512x512.png",
+            _external=True,
+        )
+    return {
+        "titulo": expo.titulo,
+        "descripcion": descripcion,
+        "imagen": imagen,
+        "url": url_for("main.gallery", slug=expo.slug, _external=True),
+    }
+
+
 def serializar_sala(sala) -> dict:
     """Estructura completa de una sala lista para el 3D. Las relaciones ya
     vienen ordenadas por `orden` (definido en los modelos)."""

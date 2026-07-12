@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from flask import Flask, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from backend.app.config import Config
 from backend.app.extensions import csrf, db, login_manager, migrate
@@ -17,6 +18,11 @@ def create_app(config_class=Config) -> Flask:
         template_folder="templates",
     )
     app.config.from_object(config_class)
+
+    # Detrás del proxy de Railway: respetar X-Forwarded-Proto/Host para que
+    # las URLs absolutas (Open Graph, sitemap) salgan con https y su dominio.
+    # En local no hay cabeceras forwarded, así que no cambia nada.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     # Extensiones
     db.init_app(app)

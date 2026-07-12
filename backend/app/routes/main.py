@@ -13,7 +13,11 @@ import re
 
 from backend.app.extensions import csrf, db
 from backend.app.models import Exposicion, Obra, Sala, Visita, VistaObra, Zona
-from backend.app.models.exposicion import ESTADO_PUBLICADA, VISIBILIDAD_ENLACE
+from backend.app.models.exposicion import (
+    ESTADO_PUBLICADA,
+    VISIBILIDAD_ENLACE,
+    VISIBILIDAD_PUBLICA,
+)
 from backend.app.models.visita import (
     DISPOSITIVO_ESCRITORIO,
     DISPOSITIVO_MOVIL,
@@ -21,7 +25,11 @@ from backend.app.models.visita import (
     MODO_3D,
 )
 from backend.app.models.vista_obra import VISTA_2D, VISTA_3D
-from backend.app.services.gallery import resumen_exposicion, serializar_sala
+from backend.app.services.gallery import (
+    og_de_expo,
+    resumen_exposicion,
+    serializar_sala,
+)
 
 bp = Blueprint("main", __name__)
 
@@ -95,18 +103,52 @@ def gallery(slug):
     expo = Exposicion.query.filter_by(
         slug=slug, estado=ESTADO_PUBLICADA
     ).first_or_404()
+    og = og_de_expo(expo)
     if not _puede_gestionar(expo):
         if not expo.abierta:
-            return render_template("gallery_cerrada.html", expo=expo)
+            return render_template("gallery_cerrada.html", expo=expo, og=og)
         if expo.requiere_codigo and not _visitante_autorizado(expo):
-            return render_template("gallery_codigo.html", expo=expo)
+            return render_template("gallery_codigo.html", expo=expo, og=og)
         _registrar_visita(expo)
     datos = serializar_sala(expo.salas[0]) if expo.salas else None
     # Modo 2D (?modo=2d): la misma sala como galería vertical, pensada para
     # móvil. Pasa por las mismas puertas de acceso que el 3D.
     if request.args.get("modo") == "2d":
-        return render_template("gallery_2d.html", datos=datos)
-    return render_template("gallery.html", datos=datos)
+        return render_template("gallery_2d.html", datos=datos, og=og, expo=expo)
+    return render_template("gallery.html", datos=datos, og=og, expo=expo)
+
+
+@bp.get("/robots.txt")
+def robots():
+    """SEO: los paneles no se indexan; el resto sí, con el sitemap a mano."""
+    cuerpo = (
+        "User-agent: *\n"
+        "Disallow: /admin\n"
+        "Disallow: /plataforma\n"
+        f"Sitemap: {url_for('main.sitemap', _external=True)}\n"
+    )
+    return cuerpo, 200, {"Content-Type": "text/plain; charset=utf-8"}
+
+
+@bp.get("/sitemap.xml")
+def sitemap():
+    """Sitemap con el portal y las exposiciones publicadas visibles (las de
+    enlace secreto o con código no se anuncian a los buscadores)."""
+    publicas = Exposicion.query.filter(
+        Exposicion.estado == ESTADO_PUBLICADA,
+        Exposicion.visibilidad == VISIBILIDAD_PUBLICA,
+    ).all()
+    urls = [f"<url><loc>{url_for('main.index', _external=True)}</loc></url>"]
+    for expo in publicas:
+        loc = url_for("main.gallery", slug=expo.slug, _external=True)
+        urls.append(f"<url><loc>{loc}</loc></url>")
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(urls)
+        + "\n</urlset>\n"
+    )
+    return xml, 200, {"Content-Type": "application/xml; charset=utf-8"}
 
 
 @bp.post("/g/<slug>/obra-vista")

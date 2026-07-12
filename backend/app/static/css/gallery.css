@@ -61,6 +61,21 @@ html, body {
     color: rgba(207, 220, 236, 0.7);
 }
 
+.hud-acciones {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* Compartir: icono fino, mismo lenguaje que el resto del HUD */
+.hud-compartir {
+    background: none;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.hud-compartir svg { width: 16px; height: 16px; display: block; }
+
 /* Botón del hilo musical (♪): tachado y atenuado cuando está en silencio */
 .hud-musica {
     background: none;

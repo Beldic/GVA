@@ -2,6 +2,12 @@
 
 {% block title %}Galería Virtual — Exposiciones abiertas{% endblock %}
 
+{% block meta %}
+{{ super() }}
+<link rel="canonical" href="{{ url_for('main.index', _external=True) }}">
+<meta property="og:url" content="{{ url_for('main.index', _external=True) }}">
+{% endblock %}
+
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/portal.css') }}">
 {% endblock %}
